@@ -1,0 +1,22 @@
+{
+	"name": "sleekmirror",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "nuxt build",
+		"dev": "nuxt dev",
+		"generate": "nuxt generate",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare"
+	},
+	"dependencies": {
+		"@tailwindcss/vite": "^4.3.1",
+		"mongoose": "^9.7.0",
+		"nuxt": "^4.4.8",
+		"nuxt-lucide-icons": "^2.1.0",
+		"openai": "^6.43.0",
+		"tailwindcss": "^4.3.1",
+		"vue": "^3.5.35",
+		"vue-router": "^5.1.0"
+	}
+}
