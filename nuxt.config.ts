@@ -10,4 +10,9 @@ export default defineNuxtConfig({
 	vite: {
 		plugins: [tailwindcss()],
 	},
+	runtimeConfig: {
+		// .env
+		mongodburi: '',
+		openaiApiKey: '',
+	},
 })
