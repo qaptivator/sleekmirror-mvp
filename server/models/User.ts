@@ -4,9 +4,10 @@ export default model(
 	'User',
 	new Schema(
 		{
-			firstName: { type: String },
-			lastName: { type: String },
+			first_name: { type: String },
+			last_name: { type: String },
 			identifiers: { type: [String], required: true },
+			credits: { type: Number, required: true, default: 0 },
 		},
 		{ timestamps: true }
 	)
