@@ -1,14 +1,13 @@
-import { Schema, model, ObjectId } from 'mongoose'
+import { Schema, model, models } from 'mongoose'
 
-export default model(
-	'User',
-	new Schema(
-		{
-			first_name: { type: String },
-			last_name: { type: String },
-			identifiers: { type: [String], required: true },
-			credits: { type: Number, required: true, default: 0 },
-		},
-		{ timestamps: true }
-	)
+const userSchema = new Schema(
+	{
+		identifiers: { type: [String], required: true },
+		credits: { type: Number, required: true, default: 0 },
+		first_name: { type: String },
+		last_name: { type: String },
+	},
+	{ timestamps: true }
 )
+
+export const User = models.User || model('User', userSchema)
