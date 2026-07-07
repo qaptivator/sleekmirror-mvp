@@ -98,7 +98,7 @@
 							/>
 							<path
 								class="transition-all duration-1000 ease-out"
-								:class="getScoreColorClass(activeCheck.overall_score, 'stroke')"
+								:style="getScoreStyle(activeCheck.overall_score, 'stroke')"
 								stroke-width="2.5"
 								stroke-dasharray="100, 100"
 								:stroke-dashoffset="100 - activeCheck.overall_score"
@@ -156,16 +156,16 @@
 									>
 										<IconShirt
 											v-if="catKey === 'outfit'"
-											:class="getScoreColorClass(catData.score, 'text')"
+											:style="getScoreStyle(catData.score, 'text')"
 										/>
 										<!-- TODO: replace with a better general face icon -->
 										<IconSmile
 											v-if="catKey === 'grooming'"
-											:class="getScoreColorClass(catData.score, 'text')"
+											:style="getScoreStyle(catData.score, 'text')"
 										/>
 										<IconSparkles
 											v-if="catKey === 'presentation'"
-											:class="getScoreColorClass(catData.score, 'text')"
+											:style="getScoreStyle(catData.score, 'text')"
 										/>
 									</div>
 									<span class="text-sm font-medium text-cream capitalize">{{
@@ -175,7 +175,7 @@
 								<div class="flex items-center gap-3 font-mono">
 									<span
 										class="text-sm font-semibold tracking-wide tabular-nums"
-										:class="getScoreColorClass(catData.score, 'text')"
+										:style="getScoreStyle(catData.score, 'text')"
 									>
 										{{ catData.score }}/100
 									</span>
@@ -393,7 +393,7 @@ const mockDocuments = {
 		user: '64f1c11b9f1d2c001b8a3f11',
 		file: '64f1c11b9f1d2c001b8a3f55',
 		context_tag: 'casual',
-		overall_score: 90,
+		overall_score: 69,
 		verdict_headline:
 			'A clean, minimalist monochrome base that gets completely derailed by clunky footwear and careless fabric bunching.',
 		categories: {
@@ -422,10 +422,43 @@ const mockDocuments = {
 			'Use a small drop of styling product to control the flyaway frizz at the top of your hair.',
 		],
 	},
+	midRange2: {
+		user: '64f1c11b9f1d2c001b8a3f11',
+		file: '64f1c11b9f1d2c001b8a3f55',
+		context_tag: 'casual',
+		overall_score: 68,
+		verdict_headline:
+			'Bright casual layers ruined by a tight bag strap and messy hair.',
+		categories: {
+			outfit: {
+				score: 72,
+				feedback:
+					'The bright red jacket is layered over a mismatched bright orange hoodie. This intense color combination looks overcrowded and clashes loudly.',
+				fix: 'Swap the orange hoodie for a neutral black or grey one.',
+			},
+			grooming: {
+				score: 65,
+				feedback:
+					'Your hair is very frizzy and sticks out on the sides. It makes your head look unkempt and messy.',
+				fix: 'Use a damp hand or gel to smooth down the frizzy sides.',
+			},
+			presentation: {
+				score: 67,
+				feedback:
+					'The bag strap is too tight across your chest. It creates deep wrinkles and leaves your jacket looking badly bunched up.',
+				fix: 'Loosen the bag strap so the jacket can sit flat.',
+			},
+		},
+		action_checklist: [
+			'Loosen the cross-body bag strap to stop the jacket from bunching.',
+			'Pat down the frizzy hair flyaways on the top and sides.',
+			'Pull the hoodie drawstrings until they hang down evenly.',
+		],
+	},
 }
 
 // Active Schema Target State Hook
-const activeCheck = ref({ ...mockDocuments.midRange })
+const activeCheck = ref({ ...mockDocuments.midRange2 })
 
 // Tracking Interactive Sub-Menu Dropdown State
 const activeCategoryTab = ref<string | null>('outfit')
@@ -494,7 +527,7 @@ function resetLocalCheckState() {
 /**
  * Returns dynamic functional color allocations strictly by score index numbers
  */
-function getScoreColorClass(
+/*function getScoreColorClass(
 	score: number,
 	mode: 'text' | 'bg' | 'stroke'
 ): string {
@@ -529,6 +562,39 @@ function getScoreColorClass(
 	return `stroke-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
 		0
 	)}%)] transition-all duration-500`
+}*/
+
+function getScoreStyle(
+	score: number,
+	mode: 'text' | 'bg' | 'stroke'
+): Record<string, string> {
+	const pct = Math.min(Math.max(score, 0), 100)
+
+	// Continuous HSL mapping (No muddy steps, purely pristine)
+	// 0%   = Rich Sepia/Bronze (HSL: 30, 20%, 40%)
+	// 100% = Pure Gold         (HSL: 45, 85%, 55%)
+	const h = 30 + pct * 0.15 // Hue shifts from 30 to 45
+	const s = 20 + pct * 0.65 // Saturation climbs from 20% to 85%
+	const l = 40 + pct * 0.15 // Lightness climbs from 40% to 55%
+
+	const color = `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(0)}%)`
+
+	if (mode === 'text') {
+		return { color }
+	}
+
+	if (mode === 'bg') {
+		// Soft backdrop tint for lower scores, more solid for high scores
+		const alpha = pct < 40 ? '0.12' : (pct / 100).toFixed(2)
+		return {
+			backgroundColor: `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(
+				0
+			)}% / ${alpha})`,
+		}
+	}
+
+	// Default to stroke for SVGs / progress bars
+	return { stroke: color }
 }
 </script>
 
