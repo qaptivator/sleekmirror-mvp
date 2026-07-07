@@ -56,9 +56,13 @@ export default defineEventHandler(async (event) => {
 		...mockEngineOutput,
 	})
 
-	await User.findByIdAndUpdate(currentUser._id, {
-		$inc: { scan_credits: -1 },
-	})
+	await User.findByIdAndUpdate(
+		currentUser._id,
+		{
+			$inc: { scan_credits: -1 },
+		},
+		{}
+	)
 
 	return finalizedCheck
 })

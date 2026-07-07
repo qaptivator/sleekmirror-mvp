@@ -1,5 +1,7 @@
 import { File } from '../../models/File'
 
+const MAX_SIZE_BYTE = 4 * 1024 * 1024 // 4 MB
+
 export default defineEventHandler(async (event) => {
 	const currentUser = event.context.user
 	if (!currentUser) {
@@ -17,6 +19,13 @@ export default defineEventHandler(async (event) => {
 	const filePart = formData.find((part) => part.name === 'file')
 	if (!filePart || !filePart.filename) {
 		throw createError({ statusCode: 400, statusMessage: 'No file detected' })
+	}
+
+	if (filePart.data.length > MAX_SIZE_BYTE) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'File larger than 4 MB',
+		})
 	}
 
 	const fileAsset = await File.create({
