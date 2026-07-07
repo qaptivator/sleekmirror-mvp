@@ -73,9 +73,9 @@
 						<div
 							class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cream/10 border border-cream/10 text-[10px] font-mono uppercase tracking-wider text-gold-soft"
 						>
-							#{{ activeCheck.context_tag }}
+							FOR {{ activeCheck.context_tag }}
 						</div>
-						<h2 class="text-lg font-semibold text-cream leading-snug">
+						<h2 class="text-md font-semibold text-cream leading-snug">
 							{{ activeCheck.verdict_headline }}
 						</h2>
 					</div>
@@ -120,7 +120,7 @@
 				<!-- ZONE B: THE FIXED TRI-GRID CATEGORY MATRIX -->
 				<div class="space-y-3">
 					<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
-						Category Deep Dive
+						Category Feedback
 					</p>
 
 					<div class="grid grid-cols-1 gap-3">
@@ -142,10 +142,32 @@
 							>
 								<div class="flex items-center gap-3">
 									<!-- Status Mini Dot Indicator -->
-									<span
+									<!--<span
 										class="w-2 h-2 rounded-full"
 										:class="getScoreColorClass(catData.score, 'bg')"
-									/>
+									/>-->
+									<div
+										class="transition-opacity"
+										:class="
+											activeCategoryTab === catKey
+												? 'opacity-100'
+												: 'opacity-50'
+										"
+									>
+										<IconShirt
+											v-if="catKey === 'outfit'"
+											:class="getScoreColorClass(catData.score, 'text')"
+										/>
+										<!-- TODO: replace with a better general face icon -->
+										<IconSmile
+											v-if="catKey === 'grooming'"
+											:class="getScoreColorClass(catData.score, 'text')"
+										/>
+										<IconSparkles
+											v-if="catKey === 'presentation'"
+											:class="getScoreColorClass(catData.score, 'text')"
+										/>
+									</div>
 									<span class="text-sm font-medium text-cream capitalize">{{
 										catKey
 									}}</span>
@@ -182,11 +204,11 @@
 								v-show="activeCategoryTab === catKey"
 								class="px-4 pb-4 pt-1 border-t border-cream/5 space-y-3 bg-black/10 transition-all text-xs"
 							>
-								<div class="space-y-1">
-									<span
+								<div class="space-y-1 pt-2">
+									<!--<span
 										class="text-[9px] uppercase tracking-wider text-muted font-semibold block"
 										>Observation Summary</span
-									>
+									>-->
 									<p class="text-cream/80 leading-relaxed">
 										{{ catData.feedback }}
 									</p>
@@ -196,7 +218,7 @@
 								>
 									<span
 										class="text-[9px] uppercase tracking-wider text-gold font-bold block"
-										>Required Fix Blueprint</span
+										>Fix</span
 									>
 									<p
 										class="text-cream/90 leading-relaxed font-mono text-[11px]"
@@ -278,9 +300,17 @@
 			>
 				<button
 					@click="resetLocalCheckState"
-					class="flex-1 bg-gold text-obsidian text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md text-center"
+					class="flex-1 bg-cream/10 border border-cream/10 text-cream/70 text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-cream/15 hover:text-cream cursor-pointer text-center flex items-center gap-2"
 				>
-					Initialize New Structural Scan
+					<IconShare2 class="w-5" />
+					Share the results
+				</button>
+				<button
+					@click="resetLocalCheckState"
+					class="flex-1 bg-gold text-obsidian text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md text-center flex items-center gap-2"
+				>
+					<IconMirrorRectangular class="w-5" />
+					Do another snap
 				</button>
 			</div>
 		</div>
@@ -297,7 +327,7 @@ const mockDocuments = {
 	optimal: {
 		user: '64f1c11b9f1d2c001b8a3f11',
 		file: '64f1c11b9f1d2c001b8a3f22',
-		context_tag: 'interview_ready',
+		context_tag: 'interview',
 		overall_score: 91,
 		verdict_headline:
 			'Highly professional composition with optimized symmetry.',
@@ -359,10 +389,43 @@ const mockDocuments = {
 			'Purge background vector noise artifacts inside active canvas bounds.',
 		],
 	},
+	midRange: {
+		user: '64f1c11b9f1d2c001b8a3f11',
+		file: '64f1c11b9f1d2c001b8a3f55',
+		context_tag: 'casual',
+		overall_score: 90,
+		verdict_headline:
+			'A clean, minimalist monochrome base that gets completely derailed by clunky footwear and careless fabric bunching.',
+		categories: {
+			outfit: {
+				score: 68,
+				feedback:
+					'The pairing of a white tunic-style shirt with light grey trousers creates a great, low-contrast minimalist base for a casual day. However, the dark, heavily patterned, oversized knit sneakers completely break the clean silhouette and create an aggressive visual anchor at your feet.',
+				fix: 'Swap out those heavy patterned sneakers for a pair of crisp, low-profile white leather sneakers or simple minimalist canvas shoes to match the clean aesthetic of your upper outfit.',
+			},
+			grooming: {
+				score: 65,
+				feedback:
+					"Your hair has awesome natural volume, but it's currently leaning towards a completely unstyled, top-heavy shape with visible frizz and flyaways pulling attention upwards.",
+				fix: 'Dampen your hair slightly and apply a pea-sized amount of light curling cream or texturizing paste to group the curls together, bringing some structured control to the volume.',
+			},
+			presentation: {
+				score: 73,
+				feedback:
+					"The shirt is bunching up awkwardly across your stomach because of how you're holding the phone, and the sleeves are rolled loosely and unevenly, resting at weird heights on your forearms. The mirror reflection also shows some surface smudges.",
+				fix: 'Unroll the sleeves and fold them back up intentionally with a crisp, tight roll that finishes right below the elbow, then pull the shirt hem down flat before you step out.',
+			},
+		},
+		action_checklist: [
+			'Swap the busy, dark patterned sneakers for minimalist low-top white shoes.',
+			'Refold both shirt sleeves to create a symmetrical, clean roll just below the elbow.',
+			'Use a small drop of styling product to control the flyaway frizz at the top of your hair.',
+		],
+	},
 }
 
 // Active Schema Target State Hook
-const activeCheck = ref({ ...mockDocuments.optimal })
+const activeCheck = ref({ ...mockDocuments.midRange })
 
 // Tracking Interactive Sub-Menu Dropdown State
 const activeCategoryTab = ref<string | null>('outfit')
@@ -435,19 +498,42 @@ function getScoreColorClass(
 	score: number,
 	mode: 'text' | 'bg' | 'stroke'
 ): string {
-	if (score >= 80) {
-		if (mode === 'text') return 'text-gold-soft'
-		if (mode === 'bg') return 'bg-gold'
-		return 'stroke-gold'
-	} else if (score >= 60) {
-		if (mode === 'text') return 'text-cream/80'
-		if (mode === 'bg') return 'bg-cream/40'
-		return 'stroke-cream/60'
+	let tier: 'elite' | 'optimal' | 'warning' | 'critical'
+
+	if (score >= 85) {
+		tier = 'elite' // High-contrast, vibrant gold highlight
+	} else if (score >= 70) {
+		tier = 'optimal' // Regular, clean golden brand color
+	} else if (score >= 40) {
+		tier = 'warning' // Muted Amber/Orange (Now covers 40-69)
 	} else {
-		if (mode === 'text') return 'text-rose-400'
-		if (mode === 'bg') return 'bg-rose-500'
-		return 'stroke-rose-500'
+		tier = 'critical' // Sharp Rose/Red (Only for scores below 40)
 	}
+
+	const colorMap = {
+		elite: {
+			text: 'text-gold font-bold drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]',
+			bg: 'bg-gold shadow-[0_0_12px_rgba(212,175,55,0.4)]',
+			stroke: 'stroke-gold',
+		},
+		optimal: {
+			text: 'text-gold-soft',
+			bg: 'bg-gold-soft/80',
+			stroke: 'stroke-gold-soft',
+		},
+		warning: {
+			text: 'text-amber-400',
+			bg: 'bg-amber-500/20',
+			stroke: 'stroke-amber-500',
+		},
+		critical: {
+			text: 'text-rose-400',
+			bg: 'bg-rose-500',
+			stroke: 'stroke-rose-500',
+		},
+	}
+
+	return colorMap[tier][mode]
 }
 </script>
 
