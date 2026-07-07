@@ -90,10 +90,15 @@ export const useCheckStore = defineStore('checks', () => {
 	}
 
 	// Run a check on a file
-	const runCheck = async (fileId: string, contextTag: string): Promise<Check> => {
+	const runCheck = async (
+		fileId: string,
+		contextTag: string
+	): Promise<Check> => {
 		// Prevent multiple simultaneous checks
 		if (runningCheckFileId.value !== null) {
-			throw new Error('A check is already running. Please wait for it to complete.')
+			throw new Error(
+				'A check is already running. Please wait for it to complete.'
+			)
 		}
 
 		runningCheckFileId.value = fileId
@@ -123,6 +128,9 @@ export const useCheckStore = defineStore('checks', () => {
 				fileCheckIds.push(check._id)
 				checksByFile.value.set(fileId, fileCheckIds)
 			}
+
+			const userStore = useUserStore()
+			userStore.updateCredits(userStore.credits - 1)
 
 			return check
 		} catch (err) {
