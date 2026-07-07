@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose'
+import mongoose, { Schema, model } from 'mongoose'
 
 const categorySchema = new Schema(
 	{
@@ -38,4 +38,4 @@ const checkSchema = new Schema(
 )
 
 // export with Nuxt-friendly Dev HMR Guard
-export const Check = models.Check || model('Check', checkSchema)
+export const Check = mongoose.models.Check || model('Check', checkSchema)
