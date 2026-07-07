@@ -498,42 +498,37 @@ function getScoreColorClass(
 	score: number,
 	mode: 'text' | 'bg' | 'stroke'
 ): string {
-	let tier: 'elite' | 'optimal' | 'warning' | 'critical'
+	// Normalize score between 0 and 100
+	const pct = Math.min(Math.max(score, 0), 100)
 
-	if (score >= 85) {
-		tier = 'elite' // High-contrast, vibrant gold highlight
-	} else if (score >= 70) {
-		tier = 'optimal' // Regular, clean golden brand color
-	} else if (score >= 40) {
-		tier = 'warning' // Muted Amber/Orange (Now covers 40-69)
-	} else {
-		tier = 'critical' // Sharp Rose/Red (Only for scores below 40)
+	// PSYCHOLOGICAL COLOR MAPPING:
+	// 0%   (Genesis)  = Deep, rich bronze/sepia (HSL: 30, 20%, 35%) - Raw, editorial starting point.
+	// 50%  (Evolving) = Warm, soft amber/ochre (HSL: 35, 60%, 50%) - Mid-way glow.
+	// 100% (Pinnacle) = Brilliant, vivid brand gold (HSL: 45, 85%, 55%) - Ultimate polish.
+
+	// We interpolate Hue (30 to 45), Saturation (20% to 85%), and Lightness (35% to 55%)
+	const h = 30 + pct * 0.15 // 30 at score 0 -> 45 at score 100
+	const s = 20 + pct * 0.65 // 20% at score 0 -> 85% at score 100
+	const l = 35 + pct * 0.2 // 35% at score 0 -> 55% at score 100
+
+	if (mode === 'text') {
+		return `text-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
+			0
+		)}%)] font-semibold transition-colors duration-500`
 	}
 
-	const colorMap = {
-		elite: {
-			text: 'text-gold font-bold drop-shadow-[0_2px_8px_rgba(212,175,55,0.3)]',
-			bg: 'bg-gold shadow-[0_0_12px_rgba(212,175,55,0.4)]',
-			stroke: 'stroke-gold',
-		},
-		optimal: {
-			text: 'text-gold-soft',
-			bg: 'bg-gold-soft/80',
-			stroke: 'stroke-gold-soft',
-		},
-		warning: {
-			text: 'text-amber-400',
-			bg: 'bg-amber-500/20',
-			stroke: 'stroke-amber-500',
-		},
-		critical: {
-			text: 'text-rose-400',
-			bg: 'bg-rose-500',
-			stroke: 'stroke-rose-500',
-		},
+	if (mode === 'bg') {
+		// High scores get a solid background, lower scores get a softer, translucent variant so it doesn't overpower
+		const alpha = pct < 40 ? 0.15 : pct / 100
+		return `bg-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
+			0
+		)}%/${alpha})] transition-all duration-500`
 	}
 
-	return colorMap[tier][mode]
+	// Default to stroke
+	return `stroke-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
+		0
+	)}%)] transition-all duration-500`
 }
 </script>
 
