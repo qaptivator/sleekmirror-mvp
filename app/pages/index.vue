@@ -2,6 +2,27 @@
 	<div
 		class="w-full h-full flex flex-col relative bg-obsidian text-cream font-sans"
 	>
+		<!-- HEADER WITH CONTEXT SELECTOR -->
+		<div
+			v-if="!capturedPhoto && !showResults"
+			class="px-4 py-4 border-b border-cream/10 flex gap-2 justify-center bg-gradient-to-b from-ink to-obsidian/50 backdrop-blur-sm"
+		>
+			<button
+				v-for="ctx in contexts"
+				:key="ctx"
+				@click="selectedContext = ctx"
+				class="px-4 py-2 text-xs font-medium tracking-wide uppercase rounded-full transition-all duration-200"
+				:class="
+					selectedContext === ctx
+						? 'bg-gold text-obsidian shadow-lg'
+						: 'bg-cream/10 text-cream/60 hover:bg-cream/15 hover:text-cream/80'
+				"
+			>
+				{{ ctx }}
+			</button>
+		</div>
+
+		<!-- MAIN CAMERA AREA -->
 		<div class="flex-1 relative bg-obsidian overflow-hidden">
 			<div
 				class="w-full h-full bg-gradient-to-br from-ink to-obsidian flex items-center justify-center transition-all duration-300"
@@ -10,7 +31,7 @@
 				<img
 					v-if="capturedPhoto"
 					:src="capturedPhoto"
-					alt="captured layout preview"
+					alt="captured image preview"
 					class="w-full h-full object-cover"
 				/>
 				<div
@@ -37,7 +58,7 @@
 							r="3"
 						/>
 					</svg>
-					<p class="text-cream/60 text-xs tracking-wide">Camera feed active</p>
+					<p class="text-cream/60 text-xs tracking-wide">Ready to analyze</p>
 				</div>
 			</div>
 
@@ -81,15 +102,18 @@
 			</Transition>
 		</div>
 
+		<!-- BOTTOM CONTROLS (UPLOAD & CAPTURE) -->
 		<Transition name="fade">
 			<div
 				v-if="!capturedPhoto && !isScanning && !showResults"
 				class="absolute bottom-0 left-0 right-0 px-6 py-8 flex flex-col items-center gap-4 bg-gradient-to-t from-obsidian via-obsidian/80 to-transparent"
 			>
 				<div class="flex items-center justify-center gap-10">
+					<!-- Upload Button -->
 					<button
-						@click="triggerUploadMock"
+						@click="triggerFileUpload"
 						class="w-12 h-12 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
+						title="Upload image file"
 					>
 						<svg
 							class="text-cream/70"
@@ -117,9 +141,11 @@
 						</svg>
 					</button>
 
+					<!-- Snap Button (Main) -->
 					<button
 						@click="handleCaptureSimulation"
 						class="w-16 h-16 rounded-full bg-gold flex items-center justify-center shadow-lg hover:shadow-gold/20 hover:scale-105 transition-all duration-300 active:scale-95 cursor-pointer"
+						title="Snap with demo image"
 					>
 						<svg
 							class="text-obsidian"
@@ -143,9 +169,11 @@
 						</svg>
 					</button>
 
+					<!-- Flip Button -->
 					<button
 						@click="triggerFlipMock"
 						class="w-12 h-12 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
+						title="Flip camera (demo)"
 					>
 						<svg
 							class="text-cream/70"
@@ -167,6 +195,16 @@
 			</div>
 		</Transition>
 
+		<!-- Hidden file input -->
+		<input
+			ref="fileInput"
+			type="file"
+			accept="image/*"
+			style="display: none"
+			@change="handleFileUpload"
+		/>
+
+		<!-- CHECK RESULTS SHEET (from CheckView) -->
 		<Teleport to="body">
 			<Transition name="fade">
 				<div
@@ -204,152 +242,235 @@
 						:style="{ maxHeight: 'calc(85vh - 3rem)' }"
 					>
 						<div class="space-y-6">
-							<div class="flex items-start gap-4">
-								<img
-									v-if="capturedPhoto"
-									:src="capturedPhoto"
-									alt="analysis thumbnail preview"
-									class="w-14 h-14 rounded-xl object-cover border border-cream/10"
-								/>
-								<div class="flex-1">
-									<h2
-										class="text-xl font-semibold text-cream serif tracking-wide"
-									>
-										Visual Profile Analysis
-									</h2>
-									<p
-										class="text-xs text-gold/80 font-medium tracking-wider mt-0.5 uppercase"
-									>
-										Scan Metrics Finalized
-									</p>
-								</div>
-							</div>
-
-							<div class="h-px bg-cream/10" />
-
+							<!-- VERDICT SECTION -->
 							<div
-								class="grid grid-cols-2 gap-4 bg-black/20 p-4 rounded-xl border border-cream/5"
+								class="flex items-center justify-between gap-4 bg-black/20 p-5 rounded-2xl border border-cream/5"
 							>
-								<div>
-									<p
-										class="text-[10px] uppercase tracking-widest text-muted font-semibold"
-									>
-										Overall Index
-									</p>
-									<div class="flex items-baseline gap-1 mt-1">
-										<span
-											class="text-5xl font-light text-gold tracking-tighter serif tabular-nums"
-										>
-											{{ Math.floor(tweenedOverallScore) }}
-										</span>
-										<span class="text-xs text-cream/40">/100</span>
-									</div>
-								</div>
-								<div>
-									<p
-										class="text-[10px] uppercase tracking-widest text-muted font-semibold mb-2"
-									>
-										Vibe Composition
-									</p>
-									<div class="flex flex-wrap gap-1.5">
-										<span
-											v-for="(vibe, index) in vibes"
-											:key="vibe"
-											class="px-2.5 py-1 text-[11px] rounded-md bg-gold/10 border border-gold/20 text-gold-soft font-medium transition-all duration-500"
-											:style="{
-												transitionDelay: `${index * 100}s`,
-												opacity: renderBars ? 1 : 0,
-											}"
-										>
-											{{ vibe }}
-										</span>
-									</div>
-								</div>
-							</div>
-
-							<div class="space-y-4">
-								<p
-									class="text-[10px] uppercase tracking-widest text-muted font-semibold"
-								>
-									Structural Breakdown
-								</p>
-								<div class="space-y-3.5">
+								<div class="space-y-1 flex-1">
 									<div
-										v-for="(metric, idx) in breakdown"
-										:key="metric.label"
-										class="space-y-1.5"
+										class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cream/10 border border-cream/10 text-[10px] font-mono uppercase tracking-wider text-gold-soft"
 									>
-										<div class="flex items-center justify-between text-xs">
-											<span class="text-cream/90 font-medium">{{
-												metric.label
-											}}</span>
-											<span
-												class="text-gold font-semibold tracking-wide tabular-nums"
-											>
-												{{ tweenedMetrics[idx]?.toFixed(1) || '0.0' }}
-											</span>
+										FOR {{ selectedContext.toUpperCase() }}
+									</div>
+									<h2 class="text-md font-semibold text-cream leading-snug">
+										{{ checkResult.verdict_headline }}
+									</h2>
+								</div>
+
+								<!-- Score Ring -->
+								<div
+									class="relative w-20 h-20 flex items-center justify-center shrink-0"
+								>
+									<svg
+										class="w-full h-full transform -rotate-90"
+										viewBox="0 0 36 36"
+									>
+										<path
+											class="text-cream/10"
+											stroke="currentColor"
+											stroke-width="2.5"
+											fill="none"
+											d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+										/>
+										<path
+											class="transition-all duration-1000 ease-out"
+											:style="getScoreStyle(checkResult.overall_score, 'stroke')"
+											stroke-width="2.5"
+											stroke-dasharray="100, 100"
+											:stroke-dashoffset="100 - checkResult.overall_score"
+											stroke-linecap="round"
+											fill="none"
+											d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+										/>
+									</svg>
+									<div class="absolute text-center">
+										<span
+											class="text-2xl font-light tracking-tighter text-cream tabular-nums font-mono"
+										>
+											{{ Math.round(checkResult.overall_score) }}
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- CATEGORY BREAKDOWN -->
+							<div class="space-y-3">
+								<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
+									Category Feedback
+								</p>
+
+								<div class="grid grid-cols-1 gap-3">
+									<div
+										v-for="(catData, catKey) in checkResult.categories"
+										:key="catKey"
+										class="border rounded-xl transition-all duration-300 overflow-hidden bg-black/10"
+										:class="
+											activeCategoryTab === catKey
+												? 'border-gold/40 shadow-md shadow-gold/5 bg-ink'
+												: 'border-cream/10 hover:border-cream/20'
+										"
+									>
+										<div
+											@click="toggleCategoryTab(catKey)"
+											class="flex items-center justify-between p-4 cursor-pointer select-none active:bg-cream/5"
+										>
+											<div class="flex items-center gap-3">
+												<div
+													class="transition-opacity"
+													:class="
+														activeCategoryTab === catKey
+															? 'opacity-100'
+															: 'opacity-50'
+													"
+												>
+													<IconShirt
+														v-if="catKey === 'outfit'"
+														:style="getScoreStyle(catData.score, 'text')"
+													/>
+													<IconSmile
+														v-else-if="catKey === 'grooming'"
+														:style="getScoreStyle(catData.score, 'text')"
+													/>
+													<IconSparkles
+														v-else-if="catKey === 'presentation'"
+														:style="getScoreStyle(catData.score, 'text')"
+													/>
+												</div>
+												<span class="text-sm font-medium text-cream capitalize">{{
+													catKey
+												}}</span>
+											</div>
+											<div class="flex items-center gap-3 font-mono">
+												<span
+													class="text-sm font-semibold tracking-wide tabular-nums"
+													:style="getScoreStyle(catData.score, 'text')"
+												>
+													{{ catData.score }}/100
+												</span>
+												<svg
+													class="text-cream/40 transition-transform duration-300"
+													:class="
+														activeCategoryTab === catKey ? 'rotate-180 text-gold' : ''
+													"
+													width="16"
+													height="16"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												>
+													<polyline points="6 9 12 15 18 9" />
+												</svg>
+											</div>
 										</div>
-										<div class="h-1.5 bg-cream/10 rounded-full overflow-hidden">
+
+										<div
+											v-show="activeCategoryTab === catKey"
+											class="px-4 pb-4 pt-1 border-t border-cream/5 space-y-3 bg-black/10 transition-all text-xs"
+										>
+											<div class="space-y-1 pt-2">
+												<p class="text-cream/80 leading-relaxed">
+													{{ catData.feedback }}
+												</p>
+											</div>
 											<div
-												class="h-full bg-gold rounded-full transition-all duration-1000 ease-out"
-												:style="{ width: renderBars ? `${metric.pct}%` : '0%' }"
-											/>
+												class="p-3 rounded-lg bg-gold/5 border border-gold/10 space-y-1"
+											>
+												<span
+													class="text-[9px] uppercase tracking-wider text-gold font-bold block"
+													>Fix</span
+												>
+												<p
+													class="text-cream/90 leading-relaxed font-mono text-[11px]"
+												>
+													{{ catData.fix }}
+												</p>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 
-							<div class="h-px bg-cream/10" />
-
-							<div class="space-y-2">
-								<p
-									class="text-[10px] uppercase tracking-widest text-muted font-semibold"
-								>
-									Identified Strengths
+							<!-- ACTION CHECKLIST -->
+							<div class="space-y-3">
+								<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
+									Priority Actions
 								</p>
-								<ul class="space-y-2">
-									<li
-										v-for="(point, index) in whatsWorking"
-										:key="point"
-										class="flex items-start gap-2.5 text-sm text-cream/80 transition-all duration-500"
-										:style="{
-											transitionDelay: `${200 + index * 100}ms`,
-											opacity: renderContent ? 1 : 0,
-											transform: renderContent
-												? 'translateX(0)'
-												: 'translateX(-8px)',
-										}"
+
+								<div
+									v-if="checkResult.action_checklist.length === 0"
+									class="text-center p-6 border border-dashed border-cream/10 rounded-xl"
+								>
+									<p class="text-xs text-muted">
+										No explicit improvement tasks assigned to this check profile.
+									</p>
+								</div>
+
+								<div
+									v-else
+									class="space-y-2"
+								>
+									<label
+										v-for="(task, index) in checkResult.action_checklist"
+										:key="index"
+										class="flex items-start gap-3 p-3.5 rounded-xl border border-cream/5 bg-black/20 hover:bg-cream/5 cursor-pointer transition-colors group select-none"
 									>
-										<span class="text-gold text-xs mt-0.5">✓</span>
-										<span>{{ point }}</span>
-									</li>
-								</ul>
-							</div>
+										<div class="relative flex items-center mt-0.5 shrink-0">
+											<input
+												type="checkbox"
+												v-model="checklistState[index]"
+												class="peer sr-only"
+											/>
+											<div
+												class="w-4 h-4 rounded border border-cream/30 bg-ink peer-checked:bg-gold peer-checked:border-gold transition-all flex items-center justify-center group-hover:border-cream/50"
+											/>
+											<svg
+												class="absolute w-3 h-3 text-obsidian scale-0 peer-checked:scale-100 transition-transform left-0.5 top-0.5 pointer-events-none"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="3"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+											>
+												<polyline points="20 6 9 17 4 12" />
+											</svg>
+										</div>
 
-							<div
-								class="p-4 rounded-xl bg-gold/5 border border-gold/15 space-y-1"
-							>
-								<p
-									class="text-[10px] uppercase tracking-widest text-gold font-bold"
-								>
-									Primary Improvement Action
-								</p>
-								<p class="text-sm text-cream/90 leading-relaxed">
-									{{ topUpgrade }}
-								</p>
-							</div>
-
-							<div class="h-px bg-cream/10" />
-
-							<div class="space-y-2.5">
-								<button
-									@click="resetLayoutTray"
-									class="w-full bg-gold text-obsidian font-semibold py-3 px-4 rounded-xl text-sm transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md"
-								>
-									Retake Photo
-								</button>
+										<span
+											class="text-xs transition-all duration-200"
+											:class="
+												checklistState[index]
+													? 'line-through text-muted opacity-60'
+													: 'text-cream/90'
+											"
+										>
+											{{ task }}
+										</span>
+									</label>
+								</div>
 							</div>
 						</div>
+					</div>
+
+					<!-- FOOTER BUTTONS -->
+					<div
+						class="p-4 border-t border-cream/10 bg-ink/80 backdrop-blur-md flex gap-3 shrink-0"
+					>
+						<button
+							@click="resetLayoutTray"
+							class="flex-1 bg-cream/10 border border-cream/10 text-cream/70 text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-cream/15 hover:text-cream cursor-pointer text-center"
+						>
+							Share Results
+						</button>
+						<button
+							@click="resetLayoutTray"
+							class="flex-1 bg-gold text-obsidian text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md text-center"
+						>
+							Try Another
+						</button>
 					</div>
 				</div>
 			</Transition>
@@ -360,18 +481,26 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 
-// UI Layout Dynamic States
+// CONTEXT SELECTOR
+const contexts = ['Interview', 'Casual', 'Formal']
+const selectedContext = ref('Interview')
+
+// UI STATE
 const capturedPhoto = ref<string | null>(null)
 const isScanning = ref(false)
 const showResults = ref(false)
 const renderContent = ref(false)
 const renderBars = ref(false)
-const scanningMessage = ref('Initializing camera parameters...')
+const scanningMessage = ref('Initializing analysis...')
+const fileInput = ref<HTMLInputElement | null>(null)
 
-// Smooth Numeric Tweening Targets
+// ANIMATION STATE
 const tweenedOverallScore = ref(0)
 const tweenedMetrics = reactive<number[]>([0, 0, 0, 0])
+const checklistState = ref<boolean[]>([])
+const activeCategoryTab = ref<string | null>('outfit')
 
+// SCANNING MESSAGES
 const scanningMessages = [
 	'Querying engine pipelines...',
 	'Isolating structural geometry...',
@@ -379,85 +508,82 @@ const scanningMessages = [
 	'Synthesizing structural context...',
 ]
 
-// Backend Matching Context Payload
-const sleekScore = 84
-const vibes = ref(['Structured', 'Sleek', 'Minimalist'])
-const breakdown = ref([
-	{ label: 'Outfit Coordination', score: 8.5, pct: 85 },
-	{ label: 'Hair Architecture', score: 7.8, pct: 78 },
-	{ label: 'Posture Vectors', score: 8.2, pct: 82 },
-	{ label: 'Composition Profile', score: 9.0, pct: 90 },
-])
-const whatsWorking = ref([
-	'High-contrast silhouette boundary alignment',
-	'Minimalist background elements optimize presentation focal points',
-	'Balanced tonal palette properties',
-])
-const topUpgrade = ref(
-	'Introduce higher visual isolation parameters. Refining framing elements will optimize overall composition depth.'
-)
+// MOCK CHECK RESULT DATA
+const checkResult = ref({
+	overall_score: 84,
+	verdict_headline: 'Highly professional composition with optimized symmetry.',
+	categories: {
+		outfit: {
+			score: 85,
+			feedback: 'Excellent contrast matching. Shoulder alignment is crisp.',
+			fix: 'Consider darker accents to enhance silhouette contrast.',
+		},
+		grooming: {
+			score: 78,
+			feedback: 'Clean facial geometry. Hair boundaries are uniform.',
+			fix: 'Ensure edge resolution remains consistent during movement.',
+		},
+		presentation: {
+			score: 82,
+			feedback: 'Posture lines run parallel with focal framing targets.',
+			fix: 'Maintain current vertical angle metrics during interactions.',
+		},
+	},
+	action_checklist: [
+		'Secure contrast uniformity across alternative scene transformations.',
+		'Retain focal distance vectors across sequential iterations.',
+		'Refine background isolation parameters.',
+	],
+})
 
 /**
- * Handles linear numerical tween updates cleanly over a fixed duration windows.
+ * Trigger file upload dialog
  */
-function animateValue(
-	start: number,
-	end: number,
-	duration: number,
-	updateFn: (val: number) => void
-) {
-	const startTime = performance.now()
-	function run(currentTime: number) {
-		const elapsed = currentTime - startTime
-		const progress = Math.min(elapsed / duration, 1)
-		// Smooth easeOutCubic curve
-		const ease = 1 - Math.pow(1 - progress, 3)
-		updateFn(start + (end - start) * ease)
-		if (progress < 1) {
-			requestAnimationFrame(run)
+function triggerFileUpload() {
+	fileInput.value?.click()
+}
+
+/**
+ * Handle selected file
+ */
+function handleFileUpload(event: Event) {
+	const input = event.target as HTMLInputElement
+	const file = input.files?.[0]
+	if (file) {
+		const reader = new FileReader()
+		reader.onload = (e) => {
+			capturedPhoto.value = e.target?.result as string
+			startScanning()
 		}
+		reader.readAsDataURL(file)
 	}
-	requestAnimationFrame(run)
+	// Reset input
+	if (fileInput.value) {
+		fileInput.value.value = ''
+	}
 }
 
 /**
- * Triggers progressive entry behaviors once sheet-slide entry transition complete finishes execution.
- */
-function triggerTweens() {
-	renderContent.value = true
-
-	// Tiny staggered delay before layout structural bars slide outward
-	setTimeout(() => {
-		renderBars.value = true
-
-		// Tween overall scale score metric
-		animateValue(0, sleekScore, 1200, (v) => {
-			tweenedOverallScore.value = v
-		})
-
-		// Loop through metrics data mapping array indices cleanly
-		breakdown.value.forEach((item, index) => {
-			animateValue(0, item.score, 1400, (v) => {
-				tweenedMetrics[index] = v
-			})
-		})
-	}, 150)
-}
-
-/**
- * Executes visual pipeline timeline loop sequencing logic parameters.
+ * Handle demo image capture
  */
 function handleCaptureSimulation() {
 	capturedPhoto.value =
 		'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1000'
+	startScanning()
+}
+
+/**
+ * Start the scanning animation and show results
+ */
+function startScanning() {
 	isScanning.value = true
 	showResults.value = false
 	renderContent.value = false
 	renderBars.value = false
 	tweenedOverallScore.value = 0
-	breakdown.value.forEach((_, i) => {
-		tweenedMetrics[i] = 0
-	})
+	checklistState.value = new Array(
+		checkResult.value.action_checklist.length
+	).fill(false)
 
 	let currentStep = 0
 	scanningMessage.value = scanningMessages[0]
@@ -474,19 +600,102 @@ function handleCaptureSimulation() {
 	}, 700)
 }
 
+/**
+ * Animate numeric values
+ */
+function animateValue(
+	start: number,
+	end: number,
+	duration: number,
+	updateFn: (val: number) => void
+) {
+	const startTime = performance.now()
+	function run(currentTime: number) {
+		const elapsed = currentTime - startTime
+		const progress = Math.min(elapsed / duration, 1)
+		const ease = 1 - Math.pow(1 - progress, 3)
+		updateFn(start + (end - start) * ease)
+		if (progress < 1) {
+			requestAnimationFrame(run)
+		}
+	}
+	requestAnimationFrame(run)
+}
+
+/**
+ * Trigger animations on results sheet entry
+ */
+function triggerTweens() {
+	renderContent.value = true
+
+	setTimeout(() => {
+		renderBars.value = true
+
+		animateValue(0, checkResult.value.overall_score, 1200, (v) => {
+			tweenedOverallScore.value = v
+		})
+
+		Object.values(checkResult.value.categories).forEach((cat, index) => {
+			animateValue(0, cat.score, 1400, (v) => {
+				tweenedMetrics[index] = v
+			})
+		})
+	}, 150)
+}
+
+/**
+ * Toggle category panel
+ */
+function toggleCategoryTab(key: string) {
+	activeCategoryTab.value = activeCategoryTab.value === key ? null : key
+}
+
+/**
+ * Get color style for score
+ */
+function getScoreStyle(
+	score: number,
+	mode: 'text' | 'bg' | 'stroke'
+): Record<string, string> {
+	const pct = Math.min(Math.max(score, 0), 100)
+
+	const h = 30 + pct * 0.15
+	const s = 20 + pct * 0.65
+	const l = 40 + pct * 0.15
+
+	const color = `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(0)}%)`
+
+	if (mode === 'text') {
+		return { color }
+	}
+
+	if (mode === 'bg') {
+		const alpha = pct < 40 ? '0.12' : (pct / 100).toFixed(2)
+		return {
+			backgroundColor: `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(
+				0
+			)}% / ${alpha})`,
+		}
+	}
+
+	return { stroke: color }
+}
+
+/**
+ * Reset to initial state
+ */
 function resetLayoutTray() {
 	capturedPhoto.value = null
 	isScanning.value = false
 	showResults.value = false
 	renderContent.value = false
 	renderBars.value = false
+	activeCategoryTab.value = 'outfit'
+	checklistState.value = []
 }
 
-function triggerUploadMock() {
-	console.log('File picker pipeline initialized.')
-}
 function triggerFlipMock() {
-	console.log('Camera hardware orientation toggled.')
+	console.log('Camera orientation toggled.')
 }
 </script>
 
