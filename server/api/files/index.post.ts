@@ -36,6 +36,13 @@ export default defineEventHandler(async (event) => {
 		binary_data: filePart.data,
 	})
 
-	// Return standard resource creation structure
-	return { file_id: fileAsset._id }
+	// Return file metadata (excluding binary data)
+	return {
+		_id: fileAsset._id,
+		filename: fileAsset.filename,
+		mime_type: fileAsset.mime_type,
+		size_bytes: fileAsset.size_bytes,
+		createdAt: fileAsset.createdAt,
+		updatedAt: fileAsset.updatedAt,
+	}
 })

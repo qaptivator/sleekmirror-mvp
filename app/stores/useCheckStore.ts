@@ -25,13 +25,8 @@ interface Check {
 }
 
 interface CheckRunRequest {
-	fileId: string
-	contextTag: string
-}
-
-interface CheckRunResponse {
-	checkId: string
-	check: Check
+	file_id: string
+	context_tag: string
 }
 
 export const useCheckStore = defineStore('checks', () => {
@@ -109,15 +104,13 @@ export const useCheckStore = defineStore('checks', () => {
 			const fileStore = useFileStore()
 			await fileStore.getFileMetadata(fileId)
 
-			const response = await $fetch<CheckRunResponse>('/api/checks/run', {
+			const check = await $fetch<Check>('/api/checks/run', {
 				method: 'POST',
 				body: {
-					fileId,
-					contextTag,
+					file_id: fileId,
+					context_tag: contextTag,
 				},
 			})
-
-			const check = response.check
 
 			// Cache the check
 			checks.value.set(check._id, check)

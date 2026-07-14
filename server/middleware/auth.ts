@@ -7,7 +7,7 @@ export default defineEventHandler((event) => {
 		event.context.user = {
 			_id: '6a4bb0da27b09ebd780971a8',
 			identifiers: ['email:user@example.com'],
-			creidts: 10,
+			credits: 10,
 			first_name: 'John',
 			last_name: 'Doe',
 		}

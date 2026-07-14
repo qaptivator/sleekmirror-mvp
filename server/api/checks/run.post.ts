@@ -1,8 +1,12 @@
+import OpenAI from 'openai'
 import { Check } from '../../models/Check'
 import { User } from '../../models/User'
 import { File } from '../../models/File'
 
 export default defineEventHandler(async (event) => {
+	// these are not even sent when i click to scan on the frontend, oh my...
+	// anyway, im gonna handle this later
+	console.log('run.post.ts')
 	const currentUser = event.context.user
 	if (!currentUser) {
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
@@ -26,40 +30,105 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const userRecord = await User.findById(currentUser._id)
-	if (!userRecord || userRecord.scan_credits <= 0) {
+	if (!userRecord || userRecord.credits <= 0) {
 		throw createError({
 			statusCode: 402,
 			statusMessage: 'Insufficient scan credits',
 		})
 	}
 
-	const mockEngineOutput = {
-		overall_score: 85,
-		verdict_headline:
-			'Clean shoulder alignment, but your shirt collar lines need adjustment.',
-		categories: {
-			outfit: { score: 90, feedback: 'Excellent fitting.', fix: 'None.' },
-			grooming: { score: 80, feedback: 'Clean finish.', fix: 'None.' },
-			presentation: {
-				score: 65,
-				feedback: 'Collar is warped on the left side.',
-				fix: 'Straighten left collar point flush.',
+	const config = useRuntimeConfig()
+	const openaiApiKey = config.openaiApiKey
+	if (!openaiApiKey) {
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'OpenAI API key not configured',
+		})
+	}
+
+	const client = new OpenAI({ apiKey: openaiApiKey })
+
+	// Convert binary data to base64 for OpenAI API
+	const base64Image = sourceFile.binary_data.toString('base64')
+
+	// Call OpenAI Vision API
+	const response = await client.chat.completions.create({
+		model: 'gpt-4-vision',
+		messages: [
+			{
+				role: 'user',
+				content: [
+					{
+						type: 'image_url',
+						image_url: {
+							url: `data:${sourceFile.mime_type};base64,${base64Image}`,
+						},
+					},
+					{
+						type: 'text',
+						text: `You are a professional image appearance analyst specializing in ${context_tag}. 
+Analyze this image and provide detailed feedback in the following JSON format (respond ONLY with valid JSON, no additional text):
+{
+  "overall_score": <number 0-100>,
+  "verdict_headline": "<brief summary>",
+  "categories": {
+    "outfit": {
+      "score": <number 0-100>,
+      "feedback": "<detailed feedback>",
+      "fix": "<specific improvement advice>"
+    },
+    "grooming": {
+      "score": <number 0-100>,
+      "feedback": "<detailed feedback>",
+      "fix": "<specific improvement advice>"
+    },
+    "presentation": {
+      "score": <number 0-100>,
+      "feedback": "<detailed feedback>",
+      "fix": "<specific improvement advice>"
+    }
+  },
+  "action_checklist": ["<actionable item 1>", "<actionable item 2>", "<actionable item 3>"]
+}`,
+					},
+				],
 			},
-		},
-		action_checklist: ['Straighten left collar point flush before leaving.'],
+		],
+		max_tokens: 1024,
+	})
+
+	const contentBlock = response.choices[0].message.content
+	if (!contentBlock || typeof contentBlock !== 'string') {
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'Invalid response from OpenAI',
+		})
+	}
+
+	console.log('contentBlock', contentBlock)
+
+	// Parse the JSON response from OpenAI
+	let engineOutput
+	try {
+		engineOutput = JSON.parse(contentBlock)
+	} catch (e) {
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'Failed to parse OpenAI response',
+		})
 	}
 
 	const finalizedCheck = await Check.create({
 		user: currentUser._id,
 		file: file_id,
 		context_tag,
-		...mockEngineOutput,
+		...engineOutput,
 	})
 
 	await User.findByIdAndUpdate(
 		currentUser._id,
 		{
-			$inc: { scan_credits: -1 },
+			$inc: { credits: -1 },
 		},
 		{}
 	)
