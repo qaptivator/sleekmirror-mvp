@@ -99,7 +99,7 @@ export const useFileStore = defineStore('files', () => {
 		error.value = null
 
 		try {
-			const metadata = await $fetch<FileMetadata>(`/api/files/${fileId}.json`)
+			const metadata = await $fetch<FileMetadata>(`/api/files/${fileId}/json`)
 
 			// Add to cache
 			files.value.set(fileId, {
@@ -129,7 +129,7 @@ export const useFileStore = defineStore('files', () => {
 
 		try {
 			// Fetch blob from server
-			const blob = await $fetch<Blob>(`/api/files/${fileId}.file`, {
+			const blob = await $fetch<Blob>(`/api/files/${fileId}/file`, {
 				responseType: 'blob',
 			})
 

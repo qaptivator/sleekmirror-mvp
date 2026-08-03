@@ -1,4 +1,4 @@
-import { File } from '../../models/File'
+import { File } from '../../../models/File'
 
 export default defineEventHandler(async (event) => {
 	const currentUser = event.context.user
