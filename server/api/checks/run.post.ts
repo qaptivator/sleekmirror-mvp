@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const userRecord = await User.findById(currentUser._id)
-	if (!userRecord || userRecord.scan_credits <= 0) {
+	if (!userRecord || userRecord.credits <= 0) {
 		throw createError({
 			statusCode: 402,
 			statusMessage: 'Insufficient scan credits',
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
 	await User.findByIdAndUpdate(
 		currentUser._id,
 		{
-			$inc: { scan_credits: -1 },
+			$inc: { credits: -1 },
 		},
 		{}
 	)
