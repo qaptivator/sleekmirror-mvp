@@ -57,7 +57,7 @@ export const useFileStore = defineStore('files', () => {
 			const formData = new FormData()
 			formData.append('file', file)
 
-			const metadata = await $fetch<FileMetadata>('/api/files', {
+			/*const metadata = await $fetch<FileMetadata>('/api/files', {
 				method: 'POST',
 				body: formData,
 			})
@@ -74,7 +74,13 @@ export const useFileStore = defineStore('files', () => {
 
 			currentCacheSize += file.size
 
-			return metadata
+			return metadata*/
+
+			const response = await $fetch<{ fileId: string }>('/api/files', {
+				method: 'POST',
+				body: formData,
+			})
+			return response // just return { fileId }
 		} catch (err) {
 			error.value = err instanceof Error ? err.message : 'Failed to upload file'
 			throw err
