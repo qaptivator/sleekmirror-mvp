@@ -117,8 +117,9 @@
 						</svg>
 					</button>
 
+					<!-- handleCaptureSimulation handleCapture -->
 					<button
-						@click="handleCaptureSimulation"
+						@click="handleCapture"
 						class="w-16 h-16 rounded-full bg-gold flex items-center justify-center shadow-lg hover:shadow-gold/20 hover:scale-105 transition-all duration-300 active:scale-95 cursor-pointer"
 					>
 						<svg
@@ -170,187 +171,13 @@
 		<Teleport to="body">
 			<Transition name="fade">
 				<div
-					v-if="showResults"
-					class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-					@click="resetLayoutTray"
-				/>
-			</Transition>
-
-			<Transition
-				name="sheet-slide"
-				@after-enter="triggerTweens"
-			>
-				<div
-					v-if="showResults"
-					class="fixed bottom-0 left-0 right-0 z-50 max-w-xl mx-auto rounded-t-3xl bg-ink border-t border-cream/15 glass shadow-2xl"
-					:style="{ maxHeight: '85vh' }"
+					v-if="showResults && currentCheck"
+					class="fixed inset-0 z-40"
 				>
-					<div
-						class="flex justify-center pt-4 pb-2 cursor-pointer"
-						@click="resetLayoutTray"
-					>
-						<div
-							class="w-12 h-1 rounded-full bg-cream/20 hover:bg-cream/40 transition-colors"
-						/>
-					</div>
-
-					<div
-						class="overflow-y-auto px-6 pb-10 pt-2 transition-all duration-500 ease-out layout-content-scroll"
-						:class="
-							renderContent
-								? 'opacity-100 translate-y-0'
-								: 'opacity-0 translate-y-4'
-						"
-						:style="{ maxHeight: 'calc(85vh - 3rem)' }"
-					>
-						<div class="space-y-6">
-							<div class="flex items-start gap-4">
-								<img
-									v-if="capturedPhoto"
-									:src="capturedPhoto"
-									alt="analysis thumbnail preview"
-									class="w-14 h-14 rounded-xl object-cover border border-cream/10"
-								/>
-								<div class="flex-1">
-									<h2
-										class="text-xl font-semibold text-cream serif tracking-wide"
-									>
-										Visual Profile Analysis
-									</h2>
-									<p
-										class="text-xs text-gold/80 font-medium tracking-wider mt-0.5 uppercase"
-									>
-										Scan Metrics Finalized
-									</p>
-								</div>
-							</div>
-
-							<div class="h-px bg-cream/10" />
-
-							<div
-								class="grid grid-cols-2 gap-4 bg-black/20 p-4 rounded-xl border border-cream/5"
-							>
-								<div>
-									<p
-										class="text-[10px] uppercase tracking-widest text-muted font-semibold"
-									>
-										Overall Index
-									</p>
-									<div class="flex items-baseline gap-1 mt-1">
-										<span
-											class="text-5xl font-light text-gold tracking-tighter serif tabular-nums"
-										>
-											{{ Math.floor(tweenedOverallScore) }}
-										</span>
-										<span class="text-xs text-cream/40">/100</span>
-									</div>
-								</div>
-								<div>
-									<p
-										class="text-[10px] uppercase tracking-widest text-muted font-semibold mb-2"
-									>
-										Vibe Composition
-									</p>
-									<div class="flex flex-wrap gap-1.5">
-										<span
-											v-for="(vibe, index) in vibes"
-											:key="vibe"
-											class="px-2.5 py-1 text-[11px] rounded-md bg-gold/10 border border-gold/20 text-gold-soft font-medium transition-all duration-500"
-											:style="{
-												transitionDelay: `${index * 100}s`,
-												opacity: renderBars ? 1 : 0,
-											}"
-										>
-											{{ vibe }}
-										</span>
-									</div>
-								</div>
-							</div>
-
-							<div class="space-y-4">
-								<p
-									class="text-[10px] uppercase tracking-widest text-muted font-semibold"
-								>
-									Structural Breakdown
-								</p>
-								<div class="space-y-3.5">
-									<div
-										v-for="(metric, idx) in breakdown"
-										:key="metric.label"
-										class="space-y-1.5"
-									>
-										<div class="flex items-center justify-between text-xs">
-											<span class="text-cream/90 font-medium">{{
-												metric.label
-											}}</span>
-											<span
-												class="text-gold font-semibold tracking-wide tabular-nums"
-											>
-												{{ tweenedMetrics[idx]?.toFixed(1) || '0.0' }}
-											</span>
-										</div>
-										<div class="h-1.5 bg-cream/10 rounded-full overflow-hidden">
-											<div
-												class="h-full bg-gold rounded-full transition-all duration-1000 ease-out"
-												:style="{ width: renderBars ? `${metric.pct}%` : '0%' }"
-											/>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="h-px bg-cream/10" />
-
-							<div class="space-y-2">
-								<p
-									class="text-[10px] uppercase tracking-widest text-muted font-semibold"
-								>
-									Identified Strengths
-								</p>
-								<ul class="space-y-2">
-									<li
-										v-for="(point, index) in whatsWorking"
-										:key="point"
-										class="flex items-start gap-2.5 text-sm text-cream/80 transition-all duration-500"
-										:style="{
-											transitionDelay: `${200 + index * 100}ms`,
-											opacity: renderContent ? 1 : 0,
-											transform: renderContent
-												? 'translateX(0)'
-												: 'translateX(-8px)',
-										}"
-									>
-										<span class="text-gold text-xs mt-0.5">✓</span>
-										<span>{{ point }}</span>
-									</li>
-								</ul>
-							</div>
-
-							<div
-								class="p-4 rounded-xl bg-gold/5 border border-gold/15 space-y-1"
-							>
-								<p
-									class="text-[10px] uppercase tracking-widest text-gold font-bold"
-								>
-									Primary Improvement Action
-								</p>
-								<p class="text-sm text-cream/90 leading-relaxed">
-									{{ topUpgrade }}
-								</p>
-							</div>
-
-							<div class="h-px bg-cream/10" />
-
-							<div class="space-y-2.5">
-								<button
-									@click="resetLayoutTray"
-									class="w-full bg-gold text-obsidian font-semibold py-3 px-4 rounded-xl text-sm transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md"
-								>
-									Retake Photo
-								</button>
-							</div>
-						</div>
-					</div>
+					<CheckView
+						:check="currentCheck"
+						@close="resetLayoutTray"
+					/>
 				</div>
 			</Transition>
 		</Teleport>
@@ -460,12 +287,12 @@ function handleCaptureSimulation() {
 	})
 
 	let currentStep = 0
-	scanningMessage.value = scanningMessages[0]
+	scanningMessage.value = scanningMessages[0] ?? ''
 
 	const segmentInterval = setInterval(() => {
 		currentStep++
 		if (currentStep < scanningMessages.length) {
-			scanningMessage.value = scanningMessages[currentStep]
+			scanningMessage.value = scanningMessages[currentStep] ?? ''
 		} else {
 			clearInterval(segmentInterval)
 			isScanning.value = false
@@ -487,6 +314,62 @@ function triggerUploadMock() {
 }
 function triggerFlipMock() {
 	console.log('Camera hardware orientation toggled.')
+}
+
+const fileStore = useFileStore()
+const checkStore = useCheckStore()
+const currentCheck = ref<Check | null>(null)
+
+async function handleCapture() {
+	// Step 1: Get photo from camera
+	// For now use file input on web, Capacitor later
+	const input = document.createElement('input')
+	input.type = 'file'
+	input.accept = 'image/*'
+
+	input.onchange = async (e: any) => {
+		const file = e.target.files[0]
+		if (!file) return
+
+		// Show the photo preview immediately
+		capturedPhoto.value = URL.createObjectURL(file)
+
+		// Show scanning state
+		isScanning.value = true
+		showResults.value = false
+		let step = 0
+		scanningMessage.value = scanningMessages[0] ?? ''
+
+		const interval = setInterval(() => {
+			step++
+			if (step < scanningMessages.length) {
+				scanningMessage.value = scanningMessages[step] ?? ''
+			}
+		}, 700)
+
+		try {
+			// Step 2: Upload file to server
+			const uploaded = await fileStore.uploadFile(file)
+
+			// Step 3: Run check against uploaded file
+			const check = await checkStore.runCheck(
+				uploaded.fileId, // note: server returns { fileId }
+				'casual'
+			)
+
+			// Step 4: Show results
+			clearInterval(interval)
+			isScanning.value = false
+			currentCheck.value = check
+			showResults.value = true
+		} catch (err) {
+			clearInterval(interval)
+			isScanning.value = false
+			console.error('Check failed:', err)
+		}
+	}
+
+	input.click()
 }
 </script>
 

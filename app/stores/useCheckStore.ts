@@ -8,7 +8,7 @@ interface Category {
 	fix: string
 }
 
-interface Check {
+export interface Check {
 	_id: string
 	user: string
 	file: string

@@ -320,6 +320,15 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
+const props = defineProps<{
+	check: any
+}>()
+
+const emit = defineEmits(['close'])
+
+// Replace activeCheck ref with computed from props:
+const activeCheck = computed(() => props.check)
+
 // ==========================================
 // COMPONENT MOCK DATABASE SEED REGISTRY
 // ==========================================
@@ -457,7 +466,7 @@ const mockDocuments = {
 }
 
 // Active Schema Target State Hook
-const activeCheck = ref({ ...mockDocuments.midRange2 })
+//const activeCheck = ref({ ...mockDocuments.midRange2 })
 
 // Tracking Interactive Sub-Menu Dropdown State
 const activeCategoryTab = ref<string | null>('outfit')
@@ -501,8 +510,8 @@ function toggleCategoryTab(key: string) {
  * Direct Schema Data Override Utility Wrapper
  */
 function loadMockState(tier: 'optimal' | 'critical') {
-	activeCheck.value = { ...mockDocuments[tier] }
-	activeCategoryTab.value = Object.keys(activeCheck.value.categories)[0] || null
+	//activeCheck.value = { ...mockDocuments[tier] }
+	//activeCategoryTab.value = Object.keys(activeCheck.value.categories)[0] || null
 }
 
 /**
@@ -519,8 +528,9 @@ function simulateIncomingPayload() {
 }
 
 function resetLocalCheckState() {
-	console.log('Resetting component schema tracking loop.')
-	loadMockState('optimal')
+	emit('close')
+	//console.log('Resetting component schema tracking loop.')
+	//loadMockState('optimal')
 }
 
 /**
