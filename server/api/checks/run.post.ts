@@ -61,6 +61,7 @@ export default defineEventHandler(async (event) => {
 		{
 			$inc: { credits: -1 },
 		},
+		// @ts-ignore
 		{}
 	)
 
