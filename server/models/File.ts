@@ -11,7 +11,7 @@ const fileSchema = new Schema(
 		filename: { type: String, required: true },
 		mimeType: { type: String, required: true },
 		sizeBytes: { type: Number, required: true },
-		binary_data: { type: Buffer, required: true },
+		binaryData: { type: Buffer, required: true },
 	},
 	{ timestamps: true }
 )

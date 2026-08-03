@@ -22,5 +22,5 @@ export default defineEventHandler(async (event) => {
 	setHeader(event, 'Content-Type', fileAsset.mimeType || 'image/jpeg')
 	setHeader(event, 'Cache-Control', 'public, max-age=31536000, immutable')
 
-	return fileAsset.binary_data
+	return fileAsset.binaryData
 })

@@ -6,9 +6,9 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 	}
 
-	// Omit binary_data completely to keep response payloads lightweight
+	// Omit binaryData completely to keep response payloads lightweight
 	return await File.find({ user: currentUser._id })
-		.select('-binary_data')
+		.select('-binaryData')
 		.sort({ createdAt: -1 })
 		.lean()
 })

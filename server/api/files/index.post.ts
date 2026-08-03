@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
 		filename: filePart.filename,
 		mimeType: filePart.type,
 		sizeBytes: filePart.data.length,
-		binary_data: filePart.data,
+		binaryData: filePart.data,
 	})
 
 	// Return standard resource creation structure

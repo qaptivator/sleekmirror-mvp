@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 		_id: fileId,
 		user: currentUser._id,
 	})
-		.select('-binary_data') // Keep it lightweight
+		.select('-binaryData') // Keep it lightweight
 		.lean()
 
 	if (!fileInfo)
