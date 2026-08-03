@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 
 interface FileMetadata {
 	_id: string
+	user: string
 	filename: string
 	mime_type: string
 	size_bytes: number
@@ -102,7 +103,8 @@ export const useFileStore = defineStore('files', () => {
 
 			return metadata
 		} catch (err) {
-			error.value = err instanceof Error ? err.message : 'Failed to fetch file metadata'
+			error.value =
+				err instanceof Error ? err.message : 'Failed to fetch file metadata'
 			throw err
 		}
 	}
@@ -148,7 +150,8 @@ export const useFileStore = defineStore('files', () => {
 
 			return blob
 		} catch (err) {
-			error.value = err instanceof Error ? err.message : 'Failed to fetch file blob'
+			error.value =
+				err instanceof Error ? err.message : 'Failed to fetch file blob'
 			throw err
 		}
 	}

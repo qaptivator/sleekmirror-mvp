@@ -10,6 +10,7 @@ interface Category {
 
 interface Check {
 	_id: string
+	user: string
 	file: string
 	context_tag: string
 	overall_score: number
