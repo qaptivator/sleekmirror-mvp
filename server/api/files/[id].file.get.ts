@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	// Tell the mobile browser how to read the buffer payload
-	setHeader(event, 'Content-Type', fileAsset.mime_type || 'image/jpeg')
+	setHeader(event, 'Content-Type', fileAsset.mimeType || 'image/jpeg')
 	setHeader(event, 'Cache-Control', 'public, max-age=31536000, immutable')
 
 	return fileAsset.binary_data

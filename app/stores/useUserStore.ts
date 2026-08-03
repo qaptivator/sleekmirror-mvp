@@ -5,8 +5,8 @@ interface User {
 	_id: string
 	identifiers: string[]
 	credits: number
-	first_name?: string
-	last_name?: string
+	firstName?: string
+	lastName?: string
 	createdAt: string
 	updatedAt: string
 }
@@ -22,8 +22,8 @@ export const useUserStore = defineStore('user', () => {
 	const credits = computed(() => currentUser.value?.credits ?? 0)
 	const fullName = computed(() => {
 		if (!currentUser.value) return ''
-		const { first_name, last_name } = currentUser.value
-		return [first_name, last_name].filter(Boolean).join(' ').trim() || 'User'
+		const { firstName, lastName } = currentUser.value
+		return [firstName, lastName].filter(Boolean).join(' ').trim() || 'User'
 	})
 
 	// Fetch user by identifier

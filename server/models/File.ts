@@ -9,8 +9,8 @@ const fileSchema = new Schema(
 			index: true,
 		},
 		filename: { type: String, required: true },
-		mime_type: { type: String, required: true },
-		size_bytes: { type: Number, required: true },
+		mimeType: { type: String, required: true },
+		sizeBytes: { type: Number, required: true },
 		binary_data: { type: Buffer, required: true },
 	},
 	{ timestamps: true }

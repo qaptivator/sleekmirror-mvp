@@ -35,7 +35,7 @@
 				<span
 					>Context:
 					<strong class="text-cream">{{
-						activeCheck.context_tag
+						activeCheck.contextTag
 					}}</strong></span
 				>
 				<span
@@ -73,10 +73,10 @@
 						<div
 							class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cream/10 border border-cream/10 text-[10px] font-mono uppercase tracking-wider text-gold-soft"
 						>
-							FOR {{ activeCheck.context_tag }}
+							FOR {{ activeCheck.contextTag }}
 						</div>
 						<h2 class="text-md font-semibold text-cream leading-snug">
-							{{ activeCheck.verdict_headline }}
+							{{ activeCheck.verdictHeadline }}
 						</h2>
 					</div>
 
@@ -98,10 +98,10 @@
 							/>
 							<path
 								class="transition-all duration-1000 ease-out"
-								:style="getScoreStyle(activeCheck.overall_score, 'stroke')"
+								:style="getScoreStyle(activeCheck.overallScore, 'stroke')"
 								stroke-width="2.5"
 								stroke-dasharray="100, 100"
-								:stroke-dashoffset="100 - activeCheck.overall_score"
+								:stroke-dashoffset="100 - activeCheck.overallScore"
 								stroke-linecap="round"
 								fill="none"
 								d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -111,7 +111,7 @@
 							<span
 								class="text-2xl font-light tracking-tighter text-cream tabular-nums font-mono"
 							>
-								{{ Math.round(activeCheck.overall_score) }}
+								{{ Math.round(activeCheck.overallScore) }}
 							</span>
 						</div>
 					</div>
@@ -238,7 +238,7 @@
 					</p>
 
 					<div
-						v-if="activeCheck.action_checklist.length === 0"
+						v-if="activeCheck.actionChecklist.length === 0"
 						class="text-center p-6 border border-dashed border-cream/10 rounded-xl"
 					>
 						<p class="text-xs text-muted">
@@ -251,7 +251,7 @@
 						class="space-y-2"
 					>
 						<label
-							v-for="(task, index) in activeCheck.action_checklist"
+							v-for="(task, index) in activeCheck.actionChecklist"
 							:key="index"
 							class="flex items-start gap-3 p-3.5 rounded-xl border border-cream/5 bg-black/20 hover:bg-cream/5 cursor-pointer transition-colors group select-none"
 						>
@@ -327,10 +327,9 @@ const mockDocuments = {
 	optimal: {
 		user: '64f1c11b9f1d2c001b8a3f11',
 		file: '64f1c11b9f1d2c001b8a3f22',
-		context_tag: 'interview',
-		overall_score: 91,
-		verdict_headline:
-			'Highly professional composition with optimized symmetry.',
+		contextTag: 'interview',
+		overallScore: 91,
+		verdictHeadline: 'Highly professional composition with optimized symmetry.',
 		categories: {
 			outfit: {
 				score: 95,
@@ -351,7 +350,7 @@ const mockDocuments = {
 				fix: 'Maintain current vertical angle metrics during target interactions.',
 			},
 		},
-		action_checklist: [
+		actionChecklist: [
 			'Secure contrast uniformity across alternative scene transformations.',
 			'Retain focal distance vectors across sequential iterations.',
 		],
@@ -359,9 +358,9 @@ const mockDocuments = {
 	critical: {
 		user: '64f1c11b9f1d2c001b8a3f11',
 		file: '64f1c11b9f1d2c001b8a3f44',
-		context_tag: 'casual_profile',
-		overall_score: 48,
-		verdict_headline:
+		contextTag: 'casual_profile',
+		overallScore: 48,
+		verdictHeadline:
 			'Structural constraints compromised. Critical adjustments required.',
 		categories: {
 			outfit: {
@@ -383,7 +382,7 @@ const mockDocuments = {
 				fix: 'Correct spine pitch rotation by negative 4.2 degrees to normalize geometric matrix fields.',
 			},
 		},
-		action_checklist: [
+		actionChecklist: [
 			'Re-evaluate structural illumination sources before execution loop.',
 			'Calibrate tracking framework parameters to fix drift anomalies.',
 			'Purge background vector noise artifacts inside active canvas bounds.',
@@ -392,9 +391,9 @@ const mockDocuments = {
 	midRange: {
 		user: '64f1c11b9f1d2c001b8a3f11',
 		file: '64f1c11b9f1d2c001b8a3f55',
-		context_tag: 'casual',
-		overall_score: 69,
-		verdict_headline:
+		contextTag: 'casual',
+		overallScore: 69,
+		verdictHeadline:
 			'A clean, minimalist monochrome base that gets completely derailed by clunky footwear and careless fabric bunching.',
 		categories: {
 			outfit: {
@@ -416,7 +415,7 @@ const mockDocuments = {
 				fix: 'Unroll the sleeves and fold them back up intentionally with a crisp, tight roll that finishes right below the elbow, then pull the shirt hem down flat before you step out.',
 			},
 		},
-		action_checklist: [
+		actionChecklist: [
 			'Swap the busy, dark patterned sneakers for minimalist low-top white shoes.',
 			'Refold both shirt sleeves to create a symmetrical, clean roll just below the elbow.',
 			'Use a small drop of styling product to control the flyaway frizz at the top of your hair.',
@@ -425,9 +424,9 @@ const mockDocuments = {
 	midRange2: {
 		user: '64f1c11b9f1d2c001b8a3f11',
 		file: '64f1c11b9f1d2c001b8a3f55',
-		context_tag: 'casual',
-		overall_score: 68,
-		verdict_headline:
+		contextTag: 'casual',
+		overallScore: 68,
+		verdictHeadline:
 			'Bright casual layers ruined by a tight bag strap and messy hair.',
 		categories: {
 			outfit: {
@@ -449,7 +448,7 @@ const mockDocuments = {
 				fix: 'Loosen the bag strap so the jacket can sit flat.',
 			},
 		},
-		action_checklist: [
+		actionChecklist: [
 			'Loosen the cross-body bag strap to stop the jacket from bunching.',
 			'Pat down the frizzy hair flyaways on the top and sides.',
 			'Pull the hoodie drawstrings until they hang down evenly.',
@@ -477,9 +476,9 @@ const processedCategories = computed(() => {
  * Handles initialization matching tasks arrays smoothly on payload updates
  */
 function initializeChecklistTracker() {
-	if (activeCheck.value.action_checklist) {
+	if (activeCheck.value.actionChecklist) {
 		checklistState.value = new Array(
-			activeCheck.value.action_checklist.length
+			activeCheck.value.actionChecklist.length
 		).fill(false)
 	}
 }
@@ -510,8 +509,8 @@ function loadMockState(tier: 'optimal' | 'critical') {
  * Emulates full data refresh cycles to test UI reactivity pipelines
  */
 function simulateIncomingPayload() {
-	activeCheck.value.overall_score = 12
-	activeCheck.value.verdict_headline =
+	activeCheck.value.overallScore = 12
+	activeCheck.value.verdictHeadline =
 		'Processing incoming engine transformations...'
 
 	setTimeout(() => {

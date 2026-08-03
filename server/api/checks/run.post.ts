@@ -8,14 +8,14 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 	}
 
-	const { file_id, context_tag } = await readBody(event)
-	if (!file_id || !context_tag) {
+	const { fileId, contextTag } = await readBody(event)
+	if (!fileId || !contextTag) {
 		throw createError({ statusCode: 400, statusMessage: 'Missing parameters' })
 	}
 
 	// Use the clean 'user' field path matching your relational references
 	const sourceFile = await File.findOne({
-		_id: file_id,
+		_id: fileId,
 		user: currentUser._id,
 	})
 	if (!sourceFile) {
@@ -34,8 +34,8 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const mockEngineOutput = {
-		overall_score: 85,
-		verdict_headline:
+		overallScore: 85,
+		verdictHeadline:
 			'Clean shoulder alignment, but your shirt collar lines need adjustment.',
 		categories: {
 			outfit: { score: 90, feedback: 'Excellent fitting.', fix: 'None.' },
@@ -46,13 +46,13 @@ export default defineEventHandler(async (event) => {
 				fix: 'Straighten left collar point flush.',
 			},
 		},
-		action_checklist: ['Straighten left collar point flush before leaving.'],
+		actionChecklist: ['Straighten left collar point flush before leaving.'],
 	}
 
 	const finalizedCheck = await Check.create({
 		user: currentUser._id,
-		file: file_id,
-		context_tag,
+		file: fileId,
+		contextTag,
 		...mockEngineOutput,
 	})
 

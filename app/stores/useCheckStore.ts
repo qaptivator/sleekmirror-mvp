@@ -12,15 +12,15 @@ interface Check {
 	_id: string
 	user: string
 	file: string
-	context_tag: string
-	overall_score: number
-	verdict_headline: string
+	contextTag: string
+	overallScore: number
+	verdictHeadline: string
 	categories: {
 		outfit: Category
 		grooming: Category
 		presentation: Category
 	}
-	action_checklist: string[]
+	actionChecklist: string[]
 	createdAt: string
 	updatedAt: string
 }

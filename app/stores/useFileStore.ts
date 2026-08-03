@@ -5,8 +5,8 @@ interface FileMetadata {
 	_id: string
 	user: string
 	filename: string
-	mime_type: string
-	size_bytes: number
+	mimeType: string
+	sizeBytes: number
 	createdAt: string
 	updatedAt: string
 }

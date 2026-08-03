@@ -31,11 +31,11 @@ export default defineEventHandler(async (event) => {
 	const fileAsset = await File.create({
 		user: currentUser._id, // Tied using the clean 'user' model property matching key
 		filename: filePart.filename,
-		mime_type: filePart.type,
-		size_bytes: filePart.data.length,
+		mimeType: filePart.type,
+		sizeBytes: filePart.data.length,
 		binary_data: filePart.data,
 	})
 
 	// Return standard resource creation structure
-	return { file_id: fileAsset._id }
+	return { fileId: fileAsset._id }
 })

@@ -18,17 +18,17 @@ const checkSchema = new Schema(
 			index: true,
 		},
 		file: { type: Schema.Types.ObjectId, ref: 'File', required: true },
-		context_tag: { type: String, required: true },
+		contextTag: { type: String, required: true },
 
-		overall_score: { type: Number, required: true, min: 0, max: 100 },
+		overallScore: { type: Number, required: true, min: 0, max: 100 },
 
-		verdict_headline: { type: String, required: true },
+		verdictHeadline: { type: String, required: true },
 		categories: {
 			outfit: { type: categorySchema, required: true },
 			grooming: { type: categorySchema, required: true },
 			presentation: { type: categorySchema, required: true },
 		},
-		action_checklist: {
+		actionChecklist: {
 			type: [String],
 			required: true,
 			default: [],

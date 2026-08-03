@@ -8,8 +8,8 @@ export default defineEventHandler((event) => {
 			_id: '6a4bb0da27b09ebd780971a8',
 			identifiers: ['email:user@example.com'],
 			creidts: 10,
-			first_name: 'John',
-			last_name: 'Doe',
+			firstName: 'John',
+			lastName: 'Doe',
 		}
 	} else {
 		event.context.user = undefined
