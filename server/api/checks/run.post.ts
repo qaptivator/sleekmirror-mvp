@@ -64,5 +64,5 @@ export default defineEventHandler(async (event) => {
 		{}
 	)
 
-	return finalizedCheck
+	return finalizedCheck.toObject()
 })
