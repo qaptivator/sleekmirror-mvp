@@ -11,6 +11,12 @@ export default defineNitroPlugin(async () => {
 	if (!config.mongodbUri) {
 		console.error('MongoDB Connection Error: MongoDB URI not provided')
 	}
+
+	// 1 or 2 means it is already connected or currently connecting
+	const state = mongoose.connection.readyState
+	if (state === 1 || state === 2) {
+		return
+	}
 	try {
 		await mongoose.connect(config.mongodbUri)
 		console.log('MongoDB Connected Successfully')
