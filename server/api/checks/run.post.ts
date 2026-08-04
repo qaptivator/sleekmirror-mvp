@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 400, statusMessage: 'Missing parameters' })
 	}
 
+	console.log('try to connect to openai')
 	const config = useRuntimeConfig()
 	if (!config.openaiApiKey) {
 		console.error('OpenAI Connection Error: OpenAI API Key not provided')
@@ -21,6 +22,7 @@ export default defineEventHandler(async (event) => {
 	const client = new OpenAI({
 		apiKey: config.openaiApiKey,
 	})
+	console.log('connected to openai!')
 
 	// Use the clean 'user' field path matching your relational references
 	const sourceFile = await File.findOne({
@@ -61,6 +63,7 @@ export default defineEventHandler(async (event) => {
 	const base64Image = sourceFile.binaryData.toString('base64')
 	const dataUrl = `data:${sourceFile.mimeType};base64,${base64Image}`
 
+	console.log('start asking ai')
 	const response = await client.chat.completions.create({
 		model: 'gpt-4o',
 		max_tokens: 1000,
@@ -149,6 +152,7 @@ You must return a raw, valid JSON object matching the exact schema below. Do not
 			},
 		],
 	})
+	console.log('we got a response back!')
 
 	// @ts-ignore
 	const raw = response.choices[0].message.content?.trim() ?? ''
