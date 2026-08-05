@@ -25,7 +25,6 @@
 				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
 			>
 				<IconCircleUser class="w-8" />
-				Profile
 			</button>
 		</div>
 		<div class="flex-1 relative bg-obsidian overflow-hidden">
@@ -115,65 +114,23 @@
 				<div class="flex items-center justify-center gap-10">
 					<button
 						@click="triggerUploadMock"
-						class="w-12 h-12 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
+						class="w-16 h-16 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
 					>
-						<svg
-							class="text-cream/70"
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<line
-								x1="12"
-								y1="5"
-								x2="12"
-								y2="19"
-							/>
-							<line
-								x1="5"
-								y1="12"
-								x2="19"
-								y2="12"
-							/>
-						</svg>
+						<IconImage class="text-cream/70" />
 					</button>
 
 					<!-- handleCaptureSimulation handleCapture -->
 					<button
 						@click="handleCapture"
-						class="w-16 h-16 rounded-full bg-gold flex items-center justify-center shadow-lg hover:shadow-gold/20 hover:scale-105 transition-all duration-300 active:scale-95 cursor-pointer"
+						class="w-20 h-20 rounded-full bg-gold flex items-center justify-center shadow-lg hover:shadow-gold/20 hover:scale-105 transition-all duration-300 active:scale-95 cursor-pointer"
 					>
-						<svg
-							class="text-obsidian"
-							width="26"
-							height="26"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<path
-								d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"
-							/>
-							<circle
-								cx="12"
-								cy="13"
-								r="3"
-							/>
-						</svg>
+						<IconCamera class="w-10 h-10 text-obsidian" />
 					</button>
 
 					<button
-						class="w-12 h-12 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
+						class="w-16 h-16 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
 					>
-						<IconGalleryHorizontalEnd class="w-4" />
+						<IconGalleryHorizontalEnd class="text-cream/70" />
 					</button>
 				</div>
 			</div>
