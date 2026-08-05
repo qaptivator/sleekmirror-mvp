@@ -3,16 +3,22 @@
 		class="w-full h-full flex flex-col relative bg-obsidian text-cream font-sans"
 	>
 		<div class="p-4 bg-obsidian flex">
-			<button
+			<!--<button
 				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
 			>
 				<IconGalleryHorizontalEnd class="w-8" />
 				History
-			</button>
+			</button>-->
 			<button
 				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
 			>
 				<IconZap class="w-8" />
+			</button>
+			<button
+				@click="triggerFlipMock"
+				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
+			>
+				<IconRotateCw class="w-8" />
 			</button>
 			<div class="flex-1" />
 			<button
@@ -165,24 +171,9 @@
 					</button>
 
 					<button
-						@click="triggerFlipMock"
 						class="w-12 h-12 rounded-full flex items-center justify-center border border-cream/10 bg-ink/40 hover:bg-cream/10 transition-all duration-200 active:scale-95 cursor-pointer"
 					>
-						<svg
-							class="text-cream/70"
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<path
-								d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"
-							/>
-						</svg>
+						<IconGalleryHorizontalEnd class="w-4" />
 					</button>
 				</div>
 			</div>
