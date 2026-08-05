@@ -51,6 +51,21 @@
 					/>
 				</div>
 			</Transition>
+			<Transition name="fade">
+				<div
+					v-if="showHistory"
+					class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+					@click="showHistory = false"
+				/>
+			</Transition>
+			<Transition name="sheet-slide">
+				<div
+					v-if="showHistory"
+					class="fixed inset-0 z-50"
+				>
+					<ChecksView />
+				</div>
+			</Transition>
 		</Teleport>
 	</div>
 </template>
@@ -71,5 +86,13 @@ const showHistory = ref(false)
 .fade-enter-from,
 .fade-leave-to {
 	opacity: 0;
+}
+.sheet-slide-enter-active,
+.sheet-slide-leave-active {
+	transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sheet-slide-enter-from,
+.sheet-slide-leave-to {
+	transform: translateY(100%);
 }
 </style>
