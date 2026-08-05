@@ -137,7 +137,7 @@
 						>
 							<!-- Header Row Toggle -->
 							<div
-								@click="toggleCategoryTab(catKey)"
+								@click="toggleCategoryTab(catKey as string)"
 								class="flex items-center justify-between p-4 cursor-pointer select-none active:bg-cream/5"
 							>
 								<div class="flex items-center gap-3">
@@ -259,7 +259,7 @@
 							<div class="relative flex items-center mt-0.5 shrink-0">
 								<input
 									type="checkbox"
-									v-model="checklistState[index]"
+									v-model="checklistState[index as number]"
 									class="peer sr-only"
 								/>
 								<div
@@ -282,7 +282,7 @@
 							<span
 								class="text-xs transition-all duration-200"
 								:class="
-									checklistState[index]
+									checklistState[index as number]
 										? 'line-through text-muted opacity-60'
 										: 'text-cream/90'
 								"
@@ -320,280 +320,46 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
-const props = defineProps<{
-	check: any
-}>()
-
+const props = defineProps<{ check: any }>()
 const emit = defineEmits(['close'])
 
-// Replace activeCheck ref with computed from props:
 const activeCheck = computed(() => props.check)
-
-// ==========================================
-// COMPONENT MOCK DATABASE SEED REGISTRY
-// ==========================================
-const mockDocuments = {
-	optimal: {
-		user: '64f1c11b9f1d2c001b8a3f11',
-		file: '64f1c11b9f1d2c001b8a3f22',
-		contextTag: 'interview',
-		overallScore: 91,
-		verdictHeadline: 'Highly professional composition with optimized symmetry.',
-		categories: {
-			outfit: {
-				score: 95,
-				feedback:
-					'Excellent contrast matching. Shoulder alignment vectors are crisp and color values show clean color cohesion.',
-				fix: 'No optimization sequence needed for this category layer.',
-			},
-			grooming: {
-				score: 88,
-				feedback:
-					'Clean facial geometry parameters. Hair boundaries present uniform tracking fields.',
-				fix: 'Ensure edge resolution values remain consistent during movement tracking loops.',
-			},
-			presentation: {
-				score: 90,
-				feedback:
-					'Posture lines run directly parallel with focal framing targets.',
-				fix: 'Maintain current vertical angle metrics during target interactions.',
-			},
-		},
-		actionChecklist: [
-			'Secure contrast uniformity across alternative scene transformations.',
-			'Retain focal distance vectors across sequential iterations.',
-		],
-	},
-	critical: {
-		user: '64f1c11b9f1d2c001b8a3f11',
-		file: '64f1c11b9f1d2c001b8a3f44',
-		contextTag: 'casual_profile',
-		overallScore: 48,
-		verdictHeadline:
-			'Structural constraints compromised. Critical adjustments required.',
-		categories: {
-			outfit: {
-				score: 42,
-				feedback:
-					'Severe silhouette pixel crushing. Low contrast boundaries break layout isolation parameters.',
-				fix: 'Introduce higher variance midtone layers or high-contrast element filters.',
-			},
-			grooming: {
-				score: 55,
-				feedback:
-					'Diffused light sources distort edge sharpness across upper bounding paths.',
-				fix: 'Reposition localized key light vectors 45 degrees relative to primary tracking lens.',
-			},
-			presentation: {
-				score: 47,
-				feedback:
-					'Asymmetrical alignment tracking detected. Tilt vectors deviate past baseline margins.',
-				fix: 'Correct spine pitch rotation by negative 4.2 degrees to normalize geometric matrix fields.',
-			},
-		},
-		actionChecklist: [
-			'Re-evaluate structural illumination sources before execution loop.',
-			'Calibrate tracking framework parameters to fix drift anomalies.',
-			'Purge background vector noise artifacts inside active canvas bounds.',
-		],
-	},
-	midRange: {
-		user: '64f1c11b9f1d2c001b8a3f11',
-		file: '64f1c11b9f1d2c001b8a3f55',
-		contextTag: 'casual',
-		overallScore: 69,
-		verdictHeadline:
-			'A clean, minimalist monochrome base that gets completely derailed by clunky footwear and careless fabric bunching.',
-		categories: {
-			outfit: {
-				score: 68,
-				feedback:
-					'The pairing of a white tunic-style shirt with light grey trousers creates a great, low-contrast minimalist base for a casual day. However, the dark, heavily patterned, oversized knit sneakers completely break the clean silhouette and create an aggressive visual anchor at your feet.',
-				fix: 'Swap out those heavy patterned sneakers for a pair of crisp, low-profile white leather sneakers or simple minimalist canvas shoes to match the clean aesthetic of your upper outfit.',
-			},
-			grooming: {
-				score: 65,
-				feedback:
-					"Your hair has awesome natural volume, but it's currently leaning towards a completely unstyled, top-heavy shape with visible frizz and flyaways pulling attention upwards.",
-				fix: 'Dampen your hair slightly and apply a pea-sized amount of light curling cream or texturizing paste to group the curls together, bringing some structured control to the volume.',
-			},
-			presentation: {
-				score: 73,
-				feedback:
-					"The shirt is bunching up awkwardly across your stomach because of how you're holding the phone, and the sleeves are rolled loosely and unevenly, resting at weird heights on your forearms. The mirror reflection also shows some surface smudges.",
-				fix: 'Unroll the sleeves and fold them back up intentionally with a crisp, tight roll that finishes right below the elbow, then pull the shirt hem down flat before you step out.',
-			},
-		},
-		actionChecklist: [
-			'Swap the busy, dark patterned sneakers for minimalist low-top white shoes.',
-			'Refold both shirt sleeves to create a symmetrical, clean roll just below the elbow.',
-			'Use a small drop of styling product to control the flyaway frizz at the top of your hair.',
-		],
-	},
-	midRange2: {
-		user: '64f1c11b9f1d2c001b8a3f11',
-		file: '64f1c11b9f1d2c001b8a3f55',
-		contextTag: 'casual',
-		overallScore: 68,
-		verdictHeadline:
-			'Bright casual layers ruined by a tight bag strap and messy hair.',
-		categories: {
-			outfit: {
-				score: 72,
-				feedback:
-					'The bright red jacket is layered over a mismatched bright orange hoodie. This intense color combination looks overcrowded and clashes loudly.',
-				fix: 'Swap the orange hoodie for a neutral black or grey one.',
-			},
-			grooming: {
-				score: 65,
-				feedback:
-					'Your hair is very frizzy and sticks out on the sides. It makes your head look unkempt and messy.',
-				fix: 'Use a damp hand or gel to smooth down the frizzy sides.',
-			},
-			presentation: {
-				score: 67,
-				feedback:
-					'The bag strap is too tight across your chest. It creates deep wrinkles and leaves your jacket looking badly bunched up.',
-				fix: 'Loosen the bag strap so the jacket can sit flat.',
-			},
-		},
-		actionChecklist: [
-			'Loosen the cross-body bag strap to stop the jacket from bunching.',
-			'Pat down the frizzy hair flyaways on the top and sides.',
-			'Pull the hoodie drawstrings until they hang down evenly.',
-		],
-	},
-}
-
-// Active Schema Target State Hook
-//const activeCheck = ref({ ...mockDocuments.midRange2 })
-
-// Tracking Interactive Sub-Menu Dropdown State
 const activeCategoryTab = ref<string | null>('outfit')
-
-// Reactive Task Checkbox Registry Array
 const checklistState = ref<boolean[]>([])
+const processedCategories = computed(() => activeCheck.value?.categories || {})
 
-/**
- * Normalizes Schema Map to map safely across Template Iterators
- */
-const processedCategories = computed(() => {
-	return activeCheck.value.categories || {}
-})
-
-/**
- * Handles initialization matching tasks arrays smoothly on payload updates
- */
 function initializeChecklistTracker() {
-	if (activeCheck.value.actionChecklist) {
-		checklistState.value = new Array(
-			activeCheck.value.actionChecklist.length
-		).fill(false)
-	}
+	checklistState.value = new Array(
+		activeCheck.value?.actionChecklist?.length ?? 0
+	).fill(false)
 }
 initializeChecklistTracker()
 
-// Watch state data payloads to clear out previous task matrices safely
 watch(
 	() => activeCheck.value,
-	() => {
-		initializeChecklistTracker()
-	},
+	() => initializeChecklistTracker(),
 	{ deep: true }
 )
+
+function resetLocalCheckState() {
+	emit('close')
+}
 
 function toggleCategoryTab(key: string) {
 	activeCategoryTab.value = activeCategoryTab.value === key ? null : key
 }
-
-/**
- * Direct Schema Data Override Utility Wrapper
- */
-function loadMockState(tier: 'optimal' | 'critical') {
-	//activeCheck.value = { ...mockDocuments[tier] }
-	//activeCategoryTab.value = Object.keys(activeCheck.value.categories)[0] || null
-}
-
-/**
- * Emulates full data refresh cycles to test UI reactivity pipelines
- */
-function simulateIncomingPayload() {
-	activeCheck.value.overallScore = 12
-	activeCheck.value.verdictHeadline =
-		'Processing incoming engine transformations...'
-
-	setTimeout(() => {
-		loadMockState(Math.random() > 0.5 ? 'optimal' : 'critical')
-	}, 900)
-}
-
-function resetLocalCheckState() {
-	emit('close')
-	//console.log('Resetting component schema tracking loop.')
-	//loadMockState('optimal')
-}
-
-/**
- * Returns dynamic functional color allocations strictly by score index numbers
- */
-/*function getScoreColorClass(
-	score: number,
-	mode: 'text' | 'bg' | 'stroke'
-): string {
-	// Normalize score between 0 and 100
-	const pct = Math.min(Math.max(score, 0), 100)
-
-	// PSYCHOLOGICAL COLOR MAPPING:
-	// 0%   (Genesis)  = Deep, rich bronze/sepia (HSL: 30, 20%, 35%) - Raw, editorial starting point.
-	// 50%  (Evolving) = Warm, soft amber/ochre (HSL: 35, 60%, 50%) - Mid-way glow.
-	// 100% (Pinnacle) = Brilliant, vivid brand gold (HSL: 45, 85%, 55%) - Ultimate polish.
-
-	// We interpolate Hue (30 to 45), Saturation (20% to 85%), and Lightness (35% to 55%)
-	const h = 30 + pct * 0.15 // 30 at score 0 -> 45 at score 100
-	const s = 20 + pct * 0.65 // 20% at score 0 -> 85% at score 100
-	const l = 35 + pct * 0.2 // 35% at score 0 -> 55% at score 100
-
-	if (mode === 'text') {
-		return `text-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
-			0
-		)}%)] font-semibold transition-colors duration-500`
-	}
-
-	if (mode === 'bg') {
-		// High scores get a solid background, lower scores get a softer, translucent variant so it doesn't overpower
-		const alpha = pct < 40 ? 0.15 : pct / 100
-		return `bg-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
-			0
-		)}%/${alpha})] transition-all duration-500`
-	}
-
-	// Default to stroke
-	return `stroke-[hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(
-		0
-	)}%)] transition-all duration-500`
-}*/
 
 function getScoreStyle(
 	score: number,
 	mode: 'text' | 'bg' | 'stroke'
 ): Record<string, string> {
 	const pct = Math.min(Math.max(score, 0), 100)
-
-	// Continuous HSL mapping (No muddy steps, purely pristine)
-	// 0%   = Rich Sepia/Bronze (HSL: 30, 20%, 40%)
-	// 100% = Pure Gold         (HSL: 45, 85%, 55%)
-	const h = 30 + pct * 0.15 // Hue shifts from 30 to 45
-	const s = 20 + pct * 0.65 // Saturation climbs from 20% to 85%
-	const l = 40 + pct * 0.15 // Lightness climbs from 40% to 55%
-
+	const h = 30 + pct * 0.15
+	const s = 20 + pct * 0.65
+	const l = 40 + pct * 0.15
 	const color = `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(0)}%)`
-
-	if (mode === 'text') {
-		return { color }
-	}
-
+	if (mode === 'text') return { color }
 	if (mode === 'bg') {
-		// Soft backdrop tint for lower scores, more solid for high scores
 		const alpha = pct < 40 ? '0.12' : (pct / 100).toFixed(2)
 		return {
 			backgroundColor: `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(
@@ -601,8 +367,6 @@ function getScoreStyle(
 			)}% / ${alpha})`,
 		}
 	}
-
-	// Default to stroke for SVGs / progress bars
 	return { stroke: color }
 }
 </script>
