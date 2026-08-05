@@ -2,6 +2,26 @@
 	<div
 		class="w-full h-full flex flex-col relative bg-obsidian text-cream font-sans"
 	>
+		<div class="p-4 bg-obsidian flex">
+			<button
+				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
+			>
+				<IconGalleryHorizontalEnd class="w-8" />
+				History
+			</button>
+			<button
+				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
+			>
+				<IconZap class="w-8" />
+			</button>
+			<div class="flex-1" />
+			<button
+				class="bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer text-center flex items-center gap-2"
+			>
+				<IconCircleUser class="w-8" />
+				Profile
+			</button>
+		</div>
 		<div class="flex-1 relative bg-obsidian overflow-hidden">
 			<div
 				class="w-full h-full bg-gradient-to-br from-ink to-obsidian flex items-center justify-center transition-all duration-300"
