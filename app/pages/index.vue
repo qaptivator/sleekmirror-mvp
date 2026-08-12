@@ -76,6 +76,7 @@ const showHistory = ref(false)
 </script>
 
 <style scoped>
+@reference "@/assets/css/main.css";
 .icon-btn {
 	@apply bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer flex items-center gap-2;
 }
