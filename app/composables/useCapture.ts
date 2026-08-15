@@ -70,7 +70,8 @@ export function useCapture() {
 	// SOURCE B: live camera snap (Capacitor)
 	// currently falls back to gallery on web
 	async function triggerCameraSnap() {
-		try {
+		triggerGalleryPicker()
+		/*try {
 			const { Camera, CameraResultType, CameraSource } = await import(
 				'@capacitor/camera'
 			)
@@ -87,7 +88,7 @@ export function useCapture() {
 		} catch {
 			// Capacitor not available (web dev), fall back to file picker
 			triggerGalleryPicker()
-		}
+		}*/
 	}
 
 	function reset() {

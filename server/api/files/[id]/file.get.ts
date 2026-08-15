@@ -2,25 +2,26 @@ import { File } from '../../../models/File'
 
 export default defineEventHandler(async (event) => {
 	const currentUser = event.context.user
-	if (!currentUser) {
+	if (!currentUser)
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-	}
 
 	const fileId = getRouterParam(event, 'id')
 
-	// Fetch only the specific target binary
-	const fileAsset = await (File.findOne as any)({
+	const fileAsset = await File.findOne({
 		_id: fileId,
 		user: currentUser._id,
 	}).lean()
 
-	if (!fileAsset) {
+	if (!fileAsset)
 		throw createError({ statusCode: 404, statusMessage: 'File not found' })
-	}
 
-	// Tell the mobile browser how to read the buffer payload
 	setHeader(event, 'Content-Type', fileAsset.mimeType || 'image/jpeg')
 	setHeader(event, 'Cache-Control', 'public, max-age=31536000, immutable')
 
-	return fileAsset.binaryData
+	// Binary → Buffer → Uint8Array so H3 can send it
+	const buffer = Buffer.isBuffer(fileAsset.binaryData)
+		? fileAsset.binaryData
+		: Buffer.from(fileAsset.binaryData.buffer)
+
+	return buffer
 })
