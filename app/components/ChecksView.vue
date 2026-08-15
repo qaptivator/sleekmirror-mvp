@@ -1,11 +1,19 @@
 <template>
 	<div class="w-full h-screen overflow-auto bg-obsidian text-cream font-sans">
 		<!-- Header -->
-		<div class="p-6 pb-2">
-			<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
-				Past Checks
-			</p>
-			<h1 class="text-xl font-semibold text-cream mt-0.5">Your History</h1>
+		<div class="p-6 pb-2 flex justify-between">
+			<div>
+				<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
+					Past Checks
+				</p>
+				<h1 class="text-xl font-semibold text-cream mt-0.5">Your History</h1>
+			</div>
+			<button
+				@click="emit('close')"
+				class="icon-btn"
+			>
+				<IconX class="w-8" />
+			</button>
 		</div>
 
 		<!-- Loading -->
@@ -140,6 +148,7 @@ const thumbnails = ref<Record<string, string>>({})
 const loading = ref(true)
 const error = ref<string | null>(null)
 const selectedCheck = ref<any | null>(null)
+const emit = defineEmits(['close'])
 
 // Fetch all checks
 onMounted(async () => {
@@ -189,6 +198,10 @@ function getScoreStyle(score: number): Record<string, string> {
 </script>
 
 <style scoped>
+@reference "@/assets/css/main.css";
+.icon-btn {
+	@apply bg-transparent border-0 text-cream/70 text-xs font-semibold py-1.5 px-2 rounded-xl transition-all active:scale-[0.95] hover:bg-cream/10 hover:text-cream cursor-pointer flex items-center gap-2;
+}
 .fade-enter-active,
 .fade-leave-active {
 	transition: opacity 0.35s cubic-bezier(0.215, 0.61, 0.355, 1);

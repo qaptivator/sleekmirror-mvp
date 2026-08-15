@@ -63,7 +63,7 @@
 					v-if="showHistory"
 					class="fixed inset-0 z-50"
 				>
-					<ChecksView />
+					<ChecksView @close="showHistory = false" />
 				</div>
 			</Transition>
 		</Teleport>
