@@ -4,6 +4,10 @@ export default defineNuxtConfig({
 	devtools: { enabled: true },
 	modules: ['nuxt-lucide-icons', '@pinia/nuxt'],
 	css: ['~/assets/css/main.css'],
+	ssr: false,
+	nitro: {
+		preset: 'static',
+	},
 	lucide: {
 		namePrefix: 'Icon',
 	},
