@@ -6,7 +6,7 @@
 		"build": "nuxt build",
 		"build:server": "cross-env NODE_ENV=production nuxt build",
 		"build:android": "cross-env NODE_ENV=production nuxt generate && npx cap copy android",
-		"cap:sync": "cross-env NODE_ENV=production nuxi generate && npx cap sync android",
+		"cap:sync": "cross-env NODE_ENV=production nuxt generate && npx cap sync android",
 		"dev": "nuxt dev",
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",
