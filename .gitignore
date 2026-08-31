@@ -25,5 +25,10 @@ logs
 !.env.example
 
 # Capacitor
-android/
-ios/
+#android/
+#ios/
+android/.gradle
+android/app/build
+android/build
+android/captures
+android/.idea
