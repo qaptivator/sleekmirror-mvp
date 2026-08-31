@@ -128,7 +128,7 @@
 			<Transition name="fade">
 				<div
 					v-if="selectedCheck"
-					class="fixed inset-0 z-40"
+					class="fixed inset-0 z-50"
 				>
 					<CheckView
 						:check="selectedCheck"

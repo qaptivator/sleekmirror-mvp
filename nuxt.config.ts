@@ -20,7 +20,7 @@ export default defineNuxtConfig({
 			//apiBase: '',
 			apiBase:
 				process.env.NODE_ENV === 'production'
-					? process.env.NUXT_PUBLIC_API_BASE
+					? process.env.UXT_PUBLIC_API_BASE
 					: '',
 		},
 		// .env
