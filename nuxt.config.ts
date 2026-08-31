@@ -15,6 +15,9 @@ export default defineNuxtConfig({
 		plugins: [tailwindcss()],
 	},
 	runtimeConfig: {
+		public: {
+			apiBase: '',
+		},
 		// .env
 		mongodbUri: '',
 		openaiApiKey: '',
