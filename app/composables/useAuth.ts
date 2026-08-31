@@ -13,27 +13,29 @@ export const useAuth = () => {
 		}
 
 		const info = await Device.getId()
-		console.log('[Auth] Raw DeviceId object:', info)
 		return info.identifier
 	}
 
 	const initAuth = async () => {
 		const identifier = await getDeviceId()
+		console.log('initAuth identifier:', identifier)
 
 		const res = await $fetch<{ token: string; user: any }>(
-			`${config.public.apiBase}/api/auth/device-login`,
+			'/api/auth/device-login',
 			{
 				method: 'POST',
+				baseURL: config.public.apiBase,
 				body: { deviceId: identifier },
 			}
 		)
+		console.log('initAuth res:', res)
 
 		token.value = res.token
 		user.value = res.user
 	}
 
 	// Helper for authenticated requests
-	const apiFetch = (url: string, opts: any = {}) => {
+	/*const apiFetch = (url: string, opts: any = {}) => {
 		return $fetch(`${config.public.apiBase}${url}`, {
 			...opts,
 			headers: {
@@ -41,7 +43,7 @@ export const useAuth = () => {
 				Authorization: token.value ? `Bearer ${token.value}` : '',
 			},
 		})
-	}
+	}*/
 
-	return { user, token, initAuth, apiFetch }
+	return { user, token, initAuth }
 }

@@ -9,6 +9,7 @@ export const useApi = <
 ) => {
 	const config = useRuntimeConfig()
 	const token = useState<string | null>('authToken')
+	console.log('useApi token:', token)
 
 	return $fetch<T, R>(request, {
 		baseURL: config.public.apiBase,

@@ -15,23 +15,24 @@ export default defineEventHandler(async (event) => {
 
 	const deviceIdentifier = `device:${deviceId}`
 
-	console.log('try find user:', deviceIdentifier)
+	console.log('device-login deviceIdentifier:', deviceIdentifier)
 
-	// Find existing user or create a new one with the device identifier
+	// find existing user or create a new one with the device identifier
 	let user = await User.findOne({ identifiers: deviceIdentifier })
+	console.log('device-login user:', user)
 
 	if (!user) {
-		console.log('making new user')
+		console.log('device-login making new user')
 		user = await User.create({
 			identifiers: [deviceIdentifier],
 			credits: 10,
 		})
 	}
 
-	console.log('returning')
+	console.log('device-login return')
 	return {
 		success: true,
 		user,
-		token: deviceIdentifier, // Used as Bearer token in subsequent requests
+		token: deviceIdentifier, // used as Bearer token in subsequent requests
 	}
 })

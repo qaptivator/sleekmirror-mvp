@@ -18,11 +18,12 @@ useHead({
 	],
 })
 onMounted(async () => {
+	console.log('app mounting')
 	try {
 		const data = await initAuth()
-		console.log('Auth finished for device:', data)
+		console.log('auth finished for device:', data)
 	} catch (err) {
-		console.error('Device auth failed:', err)
+		console.error('device auth failed:', err)
 	}
 })
 </script>
