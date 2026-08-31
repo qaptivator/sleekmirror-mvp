@@ -16,9 +16,9 @@
         <item name="android:background">@null</item>
 
         <!-- top/status bar and bottom/navigation bar config -->
-        <item name="android:statusBarColor">#000000</item>
+        <item name="android:statusBarColor">@android:color/black</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
         <!-- needs android 27 smh -->
         <!--<item name="android:windowLightNavigationBar">false</item>-->
     </style>
@@ -28,8 +28,8 @@
         <item name="android:background">@drawable/splash</item>
 
         <!-- top/status bar and bottom/navigation bar config -->
-        <item name="android:statusBarColor">#000000</item>
+        <item name="android:statusBarColor">@android:color/black</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
 </resources>

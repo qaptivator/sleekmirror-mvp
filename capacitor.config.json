@@ -1,5 +1,13 @@
 {
-  "appId": "com.sleekout.sleekmirror",
-  "appName": "Sleekmirror",
-  "webDir": ".output/public"
+	"appId": "com.sleekout.sleekmirror",
+	"appName": "Sleekmirror",
+	"webDir": ".output/public",
+	"android": {
+		"backgroundColor": "#000000",
+		"allowMixedContent": true
+	},
+	"server": {
+		"androidScheme": "https",
+		"hostname": "sleekmirror"
+	}
 }
