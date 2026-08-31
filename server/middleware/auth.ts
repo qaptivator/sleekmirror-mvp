@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import { User } from '../models/User'
 
 export default defineEventHandler(async (event) => {
-	if (event.path.startsWith('/api/')) {
+	/*if (event.path.startsWith('/api/')) {
 		const authHeader = getRequestHeader(event, 'authorization')
 
 		if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -19,8 +19,8 @@ export default defineEventHandler(async (event) => {
 		event.context.user = undefined
 	} else {
 		event.context.user = undefined
-	}
-	/*if (event.path.startsWith('/api/')) {
+	}*/
+	if (event.path.startsWith('/api/')) {
 		//const authHeader = getRequestHeader(event, 'authorization')
 		// inject custom data into the context (similar to setting ctx.meta)
 		//event.context.user = authHeader ? { authenticated: true } : null
@@ -34,5 +34,5 @@ export default defineEventHandler(async (event) => {
 		}
 	} else {
 		event.context.user = undefined
-	}*/
+	}
 })
