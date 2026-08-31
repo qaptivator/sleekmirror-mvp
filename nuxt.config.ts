@@ -6,7 +6,8 @@ export default defineNuxtConfig({
 	css: ['~/assets/css/main.css'],
 	ssr: false,
 	nitro: {
-		preset: 'static',
+		// this makes the nuxt server not build on npx nuxt build
+		//preset: 'static',
 	},
 	lucide: {
 		namePrefix: 'Icon',
@@ -16,7 +17,11 @@ export default defineNuxtConfig({
 	},
 	runtimeConfig: {
 		public: {
-			apiBase: '',
+			//apiBase: '',
+			apiBase:
+				process.env.NODE_ENV === 'production'
+					? process.env.NUXT_PUBLIC_API_BASE
+					: '',
 		},
 		// .env
 		mongodbUri: '',

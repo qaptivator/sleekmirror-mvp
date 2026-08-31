@@ -4,6 +4,9 @@
 	"private": true,
 	"scripts": {
 		"build": "nuxt build",
+		"build:server": "cross-env NODE_ENV=production nuxt build",
+		"build:android": "cross-env NODE_ENV=production nuxt generate && npx cap copy android",
+		"cap:sync": "cross-env NODE_ENV=production nuxi generate && npx cap sync android",
 		"dev": "nuxt dev",
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",
@@ -26,6 +29,7 @@
 	},
 	"devDependencies": {
 		"@capacitor/cli": "^8.5.0",
-		"@types/node": "^26.1.0"
+		"@types/node": "^26.1.0",
+		"cross-env": "^10.1.0"
 	}
 }
