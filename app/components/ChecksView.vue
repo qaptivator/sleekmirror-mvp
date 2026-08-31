@@ -153,14 +153,14 @@ const emit = defineEmits(['close'])
 // Fetch all checks
 onMounted(async () => {
 	try {
-		checks.value = await $fetch<any[]>('/api/checks')
+		checks.value = await useApi<any[]>('/api/checks')
 
 		// Fetch thumbnails for each unique file
 		const uniqueFileIds = [...new Set(checks.value.map((c) => c.file))]
 		await Promise.all(
 			uniqueFileIds.map(async (fileId) => {
 				try {
-					const blob = await $fetch<Blob>(`/api/files/${fileId}/file`, {
+					const blob = await useApi<Blob>(`/api/files/${fileId}/file`, {
 						responseType: 'blob',
 					})
 					thumbnails.value[fileId] = URL.createObjectURL(blob)

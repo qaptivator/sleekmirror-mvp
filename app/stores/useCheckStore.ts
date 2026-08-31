@@ -71,7 +71,7 @@ export const useCheckStore = defineStore('checks', () => {
 		error.value = null
 
 		try {
-			const check = await $fetch<Check>(`/api/checks/${checkId}`)
+			const check = await useApi<Check>(`/api/checks/${checkId}`)
 
 			// Cache the check
 			checks.value.set(checkId, check)
@@ -110,7 +110,7 @@ export const useCheckStore = defineStore('checks', () => {
 			const fileStore = useFileStore()
 			await fileStore.getFileMetadata(fileId)
 
-			const response = await $fetch<Check>('/api/checks/run', {
+			const response = await useApi<Check>('/api/checks/run', {
 				method: 'POST',
 				body: {
 					fileId,

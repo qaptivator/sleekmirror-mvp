@@ -32,7 +32,7 @@ export const useUserStore = defineStore('user', () => {
 		error.value = null
 
 		try {
-			const response = await $fetch<User>('/api/users', {
+			const response = await useApi<User>('/api/users', {
 				query: {
 					identifier,
 				},

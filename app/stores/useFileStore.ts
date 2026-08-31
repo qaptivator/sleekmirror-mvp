@@ -38,7 +38,7 @@ export const useFileStore = defineStore('files', () => {
 		error.value = null
 
 		try {
-			const response = await $fetch<FileMetadata[]>('/api/files')
+			const response = await useApi<FileMetadata[]>('/api/files')
 			fileList.value = response
 			return response
 		} catch (err) {
@@ -57,7 +57,7 @@ export const useFileStore = defineStore('files', () => {
 			const formData = new FormData()
 			formData.append('file', file)
 
-			/*const metadata = await $fetch<FileMetadata>('/api/files', {
+			/*const metadata = await useApi<FileMetadata>('/api/files', {
 				method: 'POST',
 				body: formData,
 			})
@@ -76,7 +76,7 @@ export const useFileStore = defineStore('files', () => {
 
 			return metadata*/
 
-			const response = await $fetch<{ fileId: string }>('/api/files', {
+			const response = await useApi<{ fileId: string }>('/api/files', {
 				method: 'POST',
 				body: formData,
 			})
@@ -99,7 +99,7 @@ export const useFileStore = defineStore('files', () => {
 		error.value = null
 
 		try {
-			const metadata = await $fetch<FileMetadata>(`/api/files/${fileId}/json`)
+			const metadata = await useApi<FileMetadata>(`/api/files/${fileId}/json`)
 
 			// Add to cache
 			files.value.set(fileId, {
@@ -129,7 +129,7 @@ export const useFileStore = defineStore('files', () => {
 
 		try {
 			// Fetch blob from server
-			const blob = await $fetch<Blob>(`/api/files/${fileId}/file`, {
+			const blob = await useApi<Blob>(`/api/files/${fileId}/file`, {
 				responseType: 'blob',
 			})
 
