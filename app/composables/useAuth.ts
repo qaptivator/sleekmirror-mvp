@@ -13,6 +13,7 @@ export const useAuth = () => {
 		}
 
 		const info = await Device.getId()
+		console.log('[Auth] Raw DeviceId object:', info)
 		return info.identifier
 	}
 

@@ -2,6 +2,8 @@ import mongoose from 'mongoose'
 import { setServers } from 'node:dns'
 
 export default defineNitroPlugin(async () => {
+	if (import.meta.prerender) return
+
 	// forces Node's internal resolver to bypass the broken system stack
 	// (fixes MongoDB Connection Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0)
 	// ((that is a known dns error in NodeJS v24.18.0 LTS))
