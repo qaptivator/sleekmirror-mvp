@@ -10,10 +10,5 @@
 		"androidScheme": "https",
 		"hostname": "sleekmirror"
 	},
-	"plugins": {
-		"StatusBar": {
-			"backgroundColor": "#010101",
-			"style": "DARK"
-		}
-	}
+	"plugins": {}
 }
