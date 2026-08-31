@@ -3,11 +3,17 @@
 	"appName": "Sleekmirror",
 	"webDir": ".output/public",
 	"android": {
-		"backgroundColor": "#000000",
+		"backgroundColor": "#010101",
 		"allowMixedContent": true
 	},
 	"server": {
 		"androidScheme": "https",
 		"hostname": "sleekmirror"
+	},
+	"plugins": {
+		"StatusBar": {
+			"backgroundColor": "#010101",
+			"style": "DARK"
+		}
 	}
 }

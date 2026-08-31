@@ -17,7 +17,17 @@ useHead({
 		{ name: 'theme-color', content: '#0a0a0a' },
 	],
 })
+import { StatusBar, Style } from '@capacitor/status-bar'
+
+const lockStatusBarDark = async () => {
+	// 1. Force the icons to stay white/light
+	await StatusBar.setStyle({ style: Style.Dark })
+
+	// 2. Force the background to stay pure black
+	await StatusBar.setBackgroundColor({ color: '#000000' })
+}
 onMounted(async () => {
+	lockStatusBarDark()
 	console.log('app mounting')
 	try {
 		const data = await initAuth()
