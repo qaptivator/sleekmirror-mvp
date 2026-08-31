@@ -1,7 +1,26 @@
 import mongoose from 'mongoose'
+import { User } from '../models/User'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
 	if (event.path.startsWith('/api/')) {
+		const authHeader = getRequestHeader(event, 'authorization')
+
+		if (authHeader && authHeader.startsWith('Bearer ')) {
+			const token = authHeader.substring(7).trim()
+
+			// look up user directly by the identifier passed in token (or handle JWT here later)
+			const user = await User.findOne({ identifiers: token }).lean()
+			if (user) {
+				event.context.user = user
+				return
+			}
+		}
+
+		event.context.user = undefined
+	} else {
+		event.context.user = undefined
+	}
+	/*if (event.path.startsWith('/api/')) {
 		//const authHeader = getRequestHeader(event, 'authorization')
 		// inject custom data into the context (similar to setting ctx.meta)
 		//event.context.user = authHeader ? { authenticated: true } : null
@@ -15,5 +34,5 @@ export default defineEventHandler((event) => {
 		}
 	} else {
 		event.context.user = undefined
-	}
+	}*/
 })
