@@ -6,6 +6,7 @@
 	</div>
 </template>
 <script setup lang="ts">
+const { initAuth } = useAuth()
 useHead({
 	title: 'Sleekmirror',
 	meta: [
@@ -15,5 +16,13 @@ useHead({
 		},
 		{ name: 'theme-color', content: '#0a0a0a' },
 	],
+})
+onMounted(async () => {
+	try {
+		const data = await initAuth()
+		console.log('Auth finished for device:', data)
+	} catch (err) {
+		console.error('Device auth failed:', err)
+	}
 })
 </script>
