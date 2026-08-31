@@ -17,10 +17,13 @@ logs
 .DS_Store
 .fleet
 .idea
+.dev/
 
 # Local env files
 .env
 .env.*
 !.env.example
 
-.dev/
+# Capacitor
+android/
+ios/
