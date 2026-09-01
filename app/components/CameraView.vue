@@ -5,10 +5,15 @@
 			class="w-full h-full bg-gradient-to-br from-ink to-obsidian flex items-center justify-center transition-all duration-300"
 			:class="capturedPhoto ? '' : 'border-b border-cream/10'"
 		>
+			<!--
+    opacity-100 transition-opacity
+    :class="isVideoReady ? 'opacity-100' : 'opacity-0'"
+    @canplay="isVideoReady = true"
+    -->
 			<video
 				v-if="!capturedPhoto && showLiveCamera"
 				ref="videoElement"
-				class="w-full h-full object-cover opacity-100 transition-opacity duration-300 [&:not([srcObject])]:hidden"
+				class="w-full h-full object-cover transition-opacity duration-300"
 				:class="isVideoReady ? 'opacity-100' : 'opacity-0'"
 				playsinline
 				autoplay
@@ -102,11 +107,11 @@ const props = defineProps<{
 
 const videoElement = ref<HTMLVideoElement | null>(null)
 const showLiveCamera = ref(true)
-const isVideoReady = ref(true)
+const isVideoReady = ref(false)
 let currentStream: MediaStream | null = null
 
 function stopMediaTracks() {
-	//isVideoReady.value = false
+	isVideoReady.value = false
 	if (currentStream) {
 		currentStream.getTracks().forEach((track) => track.stop())
 		currentStream = null
