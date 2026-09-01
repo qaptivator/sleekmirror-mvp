@@ -9,11 +9,11 @@
 				v-if="!capturedPhoto && showLiveCamera"
 				ref="videoElement"
 				class="w-full h-full object-cover opacity-0 transition-opacity duration-300 [&:not([srcObject])]:hidden"
-				:class="{ 'opacity-100': isVideoReady }"
+				:class="isVideoReady ? 'opacity-100' : 'opacity-0'"
 				playsinline
 				autoplay
 				muted
-				@loadedmetadata="isVideoReady = true"
+				@canplay="isVideoReady = true"
 			/>
 			<img
 				v-else-if="capturedPhoto"
@@ -137,6 +137,9 @@ async function startCamera() {
 		if (videoElement.value) {
 			videoElement.value.srcObject = stream
 			showLiveCamera.value = true
+			if (videoElement.value.readyState >= 2) {
+				isVideoReady.value = true
+			}
 		}
 	} catch (err) {
 		console.error('Failed to access camera:', err)
