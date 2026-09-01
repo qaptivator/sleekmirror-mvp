@@ -43,7 +43,7 @@
 						r="3"
 					/>
 				</svg>
-				<p class="text-cream/60 text-xs tracking-wide">Camera feed active</p>
+				<p class="text-cream/60 text-xs tracking-wide">Camera feed inactive</p>
 			</div>
 		</div>
 
@@ -100,9 +100,27 @@ const props = defineProps<{
 
 const videoElement = ref<HTMLVideoElement | null>(null)
 const showLiveCamera = ref(true)
+let currentStream: MediaStream | null = null
+
+function stopMediaTracks() {
+	if (currentStream) {
+		currentStream.getTracks().forEach((track) => track.stop())
+		currentStream = null
+	}
+	if (videoElement.value) {
+		videoElement.value.srcObject = null
+	}
+}
 
 async function startCamera() {
+	if (!props.cameraPermissionGranted || props.capturedPhoto) return
+
+	stopMediaTracks()
+
+	await nextTick() // Ensure <video> DOM ref is attached
+
 	if (!videoElement.value) return
+
 	try {
 		const stream = await navigator.mediaDevices.getUserMedia({
 			video: {
@@ -111,8 +129,10 @@ async function startCamera() {
 				height: { ideal: 720 },
 			},
 		})
+		currentStream = stream
 		if (videoElement.value) {
 			videoElement.value.srcObject = stream
+			showLiveCamera.value = true
 		}
 	} catch (err) {
 		console.error('Failed to access camera:', err)
@@ -120,37 +140,42 @@ async function startCamera() {
 	}
 }
 
-onMounted(async () => {
-	if (!props.cameraPermissionGranted) return
-	await startCamera()
+onMounted(() => {
+	startCamera()
 })
 
 watch(
 	() => props.cameraPermissionGranted,
-	async (newVal) => {
-		if (newVal) {
-			await startCamera()
+	(granted) => {
+		if (granted) {
+			startCamera()
 		} else {
-			if (videoElement.value && videoElement.value.srcObject) {
-				const tracks = (videoElement.value.srcObject as MediaStream).getTracks()
-				tracks.forEach((track) => track.stop())
-				videoElement.value.srcObject = null
-			}
+			stopMediaTracks()
 			showLiveCamera.value = false
 		}
 	}
 )
 
-onBeforeUnmount(() => {
-	if (videoElement.value && videoElement.value.srcObject) {
-		const tracks = (videoElement.value.srcObject as MediaStream).getTracks()
-		tracks.forEach((track) => track.stop())
+watch(
+	() => props.capturedPhoto,
+	(newPhoto) => {
+		if (newPhoto) {
+			stopMediaTracks()
+		} else {
+			startCamera()
+		}
 	}
+)
+
+onBeforeUnmount(() => {
+	stopMediaTracks()
 })
 
 defineExpose({
 	videoElement,
 	showLiveCamera,
+	startCamera,
+	stopMediaTracks,
 })
 </script>
 
