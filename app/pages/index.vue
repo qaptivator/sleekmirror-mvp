@@ -29,6 +29,7 @@
 		:captured-photo="capture.capturedPhoto.value"
 		:is-scanning="capture.isScanning.value"
 		:scanning-message="capture.scanningMessage.value"
+		:camera-permission-granted="cameraPermissionGranted"
 	/>
 
 	<!-- Bottom controls -->
@@ -38,7 +39,7 @@
 			!capture.isScanning.value &&
 			!capture.showResults.value
 		"
-		@snap="() => capture.triggerCameraSnap(cameraViewRef?.videoElement)"
+		@snap="handleSnapClick"
 		@gallery="capture.triggerGalleryPicker"
 		@history="showHistory = true"
 	/>
@@ -77,10 +78,29 @@
 
 <script setup lang="ts">
 const capture = useCapture()
+const permissions = usePermissions()
 const showHistory = ref(false)
 const cameraViewRef = ref()
 const flashEnabled = ref(false)
 const facingMode = ref<'user' | 'environment'>('environment')
+const cameraPermissionGranted = ref(false)
+
+onMounted(async () => {
+	// Request camera permission on app launch
+	const granted = await permissions.requestCameraPermission()
+	cameraPermissionGranted.value = granted
+})
+
+async function handleSnapClick() {
+	if (!cameraPermissionGranted.value) {
+		// Permission was denied before, ask again
+		const granted = await permissions.requestCameraPermission()
+		if (!granted) return
+		cameraPermissionGranted.value = true
+	}
+	
+	await capture.triggerCameraSnap(cameraViewRef?.videoElement)
+}
 
 async function toggleFlash() {
 	flashEnabled.value = !flashEnabled.value
