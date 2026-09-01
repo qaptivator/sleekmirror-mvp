@@ -1,13 +1,21 @@
 <template>
     <div class="flex-1 relative bg-obsidian overflow-hidden">
   
-      <!-- Photo or placeholder -->
+      <!-- Video feed or captured photo -->
       <div
         class="w-full h-full bg-gradient-to-br from-ink to-obsidian flex items-center justify-center transition-all duration-300"
         :class="capturedPhoto ? '' : 'border-b border-cream/10'"
       >
+        <video
+          v-if="!capturedPhoto && showLiveCamera"
+          ref="videoElement"
+          class="w-full h-full object-cover"
+          playsinline
+          autoplay
+          muted
+        />
         <img
-          v-if="capturedPhoto"
+          v-else-if="capturedPhoto"
           :src="capturedPhoto"
           alt="captured preview"
           class="w-full h-full object-cover"
@@ -70,6 +78,40 @@
     isScanning:      boolean
     scanningMessage: string
   }>()
+
+  const videoElement = ref<HTMLVideoElement | null>(null)
+  const showLiveCamera = ref(true)
+
+  onMounted(async () => {
+    if (!videoElement.value) return
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      })
+      if (videoElement.value) {
+        videoElement.value.srcObject = stream
+      }
+    } catch (err) {
+      console.error('Failed to access camera:', err)
+      showLiveCamera.value = false
+    }
+  })
+
+  onBeforeUnmount(() => {
+    if (videoElement.value && videoElement.value.srcObject) {
+      const tracks = (videoElement.value.srcObject as MediaStream).getTracks()
+      tracks.forEach(track => track.stop())
+    }
+  })
+
+  defineExpose({
+    videoElement,
+    showLiveCamera
+  })
   </script>
   
   <style scoped>

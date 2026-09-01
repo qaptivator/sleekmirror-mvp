@@ -2,41 +2,46 @@
 	<div
 		class="w-full h-full flex flex-col relative bg-obsidian text-cream font-sans"
 	>
-		<!-- Top bar -->
-		<div class="p-4 bg-obsidian flex">
-			<button class="icon-btn">
-				<IconZap class="w-8" />
-			</button>
-			<button
-				@click="capture.reset"
-				class="icon-btn"
-			>
-				<IconRotateCw class="w-8" />
-			</button>
-			<div class="flex-1" />
-			<button class="icon-btn">
-				<IconCircleUser class="w-8" />
-			</button>
-		</div>
+	<!-- Top bar -->
+	<div class="p-4 bg-obsidian flex">
+		<button
+			@click="toggleFlash"
+			class="icon-btn"
+			:class="{ 'text-gold': flashEnabled }"
+		>
+			<IconZap class="w-8" />
+		</button>
+		<button
+			@click="toggleOrientation"
+			class="icon-btn"
+		>
+			<IconRotateCw class="w-8" />
+		</button>
+		<div class="flex-1" />
+		<button class="icon-btn">
+			<IconCircleUser class="w-8" />
+		</button>
+	</div>
 
-		<!-- Camera area -->
-		<CameraView
-			:captured-photo="capture.capturedPhoto.value"
-			:is-scanning="capture.isScanning.value"
-			:scanning-message="capture.scanningMessage.value"
-		/>
+	<!-- Camera area -->
+	<CameraView
+		ref="cameraViewRef"
+		:captured-photo="capture.capturedPhoto.value"
+		:is-scanning="capture.isScanning.value"
+		:scanning-message="capture.scanningMessage.value"
+	/>
 
-		<!-- Bottom controls -->
-		<CameraControls
-			:visible="
-				!capture.capturedPhoto.value &&
-				!capture.isScanning.value &&
-				!capture.showResults.value
-			"
-			@snap="capture.triggerCameraSnap"
-			@gallery="capture.triggerGalleryPicker"
-			@history="showHistory = true"
-		/>
+	<!-- Bottom controls -->
+	<CameraControls
+		:visible="
+			!capture.capturedPhoto.value &&
+			!capture.isScanning.value &&
+			!capture.showResults.value
+		"
+		@snap="() => capture.triggerCameraSnap(cameraViewRef?.videoElement)"
+		@gallery="capture.triggerGalleryPicker"
+		@history="showHistory = true"
+	/>
 
 		<!-- Results sheet -->
 		<Teleport to="body">
@@ -73,6 +78,51 @@
 <script setup lang="ts">
 const capture = useCapture()
 const showHistory = ref(false)
+const cameraViewRef = ref()
+const flashEnabled = ref(false)
+const facingMode = ref<'user' | 'environment'>('environment')
+
+async function toggleFlash() {
+	flashEnabled.value = !flashEnabled.value
+	if (cameraViewRef.value?.videoElement?.srcObject) {
+		const stream = cameraViewRef.value.videoElement.srcObject as MediaStream
+		const videoTrack = stream.getVideoTracks()[0]
+		if (videoTrack) {
+			try {
+				await (videoTrack as any).applyConstraints({
+					torch: flashEnabled.value
+				})
+			} catch (err) {
+				console.error('Failed to toggle flash:', err)
+			}
+		}
+	}
+}
+
+async function toggleOrientation() {
+	facingMode.value = facingMode.value === 'environment' ? 'user' : 'environment'
+	
+	if (cameraViewRef.value?.videoElement?.srcObject) {
+		const stream = cameraViewRef.value.videoElement.srcObject as MediaStream
+		stream.getTracks().forEach(track => track.stop())
+	}
+	
+	try {
+		const stream = await navigator.mediaDevices.getUserMedia({
+			video: {
+				facingMode: facingMode.value,
+				width: { ideal: 1280 },
+				height: { ideal: 720 }
+			}
+		})
+		if (cameraViewRef.value?.videoElement) {
+			cameraViewRef.value.videoElement.srcObject = stream
+		}
+	} catch (err) {
+		console.error('Failed to switch camera:', err)
+		facingMode.value = facingMode.value === 'environment' ? 'user' : 'environment'
+	}
+}
 </script>
 
 <style scoped>

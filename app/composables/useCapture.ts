@@ -68,27 +68,34 @@ export function useCapture() {
 	}
 
 	// SOURCE B: live camera snap (Capacitor)
-	// currently falls back to gallery on web
-	async function triggerCameraSnap() {
-		triggerGalleryPicker()
-		/*try {
-			const { Camera, CameraResultType, CameraSource } = await import(
-				'@capacitor/camera'
-			)
-			const photo = await Camera.getPhoto({
-				resultType: CameraResultType.DataUrl,
-				source: CameraSource.Camera,
-				quality: 90,
-			})
-			if (!photo.dataUrl) return
-			const res = await fetch(photo.dataUrl)
-			const blob = await res.blob()
-			const file = new File([blob], 'snap.jpg', { type: 'image/jpeg' })
-			await processFile(file)
-		} catch {
-			// Capacitor not available (web dev), fall back to file picker
+	async function triggerCameraSnap(videoElement?: HTMLVideoElement) {
+		if (!videoElement) {
 			triggerGalleryPicker()
-		}*/
+			return
+		}
+
+		try {
+			const canvas = document.createElement('canvas')
+			canvas.width = videoElement.videoWidth
+			canvas.height = videoElement.videoHeight
+			const ctx = canvas.getContext('2d')
+			if (!ctx) {
+				triggerGalleryPicker()
+				return
+			}
+			ctx.drawImage(videoElement, 0, 0)
+			canvas.toBlob(async (blob) => {
+				if (!blob) {
+					triggerGalleryPicker()
+					return
+				}
+				const file = new File([blob], 'snap.jpg', { type: 'image/jpeg' })
+				await processFile(file)
+			}, 'image/jpeg', 0.9)
+		} catch (err) {
+			console.error('Failed to capture from video:', err)
+			triggerGalleryPicker()
+		}
 	}
 
 	function reset() {
