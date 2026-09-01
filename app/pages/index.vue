@@ -10,18 +10,18 @@
 					class="icon-btn"
 					:class="{ 'text-gold': flashEnabled }"
 				>
-					<IconZap class="w-8 h-8" />
+					<IconZap class="w-5 h-5" />
 				</button>
 				<button
 					@click="toggleOrientation"
 					class="icon-btn"
 				>
-					<IconRotateCw class="w-8 h-8" />
+					<IconRotateCw class="w-5 h-5" />
 				</button>
 			</div>
 
 			<button class="icon-btn">
-				<IconCircleUser class="w-8 h-8" />
+				<IconCircleUser class="w-5 h-5" />
 			</button>
 		</div>
 
