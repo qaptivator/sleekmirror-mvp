@@ -83,6 +83,7 @@ export default defineEventHandler(async (event) => {
 	const response = await client.chat.completions.create({
 		model: 'gpt-4o',
 		max_tokens: 1000,
+		response_format: { type: 'json_object' },
 		messages: [
 			{
 				role: 'system',
@@ -171,7 +172,13 @@ You must return a raw, valid JSON object matching the exact schema below. Do not
 	console.log('we got a response back!')
 
 	// @ts-ignore
-	const raw = response.choices[0].message.content?.trim() ?? ''
+	let raw = response.choices[0].message.content?.trim() ?? ''
+	if (raw.startsWith('```')) {
+		raw = raw
+			.replace(/^```(?:json)?\s*\n?/i, '')
+			.replace(/\n?```\s*$/i, '')
+			.trim()
+	}
 	const aiOutput = JSON.parse(raw)
 
 	const finalizedCheck = await Check.create({
