@@ -11,7 +11,13 @@ const fileSchema = new Schema(
 		filename: { type: String, required: true },
 		mimeType: { type: String, required: true },
 		sizeBytes: { type: Number, required: true },
-		binaryData: { type: Buffer, required: true },
+		binaryData: { type: Buffer, required: false },
+		r2Key: { type: String, required: false },
+		storageProvider: {
+			type: String,
+			enum: ['mongodb', 'r2'],
+			default: 'mongodb',
+		},
 	},
 	{ timestamps: true }
 )

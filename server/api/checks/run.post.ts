@@ -1,6 +1,7 @@
 import { Check } from '../../models/Check'
 import { User } from '../../models/User'
 import { File } from '../../models/File'
+import { downloadFromR2 } from '../../utils/r2'
 import OpenAI from 'openai'
 
 export default defineEventHandler(async (event) => {
@@ -60,8 +61,23 @@ export default defineEventHandler(async (event) => {
 		actionChecklist: ['Straighten left collar point flush before leaving.'],
 	}*/
 
-	const base64Image = sourceFile.binaryData.toString('base64')
+	let imageBuffer: Buffer
+	if (sourceFile.r2Key) {
+		imageBuffer = await downloadFromR2(sourceFile.r2Key)
+	} else if (sourceFile.binaryData) {
+		imageBuffer = Buffer.isBuffer(sourceFile.binaryData)
+			? sourceFile.binaryData
+			: Buffer.from((sourceFile.binaryData as any).buffer)
+	} else {
+		throw createError({
+			statusCode: 404,
+			statusMessage: 'File image data not found',
+		})
+	}
+
+	const base64Image = imageBuffer.toString('base64')
 	const dataUrl = `data:${sourceFile.mimeType};base64,${base64Image}`
+
 
 	console.log('start asking ai')
 	const response = await client.chat.completions.create({

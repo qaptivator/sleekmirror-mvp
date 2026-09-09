@@ -26,5 +26,7 @@ export default defineNuxtConfig({
 		// .env
 		mongodbUri: '',
 		openaiApiKey: '',
+		r2WorkerUrl: '',
+		r2WorkerSecret: '',
 	},
 })

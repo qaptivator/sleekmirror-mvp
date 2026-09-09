@@ -11,7 +11,8 @@
 		"dev": "nuxt dev",
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",
-		"postinstall": "nuxt prepare"
+		"postinstall": "nuxt prepare",
+		"migrate:r2": "node --env-file=.env --experimental-strip-types server/scripts/migrate-to-r2.ts"
 	},
 	"dependencies": {
 		"@capacitor/camera": "^8.2.2",

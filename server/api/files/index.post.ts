@@ -1,4 +1,6 @@
+import mongoose from 'mongoose'
 import { File } from '../../models/File'
+import { generateR2Key, isR2Configured, uploadToR2 } from '../../utils/r2'
 
 const MAX_SIZE_BYTE = 4 * 1024 * 1024 // 4 MB
 
@@ -28,14 +30,43 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
+	const mimeType = filePart.type || 'image/jpeg'
+	const extParts = filePart.filename.split('.')
+	const ext = extParts.length > 1 ? extParts.pop() : 'jpg'
+	const fileId = new mongoose.Types.ObjectId()
+
+	// If R2 worker is configured, upload directly to R2 bucket
+	if (isR2Configured()) {
+		const r2Key = generateR2Key(
+			currentUser._id.toString(),
+			fileId.toString(),
+			ext
+		)
+		await uploadToR2(r2Key, filePart.data, mimeType)
+
+		const fileAsset = await File.create({
+			_id: fileId,
+			user: currentUser._id,
+			filename: filePart.filename,
+			mimeType,
+			sizeBytes: filePart.data.length,
+			r2Key,
+			storageProvider: 'r2',
+		})
+
+		return { fileId: fileAsset._id }
+	}
+
+	// Fallback to direct MongoDB binary storage if R2 is not yet configured
 	const fileAsset = await File.create({
-		user: currentUser._id, // Tied using the clean 'user' model property matching key
+		_id: fileId,
+		user: currentUser._id,
 		filename: filePart.filename,
-		mimeType: filePart.type,
+		mimeType,
 		sizeBytes: filePart.data.length,
 		binaryData: filePart.data,
+		storageProvider: 'mongodb',
 	})
 
-	// Return standard resource creation structure
 	return { fileId: fileAsset._id }
 })
