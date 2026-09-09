@@ -1,5 +1,17 @@
 import { createHmac } from 'node:crypto'
 
+function cleanEnvValue(val: any): string {
+	if (!val || typeof val !== 'string') return ''
+	let cleaned = val.trim()
+	if (
+		(cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+		(cleaned.startsWith("'") && cleaned.endsWith("'"))
+	) {
+		cleaned = cleaned.slice(1, -1).trim()
+	}
+	return cleaned
+}
+
 export function getR2Config() {
 	let config: any = {}
 	try {
@@ -8,16 +20,19 @@ export function getR2Config() {
 		// Fallback if called outside Nuxt context
 	}
 
-	const url =
+	const rawUrl =
 		config.r2WorkerUrl ||
 		process.env.NUXT_R2_WORKER_URL ||
 		process.env.R2_WORKER_URL ||
 		''
-	const secret =
+	const rawSecret =
 		config.r2WorkerSecret ||
 		process.env.NUXT_R2_WORKER_SECRET ||
 		process.env.R2_WORKER_SECRET ||
 		''
+
+	const url = cleanEnvValue(rawUrl)
+	const secret = cleanEnvValue(rawSecret)
 
 	return { url, secret }
 }
@@ -67,8 +82,13 @@ export async function uploadToR2(
 
 	const base = url.replace(/\/+$/, '')
 	const encodedKey = key.split('/').map(encodeURIComponent).join('/')
+	const uploadUrl = `${base}/internal/file/${encodedKey}`
 
-	await $fetch(`${base}/internal/file/${encodedKey}`, {
+	console.log(
+		`[r2.upload] Uploading to ${uploadUrl} (secret length: ${secret.length}, bytes: ${data.length})`
+	)
+
+	await $fetch(uploadUrl, {
 		method: 'PUT',
 		headers: {
 			'X-Service-Key': secret,

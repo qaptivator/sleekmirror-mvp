@@ -47,6 +47,19 @@ async function verifyHmac(
 	}
 }
 
+function cleanSecret(val: any): string {
+	if (!val || typeof val !== 'string') return ''
+	let cleaned = val.trim()
+	if (
+		(cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+		(cleaned.startsWith("'") && cleaned.endsWith("'"))
+	) {
+		cleaned = cleaned.slice(1, -1).trim()
+	}
+	return cleaned
+}
+
+
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const corsHeaders = getCorsHeaders(request)
@@ -195,11 +208,29 @@ export default {
 		// Protected by X-Service-Key header (Nuxt backend only)
 		// -------------------------------------------------------------
 		if (pathname.startsWith('/internal/file/')) {
-			const serviceKey = request.headers.get('X-Service-Key')
-			if (!env.AUTH_SECRET || serviceKey !== env.AUTH_SECRET) {
+			const expectedSecret = cleanSecret(env.AUTH_SECRET)
+			const providedSecret = cleanSecret(request.headers.get('X-Service-Key'))
+
+			if (!expectedSecret) {
 				return new Response(
 					JSON.stringify({
-						error: 'Unauthorized: Invalid internal service key',
+						error:
+							'Worker Misconfiguration: AUTH_SECRET is not set on Cloudflare. Run: npx wrangler secret put AUTH_SECRET',
+					}),
+					{
+						status: 500,
+						headers: {
+							...corsHeaders,
+							'Content-Type': 'application/json',
+						},
+					}
+				)
+			}
+
+			if (providedSecret !== expectedSecret) {
+				return new Response(
+					JSON.stringify({
+						error: `Unauthorized: Invalid internal service key. Received secret length: ${providedSecret.length}, expected secret length on Cloudflare: ${expectedSecret.length}`,
 					}),
 					{
 						status: 401,
