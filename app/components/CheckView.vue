@@ -294,25 +294,35 @@
 				</div>
 			</div>
 
-			<!-- Footer Action Router Block -->
+		<!-- Footer Action Router Block -->
 			<div
 				class="p-4 border-t border-cream/10 bg-ink/80 backdrop-blur-md flex gap-3 shrink-0"
 			>
 				<button
-					@click="resetLocalCheckState"
-					class="flex-1 bg-cream/10 border border-cream/10 text-cream/70 text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-cream/15 hover:text-cream cursor-pointer text-center flex items-center gap-2"
+					@click="handleShare"
+					class="flex-1 bg-cream/10 border border-cream/10 text-cream/70 text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-cream/15 hover:text-cream cursor-pointer text-center flex items-center justify-center gap-2"
 				>
-					<IconShare2 class="w-5" />
-					Share the results
+					<IconShare2 class="w-4" />
+					Share results
 				</button>
 				<button
-					@click="resetLocalCheckState"
-					class="flex-1 bg-gold text-obsidian text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md text-center flex items-center gap-2"
+					@click="$emit('close')"
+					class="flex-1 bg-gold text-obsidian text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md text-center flex items-center justify-center gap-2"
 				>
-					<IconMirrorRectangular class="w-5" />
-					Do another snap
+					<IconCamera class="w-4" />
+					New snap
 				</button>
 			</div>
+
+			<!-- Clipboard Toast -->
+			<Transition name="toast-fade">
+				<div
+					v-if="showCopiedToast"
+					class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-ink border border-cream/20 rounded-xl px-4 py-2.5 text-xs text-cream shadow-xl z-50 whitespace-nowrap"
+				>
+					✓ Results copied to clipboard!
+				</div>
+			</Transition>
 		</div>
 	</div>
 </template>
@@ -327,6 +337,7 @@ const activeCheck = computed(() => props.check)
 const activeCategoryTab = ref<string | null>('outfit')
 const checklistState = ref<boolean[]>([])
 const processedCategories = computed(() => activeCheck.value?.categories || {})
+const showCopiedToast = ref(false)
 
 function initializeChecklistTracker() {
 	checklistState.value = new Array(
@@ -340,10 +351,6 @@ watch(
 	() => initializeChecklistTracker(),
 	{ deep: true }
 )
-
-function resetLocalCheckState() {
-	emit('close')
-}
 
 function toggleCategoryTab(key: string) {
 	activeCategoryTab.value = activeCategoryTab.value === key ? null : key
@@ -369,14 +376,63 @@ function getScoreStyle(
 	}
 	return { stroke: color }
 }
+
+async function handleShare() {
+	const check = activeCheck.value
+	if (!check) return
+
+	const cats = check.categories || {}
+	const lines = [
+		`Sleekmirror Check — ${check.contextTag?.toUpperCase() ?? ''}`,
+		`Score: ${Math.round(check.overallScore)}/100`,
+		`"${check.verdictHeadline}"`,
+		'',
+	]
+
+	for (const [key, val] of Object.entries(cats) as [string, any][]) {
+		lines.push(`${key.charAt(0).toUpperCase() + key.slice(1)}: ${val.score}/100`)
+	}
+
+	if (check.actionChecklist?.length) {
+		lines.push('')
+		lines.push('Priority Actions:')
+		check.actionChecklist.forEach((t: string, i: number) => {
+			lines.push(`${i + 1}. ${t}`)
+		})
+	}
+
+	lines.push('')
+	lines.push('via Sleekmirror · AI outfit & look analysis')
+
+	const text = lines.join('\n')
+
+	// Try native Web Share API first (mobile)
+	if (navigator.share) {
+		try {
+			await navigator.share({ title: 'My Sleekmirror Check', text })
+			return
+		} catch (e) {
+			// User cancelled or share failed — fall through to clipboard
+			if ((e as any)?.name === 'AbortError') return
+		}
+	}
+
+	// Fallback: copy to clipboard
+	try {
+		await navigator.clipboard.writeText(text)
+		showCopiedToast.value = true
+		setTimeout(() => (showCopiedToast.value = false), 2500)
+	} catch {
+		// Last resort: prompt
+		prompt('Copy your results:', text)
+	}
+}
 </script>
 
 <style scoped>
-.layout-content-scroll::-webkit-scrollbar {
-	display: none;
-}
-.layout-content-scroll {
-	-ms-overflow-style: none;
-	scrollbar-width: none;
-}
+.layout-content-scroll::-webkit-scrollbar { display: none; }
+.layout-content-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+.toast-fade-enter-active, .toast-fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+.toast-fade-enter-from, .toast-fade-leave-to { opacity: 0; transform: translateX(-50%) translateY(6px); }
 </style>

@@ -32,8 +32,8 @@ export function useCapture() {
 	}
 
 	// THE ONE FUNCTION THAT DOES EVERYTHING
-	// call this with any File object regardless of source
-	async function processFile(file: File) {
+	// call this with any File object regardless of source (and chosen context tag)
+	async function processFile(file: File, contextTag: string = 'casual') {
 		capturedPhoto.value = URL.createObjectURL(file)
 		isScanning.value = true
 		showResults.value = false
@@ -43,7 +43,7 @@ export function useCapture() {
 
 		try {
 			const uploaded = await fileStore.uploadFile(file)
-			const check = await checkStore.runCheck(uploaded.fileId, 'casual')
+			const check = await checkStore.runCheck(uploaded.fileId, contextTag)
 
 			currentCheck.value = check
 			showResults.value = true
@@ -56,45 +56,48 @@ export function useCapture() {
 	}
 
 	// SOURCE A: gallery / file picker (web + android gallery)
-	function triggerGalleryPicker() {
+	function triggerGalleryPicker(contextTag: string = 'casual') {
 		const input = document.createElement('input')
 		input.type = 'file'
 		input.accept = 'image/*'
 		input.onchange = async (e: any) => {
 			const file = e.target.files?.[0]
-			if (file) await processFile(file)
+			if (file) await processFile(file, contextTag)
 		}
 		input.click()
 	}
 
-	// SOURCE B: live camera snap (Capacitor)
-	async function triggerCameraSnap(videoElement?: HTMLVideoElement) {
-		if (!videoElement) {
-			triggerGalleryPicker()
-			return
-		}
-
+	// SOURCE B: live camera snap
+	async function triggerCameraSnap(
+		videoElement: HTMLVideoElement,
+		contextTag: string = 'casual'
+	) {
 		try {
 			const canvas = document.createElement('canvas')
-			canvas.width = videoElement.videoWidth
-			canvas.height = videoElement.videoHeight
+			canvas.width = videoElement.videoWidth || 1280
+			canvas.height = videoElement.videoHeight || 720
 			const ctx = canvas.getContext('2d')
 			if (!ctx) {
-				triggerGalleryPicker()
+				triggerGalleryPicker(contextTag)
 				return
 			}
-			ctx.drawImage(videoElement, 0, 0)
-			canvas.toBlob(async (blob) => {
-				if (!blob) {
-					triggerGalleryPicker()
-					return
-				}
-				const file = new File([blob], 'snap.jpg', { type: 'image/jpeg' })
-				await processFile(file)
-			}, 'image/jpeg', 0.9)
+			// Mirror the canvas if using front camera (user-facing)
+			ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
+			canvas.toBlob(
+				async (blob) => {
+					if (!blob) {
+						triggerGalleryPicker(contextTag)
+						return
+					}
+					const file = new File([blob], 'snap.jpg', { type: 'image/jpeg' })
+					await processFile(file, contextTag)
+				},
+				'image/jpeg',
+				0.9
+			)
 		} catch (err) {
 			console.error('Failed to capture from video:', err)
-			triggerGalleryPicker()
+			triggerGalleryPicker(contextTag)
 		}
 	}
 
