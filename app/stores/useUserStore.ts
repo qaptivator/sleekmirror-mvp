@@ -4,11 +4,13 @@ import { ref, computed } from 'vue'
 interface User {
 	_id: string
 	identifiers: string[]
+	email?: string
+	emailVerified?: boolean
 	credits: number
 	firstName?: string
 	lastName?: string
-	createdAt: string
-	updatedAt: string
+	createdAt?: string
+	updatedAt?: string
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -62,6 +64,11 @@ export const useUserStore = defineStore('user', () => {
 		}
 	}
 
+	// Set user (from login)
+	const setUser = (user: User) => {
+		currentUser.value = user
+	}
+
 	// Clear user (logout)
 	const clearUser = () => {
 		currentUser.value = null
@@ -92,6 +99,7 @@ export const useUserStore = defineStore('user', () => {
 		fetchUser,
 		updateUserCache,
 		updateCredits,
+		setUser,
 		clearUser,
 		getCredits,
 		hasEnoughCredits,

@@ -1,38 +1,56 @@
-import mongoose from 'mongoose'
 import { User } from '../models/User'
+import { verifyAccessToken } from '../utils/jwt'
 
 export default defineEventHandler(async (event) => {
-	if (event.path.startsWith('/api/')) {
-		const authHeader = getRequestHeader(event, 'authorization')
+  // Skip auth for these paths
+  const publicPaths = [
+    '/api/auth/login-device',
+    '/api/auth/request-otp',
+    '/api/auth/verify-otp',
+    '/api/auth/refresh',
+    '/api/auth/logout',
+  ]
 
-		if (authHeader && authHeader.startsWith('Bearer ')) {
-			const token = authHeader.substring(7).trim()
+  if (publicPaths.includes(event.path)) {
+    event.context.user = undefined
+    return
+  }
 
-			// look up user directly by the identifier passed in token (or handle JWT here later)
-			const user = await User.findOne({ identifiers: token }).lean()
-			if (user) {
-				event.context.user = user
-				return
-			}
-		}
+  if (!event.path.startsWith('/api/')) {
+    event.context.user = undefined
+    return
+  }
 
-		event.context.user = undefined
-	} else {
-		event.context.user = undefined
-	}
-	/*if (event.path.startsWith('/api/')) {
-		//const authHeader = getRequestHeader(event, 'authorization')
-		// inject custom data into the context (similar to setting ctx.meta)
-		//event.context.user = authHeader ? { authenticated: true } : null
-		// simulate user auth and resolving
-		event.context.user = {
-			_id: new mongoose.Types.ObjectId('6a4bb0da27b09ebd780971a8'),
-			identifiers: ['email:user@example.com'],
-			credits: 10,
-			firstName: 'John',
-			lastName: 'Doe',
-		}
-	} else {
-		event.context.user = undefined
-	}*/
+  const config = useRuntimeConfig()
+  const authHeader = getRequestHeader(event, 'authorization')
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Missing or invalid authorization header',
+    })
+  }
+
+  const token = authHeader.substring(7).trim()
+  const payload = verifyAccessToken(token, config)
+
+  if (!payload) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid or expired token',
+    })
+  }
+
+  // Fetch user from database
+  const user = await User.findById(payload.sub).lean()
+
+  if (!user) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'User not found',
+    })
+  }
+
+  event.context.user = user
 })
+

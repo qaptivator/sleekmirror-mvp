@@ -52,16 +52,35 @@
 						</div>
 					</div>
 
-					<!-- Coming Soon: Link Account -->
-					<div class="bg-gold/5 border border-gold/15 rounded-2xl p-4 space-y-2">
+					<!-- Link Account Button (if not already linked) -->
+					<div
+						v-if="!userStore.currentUser?.emailVerified"
+						class="bg-gold/5 border border-gold/15 rounded-2xl p-4 space-y-3"
+					>
 						<p class="text-xs font-semibold text-gold flex items-center gap-1.5">
-							<IconLink class="w-3.5 h-3.5" />
+							<IconCircleAlert class="w-4 h-4" />
 							Secure Your Account
 						</p>
 						<p class="text-[11px] text-cream/50 leading-relaxed">
-							Link an email to save credits and history across devices.
+							Link an email to protect your account. Otherwise, switching devices will lose your progress.
 						</p>
-						<p class="text-[10px] text-muted/60 font-mono">Coming soon</p>
+						<button
+							@click="showLinkEmail = true"
+							class="w-full py-2 px-3 rounded-lg bg-gold/20 text-gold hover:bg-gold/30 transition-colors text-xs font-semibold"
+						>
+							Link Email Now
+						</button>
+					</div>
+
+					<!-- Already linked -->
+					<div v-else class="bg-gold/5 border border-gold/15 rounded-2xl p-4 space-y-2">
+						<p class="text-xs font-semibold text-gold flex items-center gap-1.5">
+							<IconCircleCheck class="w-4 h-4" />
+							Account Secured
+						</p>
+						<p class="text-[11px] text-cream/50">
+							Email: <span class="text-cream font-mono">{{ userStore.currentUser?.email }}</span>
+						</p>
 					</div>
 
 					<!-- Preferences -->
@@ -122,6 +141,17 @@
 						</div>
 					</div>
 
+					<!-- Logout Button -->
+					<div class="border-t border-cream/10 pt-4">
+						<button
+							@click="handleLogout"
+							:disabled="isLoggingOut"
+							class="w-full py-3 px-4 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all active:scale-[0.98] disabled:opacity-50 text-xs font-semibold"
+						>
+							{{ isLoggingOut ? 'Logging out...' : 'Log Out' }}
+						</button>
+					</div>
+
 					<div class="h-2" />
 				</div>
 
@@ -137,6 +167,9 @@
 			</div>
 		</Transition>
 	</Teleport>
+
+	<!-- Email linking modal -->
+	<EmailLinkingSheet v-model="showLinkEmail" />
 </template>
 
 <script setup lang="ts">
@@ -146,10 +179,13 @@ defineProps<{ modelValue: boolean }>()
 defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const userStore = useUserStore()
+const auth = useJwtAuth()
 const deviceIdentifier = ref<string>('')
 const showCopyToast = ref(false)
+const showLinkEmail = ref(false)
 const hapticsEnabled = ref(true)
 const defaultMode = ref('casual')
+const isLoggingOut = ref(false)
 
 onMounted(async () => {
 	try {
@@ -187,6 +223,15 @@ async function copyDeviceId() {
 	}
 	showCopyToast.value = true
 	setTimeout(() => (showCopyToast.value = false), 2000)
+}
+
+async function handleLogout() {
+	isLoggingOut.value = true
+	try {
+		await auth.logout()
+	} finally {
+		isLoggingOut.value = false
+	}
 }
 </script>
 

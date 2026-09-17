@@ -32,5 +32,13 @@ export default defineNuxtConfig({
 			process.env.NUXT_R2_WORKER_SECRET ||
 			process.env.R2_WORKER_SECRET ||
 			'',
+		jwtSecret:
+			process.env.NUXT_JWT_SECRET ||
+			process.env.JWT_SECRET ||
+			'dev-secret-change-in-production',
+		jwtRefreshSecret:
+			process.env.NUXT_JWT_REFRESH_SECRET ||
+			process.env.JWT_REFRESH_SECRET ||
+			'dev-refresh-secret-change-in-production',
 	},
 })

@@ -1,10 +1,11 @@
 import { User } from '../../models/User'
+import { generateTokens } from '../../utils/jwt'
 
+// Legacy endpoint for backward compatibility
 export default defineEventHandler(async (event) => {
+	const config = useRuntimeConfig()
 	const body = await readBody(event)
 	const { deviceId } = body
-
-	console.log('device-login deviceId:', deviceId)
 
 	if (!deviceId) {
 		throw createError({
@@ -15,24 +16,39 @@ export default defineEventHandler(async (event) => {
 
 	const deviceIdentifier = `device:${deviceId}`
 
-	console.log('device-login deviceIdentifier:', deviceIdentifier)
-
-	// find existing user or create a new one with the device identifier
+	// Find or create user by device identifier
 	let user = await User.findOne({ identifiers: deviceIdentifier })
-	console.log('device-login user:', user)
 
 	if (!user) {
-		console.log('device-login making new user')
 		user = await User.create({
 			identifiers: [deviceIdentifier],
 			credits: 10,
 		})
 	}
 
-	console.log('device-login return')
+	const { accessToken, refreshToken, expiresIn } = generateTokens(user._id, config)
+
+	// Store refresh token in httpOnly cookie
+	setCookie(event, 'refreshToken', refreshToken, {
+		httpOnly: true,
+		secure: true,
+		sameSite: 'lax',
+		maxAge: 7 * 24 * 60 * 60,
+		path: '/',
+	})
+
 	return {
 		success: true,
-		user,
-		token: deviceIdentifier, // used as Bearer token in subsequent requests
+		user: {
+			_id: user._id,
+			identifiers: user.identifiers,
+			email: user.email,
+			emailVerified: user.emailVerified,
+			credits: user.credits,
+			firstName: user.firstName,
+			lastName: user.lastName,
+		},
+		accessToken,
+		expiresIn,
 	}
 })
