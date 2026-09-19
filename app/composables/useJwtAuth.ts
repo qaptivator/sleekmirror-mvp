@@ -1,14 +1,15 @@
 // JWT-based authentication composable
 // Manages access token, refresh token, and user state
 
-const accessToken = useState<string | null>('auth:accessToken', () => null)
-const isLoading = useState<boolean>('auth:isLoading', () => false)
-const error = useState<string | null>('auth:error', () => null)
-
-// Computed based on access token presence
-const isAuthenticated = computed(() => accessToken.value !== null)
-
 export function useJwtAuth() {
+  // Initialize state refs inside the function (required by Nuxt)
+  const accessToken = useState<string | null>('auth:accessToken', () => null)
+  const isLoading = useState<boolean>('auth:isLoading', () => false)
+  const error = useState<string | null>('auth:error', () => null)
+
+  // Computed based on access token presence
+  const isAuthenticated = computed(() => accessToken.value !== null)
+
   // Get user from the user store
   const userStore = useUserStore()
 
@@ -23,7 +24,6 @@ export function useJwtAuth() {
       })
 
       accessToken.value = response.accessToken
-      isAuthenticated.value = true
       userStore.setUser(response.user)
 
       return response
@@ -65,7 +65,6 @@ export function useJwtAuth() {
       })
 
       accessToken.value = response.accessToken
-      isAuthenticated.value = true
       userStore.setUser(response.user)
 
       return response
@@ -88,7 +87,6 @@ export function useJwtAuth() {
     } catch (err: any) {
       // Refresh failed — clear auth state
       accessToken.value = null
-      isAuthenticated.value = false
       userStore.clearUser()
       throw err
     }
@@ -106,7 +104,6 @@ export function useJwtAuth() {
       console.error('Logout error:', err)
     } finally {
       accessToken.value = null
-      isAuthenticated.value = false
       userStore.clearUser()
       isLoading.value = false
     }
@@ -119,7 +116,7 @@ export function useJwtAuth() {
   async function tryRestoreAuth() {
     // On app boot, try to refresh the access token using the refresh token cookie
     try {
-      const response = await refresh()
+      await refresh()
       // If successful, user is already set in the store from previous session
       return true
     } catch {
