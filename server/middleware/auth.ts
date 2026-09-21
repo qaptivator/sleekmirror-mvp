@@ -21,6 +21,11 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  // Handle preflight requests
+  if (event.method === 'OPTIONS') {
+    return
+  }
+
   const config = useRuntimeConfig()
   const authHeader = getRequestHeader(event, 'authorization')
 
