@@ -4,10 +4,13 @@ export default defineNuxtConfig({
 	devtools: { enabled: true },
 	modules: ['nuxt-lucide-icons', '@pinia/nuxt'],
 	css: ['~/assets/css/main.css'],
-	ssr: false,
+	ssr: true, // Changed from false — we need the Nitro server for /api routes!
 	nitro: {
-		// this makes the nuxt server not build on npx nuxt build
-		//preset: 'static',
+		// Serve the frontend SPA from the Nitro server
+		prerender: {
+			crawlLinks: false,
+			routes: ['/'],
+		},
 	},
 	lucide: {
 		namePrefix: 'Icon',
@@ -23,7 +26,7 @@ export default defineNuxtConfig({
 				process.env.NODE_ENV === 'production'
 					? process.env.UXT_PUBLIC_API_BASE ||
 					  'https://sleekmirror-api.convenotes.com'
-					: '', // dev: relative URLs (goes to localhost:3000 backend)
+					: 'https://sleekmirror-api.convenotes.com', // dev: relative URLs (goes to localhost:3000 backend)
 		},
 		// .env
 		mongodbUri: '',
