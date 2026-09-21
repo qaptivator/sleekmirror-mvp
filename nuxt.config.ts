@@ -17,11 +17,13 @@ export default defineNuxtConfig({
 	},
 	runtimeConfig: {
 		public: {
-			//apiBase: '',
+			// Development: empty string (requests go to same origin, Nitro backend)
+			// Production: use the full API URL from environment variable
 			apiBase:
 				process.env.NODE_ENV === 'production'
-					? process.env.UXT_PUBLIC_API_BASE
-					: '',
+					? process.env.UXT_PUBLIC_API_BASE ||
+					  'https://sleekmirror-api.convenotes.com'
+					: '', // dev: relative URLs (goes to localhost:3000 backend)
 		},
 		// .env
 		mongodbUri: '',
@@ -29,9 +31,7 @@ export default defineNuxtConfig({
 		r2WorkerUrl:
 			process.env.NUXT_R2_WORKER_URL || process.env.R2_WORKER_URL || '',
 		r2WorkerSecret:
-			process.env.NUXT_R2_WORKER_SECRET ||
-			process.env.R2_WORKER_SECRET ||
-			'',
+			process.env.NUXT_R2_WORKER_SECRET || process.env.R2_WORKER_SECRET || '',
 		jwtSecret:
 			process.env.NUXT_JWT_SECRET ||
 			process.env.JWT_SECRET ||

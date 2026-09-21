@@ -116,7 +116,9 @@ async function handleDeviceLogin() {
 
 	try {
 		const info = await Device.getId()
+		console.log('handleDeviceLogin Device.getId', info)
 		await auth.loginWithDevice(info.identifier)
+		console.log('auth.loginWithDevice done')
 		emit('authenticated')
 	} catch (err: any) {
 		errorMessage.value = err?.message || 'Device login failed'
