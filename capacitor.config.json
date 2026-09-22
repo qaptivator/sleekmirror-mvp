@@ -1,5 +1,5 @@
 {
-	"appId": "com.sleekout.sleekmirror",
+	"appId": "com.sleekmirror.app",
 	"appName": "Sleekmirror",
 	"webDir": ".output/public",
 	"android": {
