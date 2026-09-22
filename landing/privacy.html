@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Privacy Policy - Sleekmirror</title>
+		<style>
+			:root {
+				--bg-color: #0a0a0a;
+				--text-color: #f5f1e8;
+				--muted-color: #a1a1aa;
+				--accent-color: #e4e4e7;
+				--border-color: #27272a;
+			}
+
+			body {
+				background-color: var(--bg-color);
+				color: var(--text-color);
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+					Helvetica, Arial, sans-serif;
+				margin: 0;
+				padding: 40px 20px;
+				text-align: center;
+				line-height: 1.6;
+			}
+
+			.container {
+				max-width: 720px;
+				margin: 0 auto;
+			}
+
+			a {
+				color: var(--text-color);
+				text-decoration: underline;
+				transition: opacity 0.2s ease;
+			}
+
+			a:hover {
+				opacity: 0.8;
+			}
+
+			.nav-back {
+				display: inline-block;
+				margin-bottom: 32px;
+				font-size: 0.95rem;
+			}
+
+			h1 {
+				font-size: 2.25rem;
+				margin-bottom: 8px;
+				font-weight: 600;
+				letter-spacing: -0.02em;
+			}
+
+			.meta {
+				color: var(--muted-color);
+				font-size: 0.875rem;
+				margin-bottom: 40px;
+			}
+
+			hr {
+				border: 0;
+				border-top: 1px solid var(--border-color);
+				margin: 32px 0;
+			}
+
+			h2 {
+				font-size: 1.35rem;
+				margin-top: 32px;
+				margin-bottom: 12px;
+				font-weight: 600;
+			}
+
+			p {
+				margin-bottom: 16px;
+				font-size: 1rem;
+				color: #e2dfd8;
+			}
+
+			ul {
+				list-style: none;
+				padding: 0;
+				margin: 0 0 24px 0;
+			}
+
+			li {
+				margin-bottom: 10px;
+				color: #e2dfd8;
+			}
+
+			footer {
+				margin-top: 48px;
+				font-size: 0.875rem;
+				color: var(--muted-color);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<a
+				href="/"
+				class="nav-back"
+				>&larr; Back to Home</a
+			>
+
+			<h1>Privacy Policy</h1>
+			<div class="meta">
+				<strong>Effective Date:</strong> September 23, 2026 |
+				<strong>Last Updated:</strong> September 23, 2026
+			</div>
+
+			<p>
+				At <strong>Sleekmirror</strong> ("we," "our," or "us"), we value your
+				privacy and are committed to protecting your personal data. This Privacy
+				Policy explains how we collect, use, store, and share information when
+				you use the Sleekmirror mobile application and web services
+				(collectively, the "Service").
+			</p>
+			<p>
+				By using Sleekmirror, you agree to the collection and use of information
+				in accordance with this policy.
+			</p>
+
+			<hr />
+
+			<h2>1. Information We Collect</h2>
+			<p>
+				We collect only the information necessary to provide, secure, and
+				improve our AI-powered visual analysis service:
+			</p>
+			<ul>
+				<li>
+					<strong>Device Identifiers:</strong> Hardware-bound, volatile device
+					IDs collected to allow immediate app usage without forcing account
+					creation.
+				</li>
+				<li>
+					<strong>Email Address (Optional):</strong> Collected if you choose to
+					link or register an account for cross-device synchronization and
+					account recovery.
+				</li>
+				<li>
+					<strong>Uploaded Images:</strong> Images you submit for analysis are
+					uploaded to our secure object storage (Cloudflare R2).
+				</li>
+				<li>
+					<strong>Technical Metadata:</strong> Server logs, timestamps, IP
+					addresses, platform details, and authentication cookies (`httpOnly`,
+					`Secure`).
+				</li>
+				<li>
+					<strong>AI Analysis Data:</strong> Visual feedback scores, category
+					evaluations, and text feedback stored in our database.
+				</li>
+			</ul>
+
+			<h2>2. How We Use Your Information</h2>
+			<ul>
+				<li>
+					<strong>Service Delivery:</strong> To analyze uploaded images using
+					third-party AI engines and present structured feedback.
+				</li>
+				<li>
+					<strong>Account & Balance Management:</strong> To track your free
+					daily token allocations, credit balances, and subscription statuses.
+				</li>
+				<li>
+					<strong>Session Security:</strong> To authenticate user requests,
+					prevent unauthorized access, and mitigate abusive API calls.
+				</li>
+			</ul>
+
+			<h2>3. Third-Party Services & Data Sharing</h2>
+			<p>
+				We do not sell, rent, or trade your personal data. We share data with
+				trusted service providers solely to operate the Service:
+			</p>
+			<ul>
+				<li>
+					<strong>OpenAI (GPT-4o Vision API):</strong> Images are processed
+					strictly for feedback generation. API data is not used to train OpenAI
+					models and is retained by OpenAI for up to 30 days solely for abuse
+					monitoring.
+				</li>
+				<li>
+					<strong>Cloudflare R2:</strong> Used for hosting uploaded images with
+					HMAC-signed URLs (1-hour time-to-live) to restrict public exposure.
+				</li>
+				<li>
+					<strong>MongoDB Atlas:</strong> Hosted database infrastructure used to
+					store account profiles and analysis records.
+				</li>
+			</ul>
+
+			<h2>4. Data Security & Storage</h2>
+			<p>
+				We implement industry-standard technical measures to safeguard your
+				information, including `httpOnly` and `Secure` authentication cookies,
+				encrypted HTTPS/TLS transport, and rate-limited OTP authentication.
+			</p>
+
+			<h2>5. Data Retention & Your Rights</h2>
+			<p>
+				<strong>Retention Schedule:</strong> Images and scan history are
+				retained until you request deletion. Authentication tokens expire
+				automatically (15 minutes for access tokens, 7 days for refresh tokens).
+			</p>
+			<p>
+				<strong>Your Rights:</strong> You have the right to request full account
+				and data deletion at any time. Account deletion triggers a cascading
+				cleanup that permanently removes your profile, scan history, and stored
+				images.
+			</p>
+
+			<h2>6. Children's Privacy</h2>
+			<p>
+				Sleekmirror is not intended for use by children under the age of 13 (or
+				16 in certain jurisdictions). We do not knowingly collect personal data
+				from children.
+			</p>
+
+			<h2>7. Changes to This Privacy Policy</h2>
+			<p>
+				We may update this Privacy Policy from time to time. We will notify you
+				of any material changes by updating the "Last Updated" date at the top
+				of this document.
+			</p>
+
+			<h2>8. Contact Us</h2>
+			<p>
+				If you have any questions, concerns, or requests regarding this Privacy
+				Policy or your personal data, please contact us at:<br />
+				<strong>Email:</strong>
+				<a href="mailto:privacy@sleekmirror.com">privacy@sleekmirror.com</a>
+			</p>
+
+			<footer>
+				<hr />
+				&copy; 2026 Sleekmirror. All rights reserved. &middot;
+				<a href="/">Home</a>
+			</footer>
+		</div>
+	</body>
+</html>
