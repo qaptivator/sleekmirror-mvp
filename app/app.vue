@@ -1,8 +1,15 @@
 <template>
 	<div class="w-full h-full">
 		<!-- Loading splash screen -->
-		<div v-if="isChecking" class="w-full h-full flex items-center justify-center bg-obsidian">
-			<img src="@/assets/icon-splash.png" alt="Sleekmirror" class="w-32 h-32" />
+		<div
+			v-if="isChecking"
+			class="w-full h-full flex items-center justify-center bg-obsidian"
+		>
+			<img
+				src="@/assets/images/icon-splash.png"
+				alt="Sleekmirror"
+				class="w-32 h-32"
+			/>
 		</div>
 
 		<!-- Not authenticated: show welcome screen -->

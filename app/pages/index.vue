@@ -1,14 +1,25 @@
 <template>
-	<div class="w-full h-full flex flex-col bg-obsidian text-cream font-sans overflow-hidden">
-
+	<div
+		class="w-full h-full flex flex-col bg-obsidian text-cream font-sans overflow-hidden"
+	>
 		<!-- Top Bar -->
-		<div class="flex items-center justify-between px-5 pt-safe-top pb-2 shrink-0">
-			<img src="@/assets/icon-bar.png" alt="Sleekmirror" class="h-6" />
+		<div
+			class="flex items-center justify-between px-5 pt-safe-top pb-2 shrink-0"
+		>
+			<img
+				src="@/assets/images/icon-bar.png"
+				alt="Sleekmirror"
+				class="h-6"
+			/>
 			<div class="flex items-center gap-2">
 				<!-- Credits Badge -->
-				<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20">
+				<div
+					class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20"
+				>
 					<IconSparkles class="w-3 h-3 text-gold" />
-					<span class="text-[11px] font-mono font-bold text-gold">{{ userStore.credits }}</span>
+					<span class="text-[11px] font-mono font-bold text-gold">{{
+						userStore.credits
+					}}</span>
 				</div>
 				<!-- Profile Button -->
 				<button
@@ -22,7 +33,6 @@
 
 		<!-- Scrollable Content -->
 		<div class="flex-1 overflow-y-auto px-5 pb-4 space-y-5 hide-scrollbar">
-
 			<!-- Greeting -->
 			<div class="pt-2">
 				<p class="text-muted text-xs tracking-wide">{{ greeting }}</p>
@@ -38,13 +48,19 @@
 			>
 				<div class="flex items-center justify-between">
 					<div class="space-y-1.5">
-						<p class="text-[10px] uppercase tracking-widest text-gold font-bold">Mirror Check</p>
+						<p
+							class="text-[10px] uppercase tracking-widest text-gold font-bold"
+						>
+							Mirror Check
+						</p>
 						<p class="text-sm font-medium text-cream">Snap your look now</p>
 						<p class="text-[11px] text-muted leading-snug max-w-[180px]">
 							AI-powered analysis in seconds.
 						</p>
 					</div>
-					<div class="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center group-hover:bg-gold/15 transition-colors shrink-0">
+					<div
+						class="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center group-hover:bg-gold/15 transition-colors shrink-0"
+					>
 						<IconCamera class="w-8 h-8 text-gold" />
 					</div>
 				</div>
@@ -52,10 +68,15 @@
 
 			<!-- Recent Checks -->
 			<div class="space-y-3">
-				<p class="text-[10px] uppercase tracking-widest text-muted font-bold">Recent Checks</p>
+				<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
+					Recent Checks
+				</p>
 
 				<!-- Loading -->
-				<div v-if="checksLoading" class="flex justify-center py-8">
+				<div
+					v-if="checksLoading"
+					class="flex justify-center py-8"
+				>
 					<div class="flex gap-1.5">
 						<span
 							v-for="i in 3"
@@ -73,11 +94,16 @@
 				>
 					<IconCamera class="w-9 h-9 text-cream/15 mx-auto mb-3" />
 					<p class="text-xs text-muted">No checks yet.</p>
-					<p class="text-[11px] text-muted/60 mt-1">Hit the snap button below to get started.</p>
+					<p class="text-[11px] text-muted/60 mt-1">
+						Hit the snap button below to get started.
+					</p>
 				</div>
 
 				<!-- Recent Cards Grid -->
-				<div v-else class="grid grid-cols-2 gap-3">
+				<div
+					v-else
+					class="grid grid-cols-2 gap-3"
+				>
 					<div
 						v-for="check in recentChecks"
 						:key="check._id"
@@ -92,24 +118,34 @@
 								alt="thumbnail"
 								class="w-full h-full object-cover"
 							/>
-							<div v-else class="w-full h-full flex items-center justify-center">
+							<div
+								v-else
+								class="w-full h-full flex items-center justify-center"
+							>
 								<IconCamera class="w-6 h-6 text-cream/20" />
 							</div>
 							<!-- Score Badge -->
-							<div class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-0.5">
+							<div
+								class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-0.5"
+							>
 								<span
 									class="text-sm font-bold font-mono tabular-nums"
 									:style="getScoreColor(check.overallScore)"
-								>{{ check.overallScore }}</span>
+									>{{ check.overallScore }}</span
+								>
 							</div>
 						</div>
 						<!-- Info -->
 						<div class="p-2.5 space-y-1">
 							<div class="flex items-center justify-between">
-								<span class="text-[9px] uppercase tracking-wider text-gold font-semibold">
+								<span
+									class="text-[9px] uppercase tracking-wider text-gold font-semibold"
+								>
 									{{ check.contextTag }}
 								</span>
-								<span class="text-[9px] text-muted">{{ formatDate(check.createdAt) }}</span>
+								<span class="text-[9px] text-muted">{{
+									formatDate(check.createdAt)
+								}}</span>
 							</div>
 							<p class="text-[10px] text-cream/70 leading-snug line-clamp-2">
 								{{ check.verdictHeadline }}
@@ -130,9 +166,12 @@
 
 			<!-- Daily Tip -->
 			<div class="bg-ink border border-cream/10 rounded-2xl p-4 space-y-2">
-				<p class="text-[10px] uppercase tracking-widest text-muted font-bold">Daily Tip</p>
+				<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
+					Daily Tip
+				</p>
 				<p class="text-xs text-cream/60 leading-relaxed italic">
-					"The best outfit is the one that fits you well and reflects how you feel today."
+					"The best outfit is the one that fits you well and reflects how you
+					feel today."
 				</p>
 			</div>
 
@@ -143,15 +182,19 @@
 		<!-- Bottom Navigation Bar -->
 		<div class="shrink-0 border-t border-cream/5 bg-obsidian">
 			<div class="flex items-center justify-around px-8 pt-3 pb-safe-bottom">
-
 				<!-- Wardrobe (WIP) -->
 				<button
 					@click="showWip = true"
 					class="flex flex-col items-center gap-1 group"
 				>
-					<div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 group-active:scale-90 transition-transform relative">
+					<div
+						class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 group-active:scale-90 transition-transform relative"
+					>
 						<IconShirt class="w-5 h-5 text-cream/35" />
-						<span class="absolute -top-1 -right-1 bg-muted/50 text-[7px] font-bold text-obsidian rounded px-1 py-0.5">WIP</span>
+						<span
+							class="absolute -top-1 -right-1 bg-muted/50 text-[7px] font-bold text-obsidian rounded px-1 py-0.5"
+							>WIP</span
+						>
 					</div>
 					<span class="text-[9px] text-muted/40 tracking-wide">Wardrobe</span>
 				</button>
@@ -169,7 +212,9 @@
 					@click="showHistory = true"
 					class="flex flex-col items-center gap-1 group"
 				>
-					<div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 group-active:scale-90 transition-transform">
+					<div
+						class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 group-active:scale-90 transition-transform"
+					>
 						<IconGalleryHorizontalEnd class="w-5 h-5 text-cream/60" />
 					</div>
 					<span class="text-[9px] text-muted tracking-wide">History</span>
@@ -185,15 +230,24 @@
 		<!-- History full-screen -->
 		<Teleport to="body">
 			<Transition name="fade">
-				<div v-if="showHistory" class="fixed inset-0 z-50">
+				<div
+					v-if="showHistory"
+					class="fixed inset-0 z-50"
+				>
 					<ChecksView @close="showHistory = false" />
 				</div>
 			</Transition>
 
 			<!-- Check result opened from home grid -->
 			<Transition name="fade">
-				<div v-if="selectedCheck" class="fixed inset-0 z-50">
-					<CheckView :check="selectedCheck" @close="selectedCheck = null" />
+				<div
+					v-if="selectedCheck"
+					class="fixed inset-0 z-50"
+				>
+					<CheckView
+						:check="selectedCheck"
+						@close="selectedCheck = null"
+					/>
 				</div>
 			</Transition>
 		</Teleport>
@@ -266,7 +320,10 @@ watch(showWip, (v) => {
 })
 
 function formatDate(dateStr: string): string {
-	return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+	return new Date(dateStr).toLocaleDateString('en-US', {
+		month: 'short',
+		day: 'numeric',
+	})
 }
 
 function getScoreColor(score: number): Record<string, string> {
@@ -281,11 +338,20 @@ function getScoreColor(score: number): Record<string, string> {
 <style scoped>
 @reference "@/assets/css/main.css";
 
-.pt-safe-top  { padding-top: max(1.5rem, env(safe-area-inset-top)); }
-.pb-safe-bottom { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+.pt-safe-top {
+	padding-top: max(1.5rem, env(safe-area-inset-top));
+}
+.pb-safe-bottom {
+	padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
 
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+.hide-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
 
 .line-clamp-2 {
 	display: -webkit-box;
@@ -294,6 +360,12 @@ function getScoreColor(score: number): Record<string, string> {
 	overflow: hidden;
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+}
 </style>
