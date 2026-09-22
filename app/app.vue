@@ -2,9 +2,7 @@
 	<div class="w-full h-full">
 		<!-- Loading splash screen -->
 		<div v-if="isChecking" class="w-full h-full flex items-center justify-center bg-obsidian">
-			<p class="text-[11px] font-mono uppercase tracking-[0.3em] text-gold">
-				Sleekmirror
-			</p>
+			<img src="@/assets/icon-splash.png" alt="Sleekmirror" class="w-32 h-32" />
 		</div>
 
 		<!-- Not authenticated: show welcome screen -->

@@ -3,9 +3,7 @@
 
 		<!-- Top Bar -->
 		<div class="flex items-center justify-between px-5 pt-safe-top pb-2 shrink-0">
-			<p class="text-[11px] font-mono uppercase tracking-[0.3em] text-gold">
-				Sleekmirror
-			</p>
+			<img src="@/assets/icon-bar.png" alt="Sleekmirror" class="h-6" />
 			<div class="flex items-center gap-2">
 				<!-- Credits Badge -->
 				<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20">
