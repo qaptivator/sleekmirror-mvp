@@ -1,9 +1,10 @@
 export default defineEventHandler(async (event) => {
   // Clear refresh token cookie
+  // SameSite: 'none' required for cross-origin requests with credentials
   setCookie(event, 'refreshToken', '', {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 0,
     path: '/',
   })

@@ -33,10 +33,11 @@ export default defineEventHandler(async (event) => {
   const { accessToken, expiresIn } = generateTokens(user._id, config)
 
   // Refresh the refresh token cookie
+  // SameSite: 'none' required for cross-origin requests with credentials
   setCookie(event, 'refreshToken', generateTokens(user._id, config).refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 7 * 24 * 60 * 60,
     path: '/',
   })

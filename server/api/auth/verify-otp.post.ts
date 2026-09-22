@@ -67,10 +67,11 @@ export default defineEventHandler(async (event) => {
   const { accessToken, refreshToken, expiresIn } = generateTokens(user._id, config)
 
   // Store refresh token in httpOnly cookie
+  // SameSite: 'none' required for cross-origin requests with credentials
   setCookie(event, 'refreshToken', refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 7 * 24 * 60 * 60,
     path: '/',
   })
