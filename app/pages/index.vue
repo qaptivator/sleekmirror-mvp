@@ -6,11 +6,9 @@
 		<div
 			class="flex items-center justify-between px-5 pt-safe-top pb-2 shrink-0"
 		>
-			<img
-				src="@/assets/images/icon-bar.png"
-				alt="Sleekmirror"
-				class="h-6"
-			/>
+			<p class="text-[11px] font-mono uppercase tracking-[0.3em] text-gold">
+				Sleekmirror
+			</p>
 			<div class="flex items-center gap-2">
 				<!-- Credits Badge -->
 				<div
