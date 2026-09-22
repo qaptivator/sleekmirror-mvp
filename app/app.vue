@@ -1,11 +1,10 @@
 <template>
 	<div class="w-full h-full">
-		<!-- Loading initial auth state -->
+		<!-- Loading splash screen -->
 		<div v-if="isChecking" class="w-full h-full flex items-center justify-center bg-obsidian">
-			<div class="flex flex-col items-center gap-4">
-				<div class="inline-block w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
-				<p class="text-xs text-cream/50 font-mono">Checking auth...</p>
-			</div>
+			<p class="text-[11px] font-mono uppercase tracking-[0.3em] text-gold">
+				Sleekmirror
+			</p>
 		</div>
 
 		<!-- Not authenticated: show welcome screen -->
