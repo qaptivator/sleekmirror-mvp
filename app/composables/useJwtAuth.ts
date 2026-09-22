@@ -26,6 +26,7 @@ export function useJwtAuth() {
         baseURL,
         method: 'POST',
         body: { deviceId },
+        credentials: 'include',
       })
 
       accessToken.value = response.accessToken
@@ -49,6 +50,7 @@ export function useJwtAuth() {
         baseURL,
         method: 'POST',
         body: { email },
+        credentials: 'include',
       })
 
       return response
@@ -69,6 +71,7 @@ export function useJwtAuth() {
         baseURL,
         method: 'POST',
         body: { email, code },
+        credentials: 'include',
       })
 
       accessToken.value = response.accessToken
@@ -88,6 +91,7 @@ export function useJwtAuth() {
       const response = await $fetch('/api/auth/refresh', {
         baseURL,
         method: 'POST',
+        credentials: 'include',
       })
 
       accessToken.value = response.accessToken
@@ -108,6 +112,7 @@ export function useJwtAuth() {
       await $fetch('/api/auth/logout', {
         baseURL,
         method: 'POST',
+        credentials: 'include',
       })
     } catch (err) {
       console.error('Logout error:', err)
