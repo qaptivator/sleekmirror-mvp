@@ -2025,6 +2025,68 @@
 		</div>
 		<script>
 			;(() => {
+				const TARGET_HTML =
+					'© 2026 Sleekmirror · See yourself through a different lens · <a href="/privacy" style="color: var(--token-fe562f39-6921-4874-be68-a094ea05cf57);">Privacy</a> · <a href="/terms" style="color: var(--token-fe562f39-6921-4874-be68-a094ea05cf57);">Terms</a>'
+
+				function enforceFooter() {
+					// Select the container rather than relying on a single volatile text node
+					const container = document.querySelector('.framer-q507mu')
+					if (!container) return
+
+					const textEl = container.querySelector('.framer-text') || container
+
+					// Only update if React modified or reset it
+					if (textEl.innerHTML !== TARGET_HTML) {
+						textEl.innerHTML = TARGET_HTML
+					}
+				}
+
+				// 1. Run immediately and on DOM load
+				enforceFooter()
+				document.addEventListener('DOMContentLoaded', enforceFooter)
+
+				// 2. Watch for React hydration swapping or mutating children
+				const observer = new MutationObserver(() => {
+					enforceFooter()
+				})
+
+				observer.observe(document.body || document.documentElement, {
+					childList: true,
+					subtree: true,
+					characterData: true,
+				})
+			})()
+            /*const d = document
+			const lock = (el, prop, value) => {
+				el[prop] = value
+				// ignore any attempts by Framer scripts to overwrite the thing
+				Object.defineProperty(el, prop, {
+					get() {
+						return value
+					},
+					set(val) {
+						console.log('footer changed', val)
+						return value
+					},
+					configurable: false,
+				})
+			}
+			const footer = d.querySelector('.framer-q507mu > .framer-text')
+			if (footer)
+				lock(
+					footer,
+					'innerHTML',
+					'© 2026 Sleekmirror · See yourself through a different lens · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>'
+				)
+
+			setTimeout(() => {
+				console.log('footer found and set', footer)
+				footer.innerHTML =
+					'© 2026 Sleekmirror · See yourself through a different lens · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>'
+			}, 2000)*/
+		</script>
+		<script>
+			;(() => {
 				function u() {
 					function n(t, e, i) {
 						let r = document.createElement('a')
