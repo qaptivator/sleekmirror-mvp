@@ -8,6 +8,7 @@
 		"build:android": "cross-env NODE_ENV=production nuxt generate && npx cap copy android",
 		"cap:sync": "cross-env NODE_ENV=production nuxt generate && npx cap sync android",
 		"full": "npm run cap:sync && npx cap run android",
+		"cap:run": "npx cap run android --no-sync"
 		"dev": "nuxt dev",
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",
