@@ -32,3 +32,5 @@ android/app/build
 android/build
 android/captures
 android/.idea
+android/key.properties
+*.jks

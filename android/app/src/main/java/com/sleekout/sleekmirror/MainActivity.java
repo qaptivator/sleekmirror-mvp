@@ -1,4 +1,4 @@
-package com.sleekout.sleekmirror;
+package com.sleekmirror.app;
 
 import com.getcapacitor.BridgeActivity;
 
