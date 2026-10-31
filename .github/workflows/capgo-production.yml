@@ -1,0 +1,44 @@
+name: Deploy Capgo OTA Production Update
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - prod
+    paths:
+      - 'app/**'
+      - 'assets/**'
+      - 'public/**'
+      - 'capacitor.config.json'
+      - 'nuxt.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  deploy-ota:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Upload Bundle to R2 via Capgo CLI
+        run: |
+          npx @capgo/cli@latest bundle upload \
+            --s3-endpoint "${{ secrets.CAPGO_R2_ENDPOINT }}" \
+            --s3-bucket-name "${{ secrets.CAPGO_R2_BUCKET_NAME }}" \
+            --s3-apikey "${{ secrets.CAPGO_R2_ACCESS_KEY_ID }}" \
+            --s3-apisecret "${{ secrets.CAPGO_R2_SECRET_ACCESS_KEY }}" \
+            --s3-region "auto" \
+            --channel production
