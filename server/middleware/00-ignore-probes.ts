@@ -1,9 +1,13 @@
 // Bots request paths like /.env. Those are not pages, but Nuxt still renders
 // them through Vue Router, which logs "No match found" for every hit.
 // Answer 404 here so the router never sees them.
-const APP_PATHS = new Set(['/', '/robots.txt'])
+// `nuxt generate` (the Capacitor build) also prerenders /200.html and /404.html.
+// Those must reach Nitro or the generate step exits on prerender errors.
+const APP_PATHS = new Set(['/', '/robots.txt', '/200.html', '/404.html', '/index.html'])
 
 export default defineEventHandler((event) => {
+	if (import.meta.prerender) return
+
 	const path = getRequestURL(event).pathname
 
 	if (
