@@ -24,12 +24,17 @@
 </template>
 
 <script setup lang="ts">
+import { CapacitorUpdater } from '@capgo/capacitor-updater'
+
 const auth = useJwtAuth()
 
 const isAuthenticated = computed(() => auth.isAuthenticated.value)
 const isChecking = ref(true)
 
 onMounted(async () => {
+	// Must be called on boot so Capgo knows the bundle is stable
+	await CapacitorUpdater.notifyAppReady()
+
 	// Try to restore authentication from previous session (refresh token)
 	await auth.tryRestoreAuth()
 	isChecking.value = false
