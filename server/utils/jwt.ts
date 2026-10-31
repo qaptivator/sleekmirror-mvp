@@ -41,12 +41,21 @@ export function generateTokens(userId: Types.ObjectId, config: any) {
   return { accessToken, refreshToken, expiresIn: 15 * 60 }
 }
 
-export function verifyAccessToken(token: string, config: any): JwtPayload | null {
+export function verifyAccessToken(
+  token: string,
+  config: any
+): { payload: JwtPayload | null; reason: string | null } {
   try {
     const payload = jwt.verify(token, config.jwtSecret) as JwtPayload
-    return payload
-  } catch {
-    return null
+    return { payload, reason: null }
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
+      return { payload: null, reason: 'expired' }
+    }
+    if (err instanceof jwt.JsonWebTokenError) {
+      return { payload: null, reason: err.message }
+    }
+    return { payload: null, reason: 'rejected' }
   }
 }
 

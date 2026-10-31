@@ -28,8 +28,10 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig()
   const authHeader = getRequestHeader(event, 'authorization')
+  const where = `${event.method} ${event.path}`
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.error(`[auth] 401 ${where} — missing or non-Bearer authorization header`)
     throw createError({
       statusCode: 401,
       statusMessage: 'Missing or invalid authorization header',
@@ -37,9 +39,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const token = authHeader.substring(7).trim()
-  const payload = verifyAccessToken(token, config)
+  const { payload, reason } = verifyAccessToken(token, config)
 
   if (!payload) {
+    console.error(`[auth] 401 ${where} — ${reason}`)
     throw createError({
       statusCode: 401,
       statusMessage: 'Invalid or expired token',
