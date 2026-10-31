@@ -27,8 +27,7 @@
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
 
-const OTA_VERSION_URL =
-	'https://239a994e8435c57654cc7796bfd866a4.r2.cloudflarestorage.com/sleekmirror-capgo'
+const OTA_VERSION_URL = 'https://sleekmirror-capgo.acdev.app'
 
 const auth = useJwtAuth()
 

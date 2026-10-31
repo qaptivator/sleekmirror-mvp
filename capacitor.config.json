@@ -12,7 +12,7 @@
 	},
 	"plugins": {
 		"CapacitorUpdater": {
-			"updateUrl": "https://239a994e8435c57654cc7796bfd866a4.r2.cloudflarestorage.com/sleekmirror-capgo",
+			"updateUrl": "https://sleekmirror-capgo.acdev.app",
 			"defaultChannel": "production"
 		}
 	}
