@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName,
     },
     accessToken,
+    refreshToken,
     expiresIn,
   }
 })

@@ -3,7 +3,13 @@ import { generateTokens, verifyRefreshToken } from '../../utils/jwt'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  const refreshToken = getCookie(event, 'refreshToken')
+  const body = await readBody(event).catch(() => null)
+  // The Capacitor app cannot store this cookie: the page is https://sleekmirror
+  // and the API is another site, so the WebView drops it. The body is the copy
+  // the app kept. Browsers can still send the cookie.
+  const refreshToken =
+    (typeof body?.refreshToken === 'string' && body.refreshToken) ||
+    getCookie(event, 'refreshToken')
 
   if (!refreshToken) {
     throw createError({
@@ -29,12 +35,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Generate new tokens
-  const { accessToken, expiresIn } = generateTokens(user._id, config)
+  const { accessToken, refreshToken: nextRefreshToken, expiresIn } = generateTokens(
+    user._id,
+    config
+  )
 
-  // Refresh the refresh token cookie
-  // SameSite: 'none' required for cross-origin requests with credentials
-  setCookie(event, 'refreshToken', generateTokens(user._id, config).refreshToken, {
+  setCookie(event, 'refreshToken', nextRefreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: 'none',
@@ -45,6 +51,16 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     accessToken,
+    refreshToken: nextRefreshToken,
     expiresIn,
+    user: {
+      _id: user._id,
+      identifiers: user.identifiers,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      credits: user.credits,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    },
   }
 })

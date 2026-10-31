@@ -1,6 +1,19 @@
 // JWT-based authentication composable
 // Manages access token, refresh token, and user state
 
+const REFRESH_KEY = 'sleekmirror.refreshToken'
+
+function readRefreshToken() {
+  if (!import.meta.client) return null
+  return localStorage.getItem(REFRESH_KEY)
+}
+
+function writeRefreshToken(token: string | null) {
+  if (!import.meta.client) return
+  if (token) localStorage.setItem(REFRESH_KEY, token)
+  else localStorage.removeItem(REFRESH_KEY)
+}
+
 export function useJwtAuth() {
   // Initialize state refs inside the function (required by Nuxt)
   const accessToken = useState<string | null>('auth:accessToken', () => null)
@@ -30,6 +43,7 @@ export function useJwtAuth() {
       })
 
       accessToken.value = response.accessToken
+      writeRefreshToken(response.refreshToken)
       userStore.setUser(response.user)
 
       return response
@@ -75,6 +89,7 @@ export function useJwtAuth() {
       })
 
       accessToken.value = response.accessToken
+      writeRefreshToken(response.refreshToken)
       userStore.setUser(response.user)
 
       return response
@@ -87,18 +102,29 @@ export function useJwtAuth() {
   }
 
   async function refresh() {
+    const refreshToken = readRefreshToken()
+    if (!refreshToken) {
+      accessToken.value = null
+      userStore.clearUser()
+      throw new Error('Refresh token not found')
+    }
+
     try {
       const response = await $fetch('/api/auth/refresh', {
         baseURL,
         method: 'POST',
         credentials: 'include',
+        body: { refreshToken },
       })
 
       accessToken.value = response.accessToken
+      if (response.refreshToken) writeRefreshToken(response.refreshToken)
+      if (response.user) userStore.setUser(response.user)
       return response
     } catch (err: any) {
       // Refresh failed — clear auth state
       accessToken.value = null
+      writeRefreshToken(null)
       userStore.clearUser()
       throw err
     }
@@ -118,6 +144,7 @@ export function useJwtAuth() {
       console.error('Logout error:', err)
     } finally {
       accessToken.value = null
+      writeRefreshToken(null)
       userStore.clearUser()
       isLoading.value = false
     }
@@ -128,13 +155,17 @@ export function useJwtAuth() {
   }
 
   async function tryRestoreAuth() {
-    // On app boot, try to refresh the access token using the refresh token cookie
+    // No saved refresh token means there is no session. Don't call the API.
+    if (!readRefreshToken()) {
+      accessToken.value = null
+      userStore.clearUser()
+      return false
+    }
+
     try {
       await refresh()
-      // If successful, user is already set in the store from previous session
       return true
     } catch {
-      // Refresh failed, need to log in
       accessToken.value = null
       userStore.clearUser()
       return false
