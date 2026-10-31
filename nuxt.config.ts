@@ -24,8 +24,7 @@ export default defineNuxtConfig({
 			// Production: use the full API URL from environment variable
 			apiBase:
 				process.env.NODE_ENV === 'production'
-					? process.env.UXT_PUBLIC_API_BASE ||
-					  'https://sleekmirror-api.convenotes.com'
+					? process.env.API_BASE || 'https://sleekmirror-api.convenotes.com'
 					: 'https://sleekmirror-api.convenotes.com', // dev: relative URLs (goes to localhost:3000 backend)
 		},
 		// .env
