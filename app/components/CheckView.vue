@@ -1,6 +1,7 @@
 <template>
 	<div
 		class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center font-sans p-0 sm:p-4"
+		@click.self="emit('close')"
 	>
 		<!-- ========================================== -->
 		<!-- DEBUG CONTROLS DRAWER                      -->
@@ -51,12 +52,20 @@
 		<!-- PRIMARY CHECK VIEW COMPONENT CONTAINER     -->
 		<!-- ========================================== -->
 		<div
-			class="w-full max-w-xl bg-ink border-t sm:border border-cream/15 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden relative flex flex-col transition-all duration-500 ease-out"
-			:style="{ maxHeight: '88vh' }"
+			class="w-full max-w-xl bg-ink border-t sm:border border-cream/15 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden relative flex flex-col"
+			:class="dragging ? '' : 'transition-transform duration-300 ease-out'"
+			:style="{
+				maxHeight: '88vh',
+				transform: dragY ? `translateY(${dragY}px)` : undefined,
+			}"
 		>
-			<!-- Top Drag/Close Anchor Indicator -->
+			<!-- Drag the lip down, or tap it, to dismiss. -->
 			<div
-				class="flex justify-center py-3 shrink-0 cursor-pointer border-b border-cream/5 hover:bg-cream/5 transition-colors"
+				class="flex justify-center py-3 shrink-0 cursor-pointer border-b border-cream/5 hover:bg-cream/5 transition-colors touch-none select-none"
+				@pointerdown="onLipPointerDown"
+				@pointermove="onLipPointerMove"
+				@pointerup="onLipPointerUp"
+				@pointercancel="onLipPointerUp"
 			>
 				<div class="w-12 h-1 rounded-full bg-cream/20" />
 			</div>
@@ -309,8 +318,8 @@
 					@click="$emit('close')"
 					class="flex-1 bg-gold text-obsidian text-xs font-semibold py-3 px-4 rounded-xl transition-all active:scale-[0.98] hover:bg-gold-soft cursor-pointer shadow-md text-center flex items-center justify-center gap-2"
 				>
-					<IconCamera class="w-4" />
-					New snap
+					<IconX class="w-4" />
+					Close
 				</button>
 			</div>
 
@@ -338,6 +347,33 @@ const activeCategoryTab = ref<string | null>('outfit')
 const checklistState = ref<boolean[]>([])
 const processedCategories = computed(() => activeCheck.value?.categories || {})
 const showCopiedToast = ref(false)
+const dragY = ref(0)
+const dragging = ref(false)
+let dragOrigin = 0
+
+function onLipPointerDown(event: PointerEvent) {
+	dragging.value = true
+	dragOrigin = event.clientY
+	dragY.value = 0
+	;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+}
+
+function onLipPointerMove(event: PointerEvent) {
+	if (!dragging.value) return
+	dragY.value = Math.max(0, event.clientY - dragOrigin)
+}
+
+function onLipPointerUp() {
+	if (!dragging.value) return
+	const traveled = dragY.value
+	dragging.value = false
+	// A tap on the lip closes. A longer pull down closes too.
+	if (traveled < 12 || traveled > 72) {
+		emit('close')
+		return
+	}
+	dragY.value = 0
+}
 
 function initializeChecklistTracker() {
 	checklistState.value = new Array(

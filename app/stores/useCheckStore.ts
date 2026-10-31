@@ -42,9 +42,15 @@ export const useCheckStore = defineStore('checks', () => {
 	const loading = ref(false)
 	const error = ref<string | null>(null)
 	const runningCheckFileId = ref<string | null>(null)
+	const checksList = ref<Check[]>([])
+	const thumbnails = ref<Record<string, string>>({})
+	const listLoading = ref(false)
+	const listError = ref<string | null>(null)
+	let listRequest: Promise<void> | null = null
 
 	// Computed
 	const checkCount = computed(() => checks.value.size)
+	const recentChecks = computed(() => checksList.value.slice(0, 4))
 	const isRunningCheck = computed(() => runningCheckFileId.value !== null)
 
 	// Get all checks for a file
@@ -90,6 +96,76 @@ export const useCheckStore = defineStore('checks', () => {
 		}
 	}
 
+	function rememberCheck(check: Check) {
+		checks.value.set(check._id, check)
+		const fileCheckIds = checksByFile.value.get(check.file) || []
+		if (!fileCheckIds.includes(check._id)) {
+			fileCheckIds.push(check._id)
+			checksByFile.value.set(check.file, fileCheckIds)
+		}
+		const without = checksList.value.filter((item) => item._id !== check._id)
+		checksList.value = [check, ...without].sort(
+			(a, b) =>
+				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+		)
+	}
+
+	async function ensureThumbnails(fileIds: string[]) {
+		const missing = [...new Set(fileIds)].filter(
+			(fileId) => fileId && !thumbnails.value[fileId]
+		)
+		await Promise.all(
+			missing.map(async (fileId) => {
+				try {
+					const blob = await useApi<Blob>(`/api/files/${fileId}/file`, {
+						responseType: 'blob',
+					})
+					thumbnails.value = {
+						...thumbnails.value,
+						[fileId]: URL.createObjectURL(blob),
+					}
+				} catch {
+					// Card keeps the camera placeholder.
+				}
+			})
+		)
+	}
+
+	// Home and history both read checksList. Call this on enter so a scan
+	// that happened on another screen shows up without a second cache.
+	async function loadChecks() {
+		if (listRequest) return listRequest
+
+		const firstLoad = checksList.value.length === 0
+		if (firstLoad) listLoading.value = true
+		listError.value = null
+
+		listRequest = (async () => {
+			try {
+				const list = await useApi<Check[]>('/api/checks')
+				const merged = new Map(checksList.value.map((check) => [check._id, check]))
+				for (const check of list) merged.set(check._id, check)
+				checksList.value = [...merged.values()].sort(
+					(a, b) =>
+						new Date(b.createdAt).getTime() -
+						new Date(a.createdAt).getTime()
+				)
+				for (const check of checksList.value) {
+					checks.value.set(check._id, check)
+				}
+				await ensureThumbnails(checksList.value.map((check) => check.file))
+			} catch (err) {
+				listError.value =
+					err instanceof Error ? err.message : 'Failed to load checks'
+			} finally {
+				listLoading.value = false
+				listRequest = null
+			}
+		})()
+
+		return listRequest
+	}
+
 	// Run a check on a file
 	const runCheck = async (
 		fileId: string,
@@ -120,15 +196,8 @@ export const useCheckStore = defineStore('checks', () => {
 
 			const check = response
 
-			// Cache the check
-			checks.value.set(check._id, check)
-
-			// Add to file's check list
-			const fileCheckIds = checksByFile.value.get(fileId) || []
-			if (!fileCheckIds.includes(check._id)) {
-				fileCheckIds.push(check._id)
-				checksByFile.value.set(fileId, fileCheckIds)
-			}
+			rememberCheck(check)
+			void ensureThumbnails([check.file])
 
 			const userStore = useUserStore()
 			userStore.updateCredits(userStore.credits - 1)
@@ -155,6 +224,7 @@ export const useCheckStore = defineStore('checks', () => {
 	const clearCache = () => {
 		checks.value.clear()
 		checksByFile.value.clear()
+		checksList.value = []
 	}
 
 	// Sync checks from server for a file (authority is server)
@@ -168,18 +238,24 @@ export const useCheckStore = defineStore('checks', () => {
 		// State
 		checks,
 		checksByFile,
+		checksList,
+		thumbnails,
 		loading,
 		error,
+		listLoading,
+		listError,
 		runningCheckFileId,
 
 		// Computed
 		checkCount,
+		recentChecks,
 		isRunningCheck,
 
 		// Methods
 		getFileChecks,
 		getCheck,
 		fetchCheck,
+		loadChecks,
 		runCheck,
 		clearFileChecksCache,
 		clearCache,

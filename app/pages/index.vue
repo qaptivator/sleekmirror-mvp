@@ -72,7 +72,7 @@
 
 				<!-- Loading -->
 				<div
-					v-if="checksLoading"
+					v-if="checkStore.listLoading && recentChecks.length === 0"
 					class="flex justify-center py-8"
 				>
 					<div class="flex gap-1.5">
@@ -111,8 +111,8 @@
 						<!-- Thumbnail -->
 						<div class="aspect-square bg-black/30 relative">
 							<img
-								v-if="thumbnails[check.file]"
-								:src="thumbnails[check.file]"
+								v-if="checkStore.thumbnails[check.file]"
+								:src="checkStore.thumbnails[check.file]"
 								alt="thumbnail"
 								class="w-full h-full object-cover"
 							/>
@@ -269,6 +269,7 @@
 import type { Check } from '~/stores/useCheckStore'
 
 const userStore = useUserStore()
+const checkStore = useCheckStore()
 
 const showSnap = ref(false)
 const showHistory = ref(false)
@@ -276,9 +277,7 @@ const showProfile = ref(false)
 const showWip = ref(false)
 const selectedCheck = ref<Check | null>(null)
 
-const recentChecks = ref<any[]>([])
-const thumbnails = ref<Record<string, string>>({})
-const checksLoading = ref(true)
+const recentChecks = computed(() => checkStore.recentChecks)
 
 const greeting = computed(() => {
 	const h = new Date().getHours()
@@ -288,29 +287,12 @@ const greeting = computed(() => {
 	return 'Good night,'
 })
 
-onMounted(async () => {
-	try {
-		const all = await useApi<any[]>('/api/checks')
-		recentChecks.value = all.slice(0, 4)
+onMounted(() => {
+	checkStore.loadChecks()
+})
 
-		const uniqueFileIds = [...new Set(recentChecks.value.map((c) => c.file))]
-		await Promise.all(
-			uniqueFileIds.map(async (fileId) => {
-				try {
-					const blob = await useApi<Blob>(`/api/files/${fileId}/file`, {
-						responseType: 'blob',
-					})
-					thumbnails.value[fileId as string] = URL.createObjectURL(blob)
-				} catch {
-					// show placeholder
-				}
-			})
-		)
-	} catch (err) {
-		console.error('Failed to load recent checks:', err)
-	} finally {
-		checksLoading.value = false
-	}
+watch(showSnap, (open) => {
+	if (!open) checkStore.loadChecks()
 })
 
 watch(showWip, (v) => {

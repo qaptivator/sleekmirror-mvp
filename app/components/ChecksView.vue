@@ -18,7 +18,7 @@
 
 		<!-- Loading -->
 		<div
-			v-if="loading"
+			v-if="checkStore.listLoading && checks.length === 0"
 			class="flex items-center justify-center h-48"
 		>
 			<div class="flex gap-1.5">
@@ -33,10 +33,10 @@
 
 		<!-- Error -->
 		<div
-			v-else-if="error"
+			v-else-if="checkStore.listError && checks.length === 0"
 			class="p-6"
 		>
-			<p class="text-xs text-red-400">Failed to load checks. {{ error }}</p>
+			<p class="text-xs text-red-400">Failed to load checks. {{ checkStore.listError }}</p>
 		</div>
 
 		<!-- Empty -->
@@ -62,8 +62,8 @@
 				<!-- Thumbnail -->
 				<div class="aspect-square bg-black/40 relative">
 					<img
-						v-if="thumbnails[check.file]"
-						:src="thumbnails[check.file]"
+						v-if="checkStore.thumbnails[check.file]"
+						:src="checkStore.thumbnails[check.file]"
 						class="w-full h-full object-cover"
 						alt="check thumbnail"
 					/>
@@ -141,39 +141,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
-const checks = ref<any[]>([])
-const thumbnails = ref<Record<string, string>>({})
-const loading = ref(true)
-const error = ref<string | null>(null)
+const checkStore = useCheckStore()
+const checks = computed(() => checkStore.checksList)
 const selectedCheck = ref<any | null>(null)
 const emit = defineEmits(['close'])
 
-// Fetch all checks
-onMounted(async () => {
-	try {
-		checks.value = await useApi<any[]>('/api/checks')
-
-		// Fetch thumbnails for each unique file
-		const uniqueFileIds = [...new Set(checks.value.map((c) => c.file))]
-		await Promise.all(
-			uniqueFileIds.map(async (fileId) => {
-				try {
-					const blob = await useApi<Blob>(`/api/files/${fileId}/file`, {
-						responseType: 'blob',
-					})
-					thumbnails.value[fileId] = URL.createObjectURL(blob)
-				} catch {
-					// thumbnail failed, just show placeholder
-				}
-			})
-		)
-	} catch (err: any) {
-		error.value = err?.message ?? 'Unknown error'
-	} finally {
-		loading.value = false
-	}
+onMounted(() => {
+	checkStore.loadChecks()
 })
 
 function formatDate(dateStr: string): string {
