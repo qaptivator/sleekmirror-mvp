@@ -1,0 +1,26 @@
+node_modules
+.output
+.nuxt
+.nitro
+.cache
+.data
+dist
+.git
+.github
+.dev
+.idea
+.fleet
+.vscode
+
+# Local secrets. Coolify injects these at runtime.
+.env
+.env.*
+
+# Mobile app and the Cloudflare worker are deployed separately.
+android
+ios
+worker
+
+*.md
+*.log
+.DS_Store
