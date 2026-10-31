@@ -9,7 +9,8 @@ export default defineEventHandler((event) => {
 	if (
 		APP_PATHS.has(path) ||
 		path.startsWith('/api/') ||
-		path.startsWith('/_nuxt/')
+		// Nitro internals: /_nuxt assets and /_payload.json during prerender.
+		path.startsWith('/_')
 	) {
 		return
 	}
