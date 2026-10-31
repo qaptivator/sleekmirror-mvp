@@ -40,5 +40,6 @@ jobs:
             --s3-bucket-name "${{ secrets.CAPGO_R2_BUCKET_NAME }}" \
             --s3-apikey "${{ secrets.CAPGO_R2_ACCESS_KEY_ID }}" \
             --s3-apisecret "${{ secrets.CAPGO_R2_SECRET_ACCESS_KEY }}" \
+            --s3-port 443 \
             --s3-region "auto" \
             --channel production
