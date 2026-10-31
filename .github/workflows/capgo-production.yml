@@ -1,4 +1,4 @@
-name: Deploy Capgo OTA Production Update
+name: Deploy OTA Production Update
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -33,13 +33,33 @@ jobs:
       - name: Build Web App
         run: npm run build
 
-      - name: Upload Bundle to R2 via Capgo CLI
+      - name: Zip and upload bundle to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CAPGO_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CAPGO_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ENDPOINT: ${{ secrets.CAPGO_R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.CAPGO_R2_BUCKET_NAME }}
+          PUBLIC_URL: ${{ secrets.OTA_PUBLIC_URL }}
         run: |
-          npx @capgo/cli@latest bundle upload \
-            --s3-endpoint "${{ secrets.CAPGO_R2_ENDPOINT }}" \
-            --s3-bucket-name "${{ secrets.CAPGO_R2_BUCKET_NAME }}" \
-            --s3-apikey "${{ secrets.CAPGO_R2_ACCESS_KEY_ID }}" \
-            --s3-apisecret "${{ secrets.CAPGO_R2_SECRET_ACCESS_KEY }}" \
-            --s3-port 443 \
-            --s3-region "auto" \
-            --channel production
+          set -euo pipefail
+
+          WEB_DIR=$(node -p "require('./capacitor.config.json').webDir")
+          #VERSION="$(node -p "require('./package.json').version")-${GITHUB_RUN_NUMBER}"
+          VERSION="$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
+          ZIP="bundle-${VERSION}.zip"
+          BASE="${PUBLIC_URL%/}"
+
+          (cd "$WEB_DIR" && zip -qr "$GITHUB_WORKSPACE/$ZIP" .)
+
+          printf '{"version":"%s","url":"%s/%s"}\n' "$VERSION" "$BASE" "$ZIP" > version.json
+          cat version.json
+
+          # zip first, version.json last, so devices never see a version whose zip is missing
+          aws s3 cp "$ZIP" "s3://$R2_BUCKET/$ZIP" --endpoint-url "$R2_ENDPOINT"
+          aws s3 cp version.json "s3://$R2_BUCKET/version.json" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --content-type application/json \
+            --cache-control "no-cache"
