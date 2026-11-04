@@ -42,14 +42,14 @@ jobs:
           AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
           R2_ENDPOINT: ${{ secrets.CAPGO_R2_ENDPOINT }}
           R2_BUCKET: ${{ secrets.CAPGO_R2_BUCKET_NAME }}
-          PUBLIC_URL: ${{ secrets.OTA_PUBLIC_URL }}
+          PUBLIC_URL: ${{ secrets.CAPGO_R2_PUBLIC_URL }}
         run: |
           set -euo pipefail
 
           # Validate configuration
           : "${R2_ENDPOINT:?R2_ENDPOINT is empty}"
           : "${R2_BUCKET:?R2_BUCKET is empty}"
-          : "${PUBLIC_URL:?OTA_PUBLIC_URL is empty}"
+          : "${PUBLIC_URL:?CAPGO_R2_PUBLIC_URL is empty}"
 
           # Resolve build output directory
           WEB_DIR=$(node -p "require('./capacitor.config.json').webDir")
