@@ -15,9 +15,10 @@
 					class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20"
 				>
 					<IconSparkles class="w-3 h-3 text-gold" />
-					<span class="text-[11px] font-mono font-bold text-gold tabular-nums">{{
-						userStore.credits
-					}}</span>
+					<span
+						class="text-[11px] font-mono font-bold text-gold tabular-nums"
+						>{{ userStore.credits }}</span
+					>
 					<span class="text-[10px] font-medium text-gold/80">scans</span>
 				</div>
 				<!-- Profile Button -->
@@ -181,18 +182,20 @@
 		<!-- Bottom Navigation Bar -->
 		<div class="shrink-0 border-t border-cream/5 bg-obsidian">
 			<div class="flex items-center justify-around px-8 pt-3 pb-safe-bottom">
-				<!-- Wardrobe is unfinished, so the button stays out of the bar.
+				<!-- Wardrobe is unfinished, so the button stays out of the bar.-->
 				<button class="flex flex-col items-center gap-1">
-					<div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 relative">
+					<div
+						class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 relative"
+					>
 						<IconShirt class="w-5 h-5 text-cream/35" />
 					</div>
 					<span class="text-[9px] text-muted/40 tracking-wide">Wardrobe</span>
 				</button>
-				-->
-				<div
+
+				<!--<div
 					class="w-12"
 					aria-hidden="true"
-				/>
+				/>-->
 
 				<!-- Center Snap Button (raised) -->
 				<button
