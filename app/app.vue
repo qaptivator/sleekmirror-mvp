@@ -126,9 +126,14 @@ async function checkForOtaUpdate() {
 		const res = await CapacitorHttp.get({
 			url: `${OTA_VERSION_URL}/version.json?t=${Date.now()}`,
 		})
+
 		const remote =
 			typeof res.data === 'string' ? JSON.parse(res.data) : res.data
-		if (!remote?.version || !remote?.url) return
+
+		if (!remote?.version || !remote?.url || !remote?.checksum) {
+			console.warn('OTA metadata is missing version, url, or checksum')
+			return
+		}
 
 		const { bundle } = await CapacitorUpdater.current()
 		if (bundle.version === remote.version) return
@@ -136,6 +141,7 @@ async function checkForOtaUpdate() {
 		const downloaded = await CapacitorUpdater.download({
 			url: remote.url,
 			version: remote.version,
+			checksum: remote.checksum,
 		})
 
 		// Applies on the next app launch, so it won't reload the app mid-session.
