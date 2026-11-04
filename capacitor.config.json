@@ -13,7 +13,9 @@
 	"plugins": {
 		"CapacitorUpdater": {
 			"updateUrl": "https://sleekmirror-capgo.acdev.app",
-			"defaultChannel": "production"
+			"defaultChannel": "production",
+			"autoUpdate": false,
+			"statsUrl": ""
 		}
 	}
 }
