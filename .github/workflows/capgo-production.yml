@@ -62,7 +62,7 @@ jobs:
           aws configure set default.s3.max_concurrent_requests 1
 
           # zip first, version.json last, so devices never see a version whose zip is missing
-          aws s3 cp "$ZIP" "s3://$R2_BUCKET/$ZIP" --endpoint-url "$R2_ENDPOINT"
+          aws s3 cp "$ZIP" "s3://$R2_BUCKET/$ZIP" --endpoint-url "$R2_ENDPOINT" --checksum-algorithm CRC32
           aws s3 cp version.json "s3://$R2_BUCKET/version.json" \
             --endpoint-url "$R2_ENDPOINT" \
             --content-type application/json \
