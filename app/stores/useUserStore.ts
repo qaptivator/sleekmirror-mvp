@@ -13,6 +13,14 @@ interface User {
 	updatedAt?: string
 }
 
+const USER_CACHE_KEY = 'sleekmirror.user'
+
+function persistUser(user: User | null) {
+	if (!import.meta.client) return
+	if (user) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user))
+	else localStorage.removeItem(USER_CACHE_KEY)
+}
+
 export const useUserStore = defineStore('user', () => {
 	// State
 	const currentUser = ref<User | null>(null)
@@ -54,6 +62,7 @@ export const useUserStore = defineStore('user', () => {
 	const updateUserCache = (updatedUser: User) => {
 		if (currentUser.value?._id === updatedUser._id) {
 			currentUser.value = updatedUser
+			persistUser(currentUser.value)
 		}
 	}
 
@@ -61,17 +70,33 @@ export const useUserStore = defineStore('user', () => {
 	const updateCredits = (newCredits: number) => {
 		if (currentUser.value) {
 			currentUser.value.credits = newCredits
+			persistUser(currentUser.value)
 		}
 	}
 
 	// Set user (from login)
 	const setUser = (user: User) => {
 		currentUser.value = user
+		persistUser(user)
+	}
+
+	const loadCachedUser = (): User | null => {
+		if (!import.meta.client) return null
+		try {
+			const raw = localStorage.getItem(USER_CACHE_KEY)
+			if (!raw) return null
+			const parsed = JSON.parse(raw) as User
+			if (!parsed?._id) return null
+			return parsed
+		} catch {
+			return null
+		}
 	}
 
 	// Clear user (logout)
 	const clearUser = () => {
 		currentUser.value = null
+		persistUser(null)
 	}
 
 	// Get current user credits
@@ -100,6 +125,7 @@ export const useUserStore = defineStore('user', () => {
 		updateUserCache,
 		updateCredits,
 		setUser,
+		loadCachedUser,
 		clearUser,
 		getCredits,
 		hasEnoughCredits,

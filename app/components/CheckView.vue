@@ -342,6 +342,11 @@ import { ref, computed, watch } from 'vue'
 const props = defineProps<{ check: any }>()
 const emit = defineEmits(['close'])
 
+useBackHandler(
+	() => true,
+	() => emit('close')
+)
+
 const activeCheck = computed(() => props.check)
 const activeCategoryTab = ref<string | null>('outfit')
 const checklistState = ref<boolean[]>([])

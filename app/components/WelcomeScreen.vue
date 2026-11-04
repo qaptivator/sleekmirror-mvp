@@ -42,6 +42,7 @@
 					</div>
 				</div>
 
+				<!-- Email linking is hidden until mail sending exists.
 				<div class="flex items-start gap-3">
 					<div class="w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center shrink-0 mt-0.5">
 						<IconLink class="w-3 h-3 text-gold" />
@@ -51,6 +52,7 @@
 						<p class="text-[11px] text-cream/50">Link email to protect your data</p>
 					</div>
 				</div>
+				-->
 			</div>
 		</div>
 
@@ -60,10 +62,17 @@
 		<!-- Buttons -->
 		<div class="px-6 pb-safe-bottom space-y-3">
 
+			<div
+				v-if="offline"
+				class="rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[11px] text-gold text-center"
+			>
+				You're offline. Connect before signing in.
+			</div>
+
 			<!-- Continue with Device -->
 			<button
 				@click="handleDeviceLogin"
-				:disabled="isLoading"
+				:disabled="isLoading || offline"
 				class="w-full py-4 px-4 rounded-xl bg-gold text-obsidian font-semibold text-sm transition-all active:scale-[0.98] hover:bg-gold-soft disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
 				<IconSmartphone v-if="!isLoading" class="w-5 h-5" />
@@ -71,16 +80,15 @@
 				{{ isLoading ? 'Signing in...' : 'Continue with Device' }}
 			</button>
 
-			<!-- Login with Email -->
+			<!-- Email login is hidden until mail sending exists.
 			<button
 				@click="showEmailFlow = true"
 				:disabled="isLoading"
-				class="w-full py-4 px-4 rounded-xl border border-cream/20 text-cream font-semibold text-sm transition-all active:scale-[0.98] hover:bg-cream/5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+				class="w-full py-4 px-4 rounded-xl border border-cream/20 text-cream font-semibold text-sm"
 			>
-				<IconMail v-if="!isLoading" class="w-5 h-5" />
-				<span v-if="isLoading" class="inline-block w-4 h-4 rounded-full border-2 border-cream/30 border-t-cream animate-spin" />
 				Login with Email
 			</button>
+			-->
 
 			<!-- Error message -->
 			<Transition name="fade">
@@ -93,8 +101,9 @@
 			</Transition>
 		</div>
 
-		<!-- Email login sheet (teleported) -->
+		<!-- Email login sheet is hidden until mail sending exists.
 		<EmailLoginSheet v-model="showEmailFlow" />
+		-->
 	</div>
 </template>
 
@@ -102,15 +111,16 @@
 import { Device } from '@capacitor/device'
 
 const auth = useJwtAuth()
+const offline = auth.offline
 const isLoading = ref(false)
 const errorMessage = ref('')
-const showEmailFlow = ref(false)
 
 const emit = defineEmits<{
 	authenticated: []
 }>()
 
 async function handleDeviceLogin() {
+	if (offline.value) return
 	isLoading.value = true
 	errorMessage.value = ''
 

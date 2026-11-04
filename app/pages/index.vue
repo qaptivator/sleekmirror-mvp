@@ -15,9 +15,10 @@
 					class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20"
 				>
 					<IconSparkles class="w-3 h-3 text-gold" />
-					<span class="text-[11px] font-mono font-bold text-gold">{{
+					<span class="text-[11px] font-mono font-bold text-gold tabular-nums">{{
 						userStore.credits
 					}}</span>
+					<span class="text-[10px] font-medium text-gold/80">scans</span>
 				</div>
 				<!-- Profile Button -->
 				<button
@@ -180,22 +181,18 @@
 		<!-- Bottom Navigation Bar -->
 		<div class="shrink-0 border-t border-cream/5 bg-obsidian">
 			<div class="flex items-center justify-around px-8 pt-3 pb-safe-bottom">
-				<!-- Wardrobe (WIP) -->
-				<button
-					@click="showWip = true"
-					class="flex flex-col items-center gap-1 group"
-				>
-					<div
-						class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 group-active:scale-90 transition-transform relative"
-					>
+				<!-- Wardrobe is unfinished, so the button stays out of the bar.
+				<button class="flex flex-col items-center gap-1">
+					<div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 relative">
 						<IconShirt class="w-5 h-5 text-cream/35" />
-						<span
-							class="absolute -top-1 -right-1 bg-muted/50 text-[7px] font-bold text-obsidian rounded px-1 py-0.5"
-							>WIP</span
-						>
 					</div>
 					<span class="text-[9px] text-muted/40 tracking-wide">Wardrobe</span>
 				</button>
+				-->
+				<div
+					class="w-12"
+					aria-hidden="true"
+				/>
 
 				<!-- Center Snap Button (raised) -->
 				<button
@@ -252,16 +249,6 @@
 
 		<!-- Profile drawer -->
 		<ProfileDrawer v-model="showProfile" />
-
-		<!-- WIP Toast -->
-		<Transition name="fade">
-			<div
-				v-if="showWip"
-				class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-ink border border-cream/20 rounded-xl px-5 py-3 text-xs text-muted z-50 shadow-xl whitespace-nowrap"
-			>
-				Wardrobe feature coming soon
-			</div>
-		</Transition>
 	</div>
 </template>
 
@@ -274,7 +261,6 @@ const checkStore = useCheckStore()
 const showSnap = ref(false)
 const showHistory = ref(false)
 const showProfile = ref(false)
-const showWip = ref(false)
 const selectedCheck = ref<Check | null>(null)
 
 const recentChecks = computed(() => checkStore.recentChecks)
@@ -293,10 +279,6 @@ onMounted(() => {
 
 watch(showSnap, (open) => {
 	if (!open) checkStore.loadChecks()
-})
-
-watch(showWip, (v) => {
-	if (v) setTimeout(() => (showWip.value = false), 2500)
 })
 
 function formatDate(dateStr: string): string {

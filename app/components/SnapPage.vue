@@ -228,6 +228,8 @@ function handleClose() {
 	emit('update:modelValue', false)
 }
 
+useBackHandler(() => props.modelValue, handleClose)
+
 function handleResultClose() {
 	capture.reset()
 	// Restart the camera feed after closing results

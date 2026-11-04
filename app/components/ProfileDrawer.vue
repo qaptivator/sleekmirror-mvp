@@ -12,7 +12,7 @@
 						<h2 class="text-lg font-semibold text-cream mt-0.5">Profile & Settings</h2>
 					</div>
 					<button
-						@click="$emit('update:modelValue', false)"
+						@click="closeDrawer"
 						class="w-9 h-9 rounded-full flex items-center justify-center bg-cream/5 hover:bg-cream/10 transition-colors active:scale-95"
 					>
 						<IconX class="w-5 h-5 text-cream/70" />
@@ -43,45 +43,20 @@
 						<div class="border-t border-cream/5 pt-3 flex items-center justify-between">
 							<div>
 								<p class="text-xs text-muted">Remaining Scans</p>
-								<p class="text-[10px] text-muted/50 mt-0.5">1 credit per check</p>
+								<p class="text-[10px] text-muted/50 mt-0.5">1 scan per check</p>
 							</div>
 							<div class="text-right">
 								<p class="text-xl font-bold text-gold font-mono tabular-nums">{{ userStore.credits }}</p>
-								<p class="text-[10px] text-muted">credits</p>
+								<p class="text-[10px] text-muted">scans left</p>
 							</div>
 						</div>
 					</div>
 
-					<!-- Link Account Button (if not already linked) -->
-					<div
-						v-if="!userStore.currentUser?.emailVerified"
-						class="bg-gold/5 border border-gold/15 rounded-2xl p-4 space-y-3"
-					>
-						<p class="text-xs font-semibold text-gold flex items-center gap-1.5">
-							<IconCircleAlert class="w-4 h-4" />
-							Secure Your Account
-						</p>
-						<p class="text-[11px] text-cream/50 leading-relaxed">
-							Link an email to protect your account. Otherwise, switching devices will lose your progress.
-						</p>
-						<button
-							@click="showLinkEmail = true"
-							class="w-full py-2 px-3 rounded-lg bg-gold/20 text-gold hover:bg-gold/30 transition-colors text-xs font-semibold"
-						>
-							Link Email Now
-						</button>
+					<!-- Email linking is hidden until mail sending exists.
+					<div class="bg-gold/5 border border-gold/15 rounded-2xl p-4">
+						<button @click="showLinkEmail = true">Link Email Now</button>
 					</div>
-
-					<!-- Already linked -->
-					<div v-else class="bg-gold/5 border border-gold/15 rounded-2xl p-4 space-y-2">
-						<p class="text-xs font-semibold text-gold flex items-center gap-1.5">
-							<IconCircleCheck class="w-4 h-4" />
-							Account Secured
-						</p>
-						<p class="text-[11px] text-cream/50">
-							Email: <span class="text-cream font-mono">{{ userStore.currentUser?.email }}</span>
-						</p>
-					</div>
+					-->
 
 					<!-- Preferences -->
 					<div class="bg-ink border border-cream/10 rounded-2xl overflow-hidden divide-y divide-cream/5">
@@ -94,13 +69,16 @@
 								<p class="text-[10px] text-muted/60 mt-0.5">Vibrate on snap &amp; results</p>
 							</div>
 							<button
+								type="button"
+								role="switch"
+								:aria-checked="hapticsEnabled"
 								@click="hapticsEnabled = !hapticsEnabled"
-								class="relative w-10 h-5.5 rounded-full transition-colors duration-200"
-								:class="hapticsEnabled ? 'bg-gold' : 'bg-cream/10'"
+								class="relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200"
+								:class="hapticsEnabled ? 'bg-gold' : 'bg-cream/15'"
 							>
 								<span
-									class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200"
-									:class="hapticsEnabled ? 'translate-x-5' : 'translate-x-0.5'"
+									class="pointer-events-none absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200"
+									:class="hapticsEnabled ? 'translate-x-5' : 'translate-x-0'"
 								/>
 							</button>
 						</div>
@@ -131,14 +109,6 @@
 							<span class="text-xs text-muted">Version</span>
 							<span class="text-xs font-mono text-cream/60">v1.0.0</span>
 						</div>
-						<div class="flex items-center justify-between px-4 py-3">
-							<span class="text-xs text-muted">Storage</span>
-							<span class="text-xs font-mono text-cream/60">Cloudflare R2</span>
-						</div>
-						<div class="flex items-center justify-between px-4 py-3">
-							<span class="text-xs text-muted">AI Engine</span>
-							<span class="text-xs font-mono text-cream/60">GPT-4o Vision</span>
-						</div>
 					</div>
 
 					<!-- Logout Button -->
@@ -168,21 +138,27 @@
 		</Transition>
 	</Teleport>
 
-	<!-- Email linking modal -->
+	<!-- Email linking stays hidden until mail sending exists.
 	<EmailLinkingSheet v-model="showLinkEmail" />
+	-->
 </template>
 
 <script setup lang="ts">
 import { Device } from '@capacitor/device'
 
-defineProps<{ modelValue: boolean }>()
-defineEmits<{ 'update:modelValue': [value: boolean] }>()
+const props = defineProps<{ modelValue: boolean }>()
+const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const userStore = useUserStore()
 const auth = useJwtAuth()
 const deviceIdentifier = ref<string>('')
 const showCopyToast = ref(false)
-const showLinkEmail = ref(false)
+
+function closeDrawer() {
+	emit('update:modelValue', false)
+}
+
+useBackHandler(() => props.modelValue, closeDrawer)
 const hapticsEnabled = ref(true)
 const defaultMode = ref('casual')
 const isLoggingOut = ref(false)

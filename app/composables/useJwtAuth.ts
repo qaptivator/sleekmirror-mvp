@@ -19,6 +19,9 @@ export function useJwtAuth() {
   const accessToken = useState<string | null>('auth:accessToken', () => null)
   const isLoading = useState<boolean>('auth:isLoading', () => false)
   const error = useState<string | null>('auth:error', () => null)
+  const offline = useState<boolean>('auth:offline', () => false)
+  // True when we must not show the welcome screen because the network failed.
+  const offlineHold = useState<boolean>('auth:offlineHold', () => false)
 
   // Computed based on access token presence
   const isAuthenticated = computed(() => accessToken.value !== null)
@@ -101,7 +104,7 @@ export function useJwtAuth() {
     }
   }
 
-  async function refresh() {
+  async function refresh(opts?: { signal?: AbortSignal }) {
     const refreshToken = readRefreshToken()
     if (!refreshToken) {
       accessToken.value = null
@@ -115,19 +118,40 @@ export function useJwtAuth() {
         method: 'POST',
         credentials: 'include',
         body: { refreshToken },
+        signal: opts?.signal,
       })
 
       accessToken.value = response.accessToken
       if (response.refreshToken) writeRefreshToken(response.refreshToken)
       if (response.user) userStore.setUser(response.user)
+      offline.value = false
+      offlineHold.value = false
       return response
     } catch (err: any) {
+      if (isNetworkError(err)) throw err
       // Refresh failed — clear auth state
       accessToken.value = null
       writeRefreshToken(null)
       userStore.clearUser()
       throw err
     }
+  }
+
+  function restoreOfflineSession() {
+    offline.value = true
+    if (!readRefreshToken()) {
+      offlineHold.value = false
+      return false
+    }
+    const cached = userStore.loadCachedUser()
+    if (cached) {
+      userStore.setUser(cached)
+      offlineHold.value = false
+      return true
+    }
+    // Keep the refresh token. The welcome screen would look like a logout.
+    offlineHold.value = true
+    return false
   }
 
   async function logout() {
@@ -155,20 +179,31 @@ export function useJwtAuth() {
   }
 
   async function tryRestoreAuth() {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return restoreOfflineSession()
+    }
+
     // No saved refresh token means there is no session. Don't call the API.
     if (!readRefreshToken()) {
       accessToken.value = null
       userStore.clearUser()
+      offlineHold.value = false
       return false
     }
 
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
     try {
-      await refresh()
+      await refresh({ signal: controller.signal })
       return true
-    } catch {
+    } catch (err) {
+      if (isNetworkError(err)) return restoreOfflineSession()
       accessToken.value = null
       userStore.clearUser()
+      offlineHold.value = false
       return false
+    } finally {
+      clearTimeout(timer)
     }
   }
 
@@ -177,6 +212,8 @@ export function useJwtAuth() {
     isAuthenticated,
     isLoading,
     error,
+    offline,
+    offlineHold,
     loginWithDevice,
     requestOtp,
     verifyOtp,

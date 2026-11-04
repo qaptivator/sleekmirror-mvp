@@ -148,6 +148,11 @@ const checks = computed(() => checkStore.checksList)
 const selectedCheck = ref<any | null>(null)
 const emit = defineEmits(['close'])
 
+useBackHandler(
+	() => true,
+	() => emit('close')
+)
+
 onMounted(() => {
 	checkStore.loadChecks()
 })

@@ -12,14 +12,43 @@
 			/>
 		</div>
 
+		<!-- Offline with no session yet: don't present the login menu -->
+		<div
+			v-else-if="offlineHold && !hasSession"
+			class="w-full h-full flex flex-col items-center justify-center bg-obsidian text-cream px-8 text-center"
+		>
+			<p class="text-[11px] font-mono uppercase tracking-[0.3em] text-gold">
+				Sleekmirror
+			</p>
+			<h1 class="text-2xl font-semibold mt-4">You're offline</h1>
+			<p class="text-sm text-cream/60 mt-2 max-w-xs leading-relaxed">
+				Connect to the internet to open your account. Nothing was signed out.
+			</p>
+		</div>
+
 		<!-- Not authenticated: show welcome screen -->
 		<WelcomeScreen
-			v-else-if="!isAuthenticated"
+			v-else-if="!hasSession"
 			@authenticated="onAuthenticatedSuccess"
 		/>
 
 		<!-- Authenticated: show main app -->
-		<NuxtPage v-else />
+		<div
+			v-else
+			class="w-full h-full flex flex-col"
+		>
+			<div
+				v-if="offline"
+				class="shrink-0 bg-ink border-b border-gold/20 px-4 pt-[max(0.55rem,env(safe-area-inset-top))] pb-2 text-center"
+			>
+				<p class="text-[11px] text-gold">
+					You're offline. Reconnect before taking a check.
+				</p>
+			</div>
+			<div class="flex-1 min-h-0">
+				<NuxtPage />
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -30,21 +59,64 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater'
 const OTA_VERSION_URL = 'https://sleekmirror-capgo.acdev.app'
 
 const auth = useJwtAuth()
+const userStore = useUserStore()
 
-const isAuthenticated = computed(() => auth.isAuthenticated.value)
+const offline = auth.offline
+const offlineHold = auth.offlineHold
+const hasSession = computed(
+	() => auth.isAuthenticated.value || userStore.currentUser !== null
+)
 const isChecking = ref(true)
+let removeBackListener: (() => void) | null = null
 
 onMounted(async () => {
 	// Must be called on boot so Capgo knows the bundle is stable
 	await CapacitorUpdater.notifyAppReady()
 
+	window.addEventListener('offline', onOffline)
+	window.addEventListener('online', onOnline)
+
 	// Try to restore authentication from previous session (refresh token)
 	await auth.tryRestoreAuth()
 	isChecking.value = false
 
+	if (Capacitor.isNativePlatform()) {
+		try {
+			const { App } = await import('@capacitor/app')
+			const handle = await App.addListener('backButton', () => {
+				if (!consumeBack()) App.exitApp()
+			})
+			removeBackListener = () => {
+				void handle.remove()
+			}
+		} catch (e) {
+			console.warn('Back button handler unavailable', e)
+		}
+	}
+
 	// Fire and forget, never block the UI on an update check
 	checkForOtaUpdate()
 })
+
+onUnmounted(() => {
+	window.removeEventListener('offline', onOffline)
+	window.removeEventListener('online', onOnline)
+	removeBackListener?.()
+})
+
+function onOffline() {
+	offline.value = true
+}
+
+async function onOnline() {
+	if (!navigator.onLine) return
+	offline.value = false
+	if (auth.isAuthenticated.value) {
+		offlineHold.value = false
+		return
+	}
+	await auth.tryRestoreAuth()
+}
 
 async function checkForOtaUpdate() {
 	if (!Capacitor.isNativePlatform()) return

@@ -31,8 +31,9 @@ export const useApi = <
 							Authorization: `Bearer ${auth.accessToken.value}`,
 						},
 					})
-				} catch {
-					// Refresh failed, user needs to re-login
+				} catch (err) {
+					// A dead connection is not a logged-out session.
+					if (isNetworkError(err)) return
 					await auth.logout()
 					throw new Error('Session expired, please log in again')
 				}
