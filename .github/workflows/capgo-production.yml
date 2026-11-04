@@ -40,42 +40,78 @@ jobs:
           AWS_DEFAULT_REGION: auto
           AWS_REQUEST_CHECKSUM_CALCULATION: when_required
           AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
-          AWS_SIGV4_SIGN_OPTIONS: 'all'
           R2_ENDPOINT: ${{ secrets.CAPGO_R2_ENDPOINT }}
           R2_BUCKET: ${{ secrets.CAPGO_R2_BUCKET_NAME }}
           PUBLIC_URL: ${{ secrets.OTA_PUBLIC_URL }}
         run: |
           set -euo pipefail
 
+          # Validate configuration
+          : "${R2_ENDPOINT:?R2_ENDPOINT is empty}"
+          : "${R2_BUCKET:?R2_BUCKET is empty}"
+          : "${PUBLIC_URL:?OTA_PUBLIC_URL is empty}"
+
+          # Resolve build output directory
           WEB_DIR=$(node -p "require('./capacitor.config.json').webDir")
-          #VERSION="$(node -p "require('./package.json').version")-${GITHUB_RUN_NUMBER}"
-          VERSION="$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}"
-          ZIP="bundle-${VERSION}.zip"
+
+          if [[ ! -f "$WEB_DIR/index.html" ]]; then
+            echo "Error: index.html not found in $WEB_DIR"
+            exit 1
+          fi
+
+          # Generate a SemVer-compatible version
+          VERSION="$(date +%Y.%-m.%-d)-${GITHUB_RUN_NUMBER}"
+
+          ZIP_NAME="bundle-${VERSION}.zip"
           BASE="${PUBLIC_URL%/}"
 
-          (cd "$WEB_DIR" && zip -qr "$GITHUB_WORKSPACE/$ZIP" .)
+          echo "Building bundle: $ZIP_NAME"
 
-          printf '{"version":"%s","url":"%s/%s"}\n' "$VERSION" "$BASE" "$ZIP" > version.json
+          # Package the web app
+          (cd "$WEB_DIR" && zip -qr "$GITHUB_WORKSPACE/$ZIP_NAME" .)
+
+          # Calculate SHA-256 of the exact ZIP being uploaded
+          CHECKSUM=$(sha256sum "$ZIP_NAME" | awk '{print $1}')
+
+          echo "Bundle checksum: $CHECKSUM"
+
+          # Generate update metadata
+          jq -n \
+            --arg version "$VERSION" \
+            --arg url "$BASE/$ZIP_NAME" \
+            --arg checksum "$CHECKSUM" \
+            '{
+              version: $version,
+              url: $url,
+              checksum: $checksum
+            }' > version.json
+
+          echo "Generated version.json:"
           cat version.json
 
-          # fix the "An error occurred (401) when calling the CreateMultipartUpload operation: Unauthorized" error
-          aws configure set default.s3.multipart_threshold 100GB
-          aws configure set default.s3.max_concurrent_requests 1
+          # Upload bundle first
+          aws s3 cp "$ZIP_NAME" "s3://$R2_BUCKET/$ZIP_NAME" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --content-type application/zip
 
-          # zip first, version.json last, so devices never see a version whose zip is missing
-          aws s3 cp "$ZIP" "s3://$R2_BUCKET/$ZIP" --endpoint-url "$R2_ENDPOINT" --checksum-algorithm CRC32
+          # Publish metadata last, so clients never discover an incomplete bundle
           aws s3 cp version.json "s3://$R2_BUCKET/version.json" \
             --endpoint-url "$R2_ENDPOINT" \
             --content-type application/json \
             --cache-control "no-cache"
 
-          # keep the newest 5 bundles, delete the rest (the latest is always among the kept ones)
-          #aws s3api list-objects-v2 \
-          #  --bucket "$R2_BUCKET" \
-          #  --prefix "bundle-" \
-          #  --endpoint-url "$R2_ENDPOINT" \
-          #  --query 'sort_by(Contents, &LastModified)[:-5].Key' \
-          #  --output text \
-          #  | tr '\t' '\n' | grep '^bundle-' | while read -r key; do
-          #      aws s3 rm "s3://$R2_BUCKET/$key" --endpoint-url "$R2_ENDPOINT"
-          #    done || true
+          echo "Deployment successful: $VERSION"
+
+          # Optional: keep the newest 5 bundles
+          # aws s3api list-objects-v2 \
+          #   --bucket "$R2_BUCKET" \
+          #   --prefix "bundle-" \
+          #   --endpoint-url "$R2_ENDPOINT" \
+          #   --query 'sort_by(Contents, &LastModified)[:-5].Key' \
+          #   --output text \
+          #   | tr '\t' '\n' \
+          #   | grep '^bundle-' \
+          #   | while read -r key; do
+          #       aws s3 rm "s3://$R2_BUCKET/$key" \
+          #         --endpoint-url "$R2_ENDPOINT"
+          #     done
