@@ -65,12 +65,12 @@ jobs:
             --cache-control "no-cache"
 
           # keep the newest 5 bundles, delete the rest (the latest is always among the kept ones)
-          aws s3api list-objects-v2 \
-            --bucket "$R2_BUCKET" \
-            --prefix "bundle-" \
-            --endpoint-url "$R2_ENDPOINT" \
-            --query 'sort_by(Contents, &LastModified)[:-5].Key' \
-            --output text \
-            | tr '\t' '\n' | grep '^bundle-' | while read -r key; do
-                aws s3 rm "s3://$R2_BUCKET/$key" --endpoint-url "$R2_ENDPOINT"
-              done || true
+          #aws s3api list-objects-v2 \
+          #  --bucket "$R2_BUCKET" \
+          #  --prefix "bundle-" \
+          #  --endpoint-url "$R2_ENDPOINT" \
+          #  --query 'sort_by(Contents, &LastModified)[:-5].Key' \
+          #  --output text \
+          #  | tr '\t' '\n' | grep '^bundle-' | while read -r key; do
+          #      aws s3 rm "s3://$R2_BUCKET/$key" --endpoint-url "$R2_ENDPOINT"
+          #    done || true
