@@ -31,6 +31,12 @@ jobs:
         run: npm ci
 
       - name: Diagnose R2 connection
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CAPGO_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CAPGO_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.CAPGO_R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.CAPGO_R2_BUCKET_NAME }}
         run: |
           aws --version
 
