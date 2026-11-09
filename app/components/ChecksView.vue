@@ -79,6 +79,13 @@
 						class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1"
 					>
 						<span
+							v-if="check.photoUsable === false"
+							class="text-[10px] font-bold uppercase tracking-wide text-cream/70"
+						>
+							N/A
+						</span>
+						<span
+							v-else
 							class="text-sm font-bold font-mono tabular-nums"
 							:style="getScoreStyle(check.overallScore)"
 						>
@@ -100,11 +107,18 @@
 						</span>
 					</div>
 					<p class="text-[11px] text-cream/80 leading-snug line-clamp-2">
-						{{ check.verdictHeadline }}
+						{{
+							check.photoUsable === false
+								? check.photoIssue || "This photo can't be scored"
+								: check.verdictHeadline
+						}}
 					</p>
 
 					<!-- Category mini bars -->
-					<div class="flex gap-1 pt-1">
+					<div
+						v-if="check.photoUsable !== false && check.categories"
+						class="flex gap-1 pt-1"
+					>
 						<div
 							v-for="(cat, key) in check.categories"
 							:key="key"

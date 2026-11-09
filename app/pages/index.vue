@@ -129,6 +129,12 @@
 								class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-0.5"
 							>
 								<span
+									v-if="check.photoUsable === false"
+									class="text-[10px] font-bold uppercase tracking-wide text-cream/70"
+									>N/A</span
+								>
+								<span
+									v-else
 									class="text-sm font-bold font-mono tabular-nums"
 									:style="getScoreColor(check.overallScore)"
 									>{{ check.overallScore }}</span
@@ -148,7 +154,11 @@
 								}}</span>
 							</div>
 							<p class="text-[10px] text-cream/70 leading-snug line-clamp-2">
-								{{ check.verdictHeadline }}
+								{{
+									check.photoUsable === false
+										? check.photoIssue || "This photo can't be scored"
+										: check.verdictHeadline
+								}}
 							</p>
 						</div>
 					</div>

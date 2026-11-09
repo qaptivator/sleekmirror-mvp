@@ -20,22 +20,29 @@ const checkSchema = new Schema(
 		file: { type: Schema.Types.ObjectId, ref: 'File', required: true },
 		contextTag: { type: String, required: true },
 
-		overallScore: { type: Number, required: true, min: 0, max: 100 },
+		photoUsable: { type: Boolean, required: true, default: true },
+		photoIssue: { type: String, default: '' },
 
-		verdictHeadline: { type: String, required: true },
+		overallScore: { type: Number, required: true, min: 0, max: 100 },
+		contextPenalty: { type: Number, default: 0, min: 0, max: 100 },
+
+		verdictHeadline: { type: String, default: '' },
+		topFix: { type: String, default: '' },
 		categories: {
-			outfit: { type: categorySchema, required: true },
-			grooming: { type: categorySchema, required: true },
-			presentation: { type: categorySchema, required: true },
+			outfit: { type: categorySchema, required: false },
+			grooming: { type: categorySchema, required: false },
+			presentation: { type: categorySchema, required: false },
 		},
 		actionChecklist: {
 			type: [String],
-			required: true,
 			default: [],
 		},
 	},
 	{ timestamps: true }
 )
 
-// export with Nuxt-friendly Dev HMR Guard
-export const Check = mongoose.models.Check || model('Check', checkSchema)
+// Re-register on hot reload so new fields are not stripped by a cached schema.
+if (mongoose.models.Check) {
+	mongoose.deleteModel('Check')
+}
+export const Check = model('Check', checkSchema)

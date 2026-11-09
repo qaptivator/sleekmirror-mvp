@@ -76,6 +76,24 @@
 			>
 				<!-- ZONE A: VERDICT HEADLINE & SCORE BLOCK -->
 				<div
+					v-if="activeCheck.photoUsable === false"
+					class="bg-black/20 p-5 rounded-2xl border border-cream/5 space-y-2"
+				>
+					<div
+						class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-cream/10 border border-cream/10 text-[10px] font-mono uppercase tracking-wider text-gold-soft"
+					>
+						PHOTO
+					</div>
+					<h2 class="text-md font-semibold text-cream leading-snug">
+						This photo can't be scored
+					</h2>
+					<p class="text-sm text-cream/80 leading-snug">
+						{{ activeCheck.photoIssue || 'Retake it with one person, in clear light, outfit in frame.' }}
+					</p>
+				</div>
+
+				<div
+					v-else
 					class="flex items-center justify-between gap-4 bg-black/20 p-5 rounded-2xl border border-cream/5"
 				>
 					<div class="space-y-1 flex-1">
@@ -87,6 +105,12 @@
 						<h2 class="text-md font-semibold text-cream leading-snug">
 							{{ activeCheck.verdictHeadline }}
 						</h2>
+						<p
+							v-if="activeCheck.topFix"
+							class="text-[13px] text-gold leading-snug pt-1"
+						>
+							{{ activeCheck.topFix }}
+						</p>
 					</div>
 
 					<!-- Macro Gauge Area -->
@@ -127,7 +151,10 @@
 				</div>
 
 				<!-- ZONE B: THE FIXED TRI-GRID CATEGORY MATRIX -->
-				<div class="space-y-3">
+				<div
+					v-if="activeCheck.photoUsable !== false"
+					class="space-y-3"
+				>
 					<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
 						Category Feedback
 					</p>
@@ -241,7 +268,10 @@
 				</div>
 
 				<!-- ZONE C: INTERACTIVE ACTION CHECKLIST ARRAY -->
-				<div class="space-y-3">
+				<div
+					v-if="activeCheck.photoUsable !== false"
+					class="space-y-3"
+				>
 					<p class="text-[10px] uppercase tracking-widest text-muted font-bold">
 						Priority Actions
 					</p>
@@ -348,7 +378,7 @@ useBackHandler(
 )
 
 const activeCheck = computed(() => props.check)
-const activeCategoryTab = ref<string | null>('outfit')
+const activeCategoryTab = ref<string | null>(null)
 const checklistState = ref<boolean[]>([])
 const processedCategories = computed(() => activeCheck.value?.categories || {})
 const showCopiedToast = ref(false)
@@ -423,10 +453,25 @@ async function handleShare() {
 	if (!check) return
 
 	const cats = check.categories || {}
+	if (check.photoUsable === false) {
+		const text = [
+			`Sleekmirror Check — ${check.contextTag?.toUpperCase() ?? ''}`,
+			'This photo could not be scored.',
+			check.photoIssue || '',
+			'',
+			'via Sleekmirror · AI outfit & look analysis',
+		]
+			.filter((line) => line !== undefined)
+			.join('\n')
+		await copyOrShare(text)
+		return
+	}
+
 	const lines = [
 		`Sleekmirror Check — ${check.contextTag?.toUpperCase() ?? ''}`,
 		`Score: ${Math.round(check.overallScore)}/100`,
 		`"${check.verdictHeadline}"`,
+		check.topFix ? `Fix: ${check.topFix}` : '',
 		'',
 	]
 
@@ -446,7 +491,10 @@ async function handleShare() {
 	lines.push('via Sleekmirror · AI outfit & look analysis')
 
 	const text = lines.join('\n')
+	await copyOrShare(text)
+}
 
+async function copyOrShare(text: string) {
 	// Try native Web Share API first (mobile)
 	if (navigator.share) {
 		try {

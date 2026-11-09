@@ -13,9 +13,13 @@ export interface Check {
 	user: string
 	file: string
 	contextTag: string
+	photoUsable?: boolean
+	photoIssue?: string
 	overallScore: number
+	contextPenalty?: number
 	verdictHeadline: string
-	categories: {
+	topFix?: string
+	categories?: {
 		outfit: Category
 		grooming: Category
 		presentation: Category
