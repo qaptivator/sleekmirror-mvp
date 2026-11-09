@@ -12,6 +12,17 @@ export default defineNuxtConfig({
 			routes: ['/'],
 		},
 	},
+	app: {
+		head: {
+			script: [
+				{
+					src: 'https://analytics.acdev.app/script.js',
+					defer: true,
+					'data-website-id': 'b84095ac-e340-4aaa-a353-a51f7a877ca5',
+				},
+			],
+		},
+	},
 	lucide: {
 		namePrefix: 'Icon',
 	},
