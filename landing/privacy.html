@@ -31,13 +31,13 @@
 					Helvetica, Arial, sans-serif;
 				margin: 0;
 				padding: 40px 20px;
-				text-align: center;
 				line-height: 1.6;
 			}
 
 			.container {
 				max-width: 720px;
 				margin: 0 auto;
+				text-align: left;
 			}
 
 			a {
@@ -89,8 +89,7 @@
 			}
 
 			ul {
-				list-style: none;
-				padding: 0;
+				padding-left: 1.25rem;
 				margin: 0 0 24px 0;
 			}
 
@@ -103,6 +102,7 @@
 				margin-top: 48px;
 				font-size: 0.875rem;
 				color: var(--muted-color);
+				text-align: center;
 			}
 		</style>
 		<script
@@ -121,178 +121,215 @@
 
 			<h1>Privacy Policy</h1>
 			<div class="meta">
-				<strong>Effective Date:</strong> November 4, 2026 |
-				<strong>Last Updated:</strong> November 4, 2026
+				<strong>Effective Date:</strong> November 9, 2026 |
+				<strong>Last Updated:</strong> November 9, 2026
 			</div>
 
 			<p>
-				At <strong>Sleekmirror</strong> ("we," "our," or "us"), we value your
-				privacy and are committed to protecting your personal data. This Privacy
-				Policy explains how we collect, use, store, and share information when
-				you use the Sleekmirror mobile application and web services
-				(collectively, the "Service"). Sleekmirror is operated by acdev.
+				Sleekmirror is operated by acdev ("we," "our," or "us"). This policy
+				explains what personal data we process when you use the Sleekmirror app
+				or the website at sleekmirror.com (the "Service"), why we process it,
+				and the rights you have under the GDPR and similar laws.
 			</p>
 			<p>
-				By using Sleekmirror, you agree to the collection and use of information
-				in accordance with this policy.
+				The controller is acdev. For privacy requests, email
+				<a href="mailto:contact@acdev.app">contact@acdev.app</a>.
 			</p>
 
 			<hr />
 
-			<h2>1. Information We Collect</h2>
-			<p>
-				We collect only the information necessary to provide, secure, and
-				improve our AI-powered visual analysis service:
-			</p>
+			<h2>1. What we collect</h2>
 			<ul>
 				<li>
-					<strong>Device Identifiers:</strong> An identifier for your device,
-					collected to allow immediate app usage without forcing account
-					creation.
+					<strong>Support ID.</strong> A device identifier, shown in Profile as
+					your Support ID. It is also the key for your guest account, so you
+					can use the app without creating an email account.
 				</li>
 				<li>
-					<strong>Uploaded Images:</strong> Images you submit for analysis are
-					uploaded to our secure object storage (Cloudflare R2).
+					<strong>Photos, only for the request.</strong> The photo you submit
+					for a check is held in memory long enough to send it for analysis,
+					then discarded. We do not save the photo in our database, and we do
+					not store it in Cloudflare R2 or any other file store.
 				</li>
 				<li>
-					<strong>AI Analysis Data:</strong> The occasion you select, plus the
-					scores, category evaluations, and text feedback generated for each
-					check, stored in our database.
+					<strong>Check results.</strong> The occasion you pick, the scores,
+					the written feedback, the top fix, and the short action list. If a
+					photo cannot be scored, we store that short reason instead of a
+					score. We do not store the image with the result.
 				</li>
 				<li>
-					<strong>Credits and Usage Data:</strong> Your daily free allowance,
-					credit balance, and scan counts, used to apply limits.
+					<strong>Scan balance.</strong> How many checks you have left.
 				</li>
 				<li>
-					<strong>Crash and Analytics Data:</strong> Crash reports and basic app
-					usage information (such as which screens are used), collected through
-					Firebase Crashlytics and Google Analytics for Firebase.
+					<strong>Session data.</strong> An access token that expires after 15
+					minutes, and a refresh token that expires after 7 days. On the
+					website the refresh token is an httpOnly, Secure cookie. In the app
+					it is stored on the device. Preferences such as your default occasion
+					stay on the device only.
 				</li>
 				<li>
-					<strong>Technical Metadata:</strong> Server logs, timestamps, IP
-					addresses, platform details, and authentication cookies (httpOnly,
-					Secure).
+					<strong>Page analytics.</strong> Cookieless statistics from Umami,
+					hosted by us at analytics.acdev.app. A page view can include the page
+					address, referrer, browser, operating system, device type, and
+					country. It is not tied to your account or Support ID. Umami does not
+					use advertising cookies and we do not use it to build a profile of
+					you.
 				</li>
 				<li>
-					<strong>Email Address (Optional, when available):</strong> Email
-					linking for cross-device recovery is not available in the current
-					version. If we add it, we will collect your email address only if you
-					choose to link it.
+					<strong>Security logs.</strong> Our servers may record IP address,
+					time, and request details for a short period to keep the Service
+					secure.
+				</li>
+			</ul>
+			<p>
+				The current app does not ask for your email. If you email us, we use
+				that address only to handle your request.
+			</p>
+
+			<h2>2. Photos</h2>
+			<p>
+				A photo is used only to produce that check. We do not run facial
+				recognition, we do not try to identify who is in the photo, and we do
+				not build a face template. The analysis is instructed not to guess age,
+				ethnicity, health, weight, religion, sexuality, or attractiveness.
+			</p>
+			<p>
+				Only submit a photo of yourself, or of an adult who has agreed. If the
+				photo appears to show a minor, the check is refused and the image is
+				not kept.
+			</p>
+			<p>
+				Earlier versions of Sleekmirror could store photos, including in
+				Cloudflare R2. New checks do not. Email us with your Support ID if you
+				want any earlier photo or account data deleted.
+			</p>
+
+			<h2>3. Why we process data</h2>
+			<ul>
+				<li>
+					<strong>To provide the Service</strong> (contract): run the check,
+					show your history of results, and keep your scan balance.
+				</li>
+				<li>
+					<strong>To keep accounts secure</strong> (legitimate interest):
+					authenticate requests, limit abuse, and keep short security logs.
+				</li>
+				<li>
+					<strong>To see which pages are used</strong> (legitimate interest):
+					the Umami stats described above. You can object by emailing us.
+				</li>
+				<li>
+					<strong>To meet a legal duty</strong> (legal obligation), if a law
+					requires us to keep or disclose something.
+				</li>
+			</ul>
+			<p>We do not sell personal data and we do not use it for advertising.</p>
+
+			<h2>4. Who receives data</h2>
+			<ul>
+				<li>
+					<strong>OpenAI.</strong> The photo and the occasion are sent to the
+					OpenAI API to write the feedback. Under OpenAI's API terms, that
+					content is not used to train their models. OpenAI may keep it for up
+					to 30 days to monitor abuse. We do not keep a copy of the photo
+					after the request.
+				</li>
+				<li>
+					<strong>MongoDB Atlas.</strong> Hosts the account record and the
+					text of your check results.
+				</li>
+				<li>
+					<strong>Umami, on analytics.acdev.app.</strong> Receives the page
+					analytics described above. We host this ourselves.
+				</li>
+			</ul>
+			<p>
+				We may also disclose data if the law requires it. Logging out of the
+				app ends the session on that device. It does not delete the account or
+				the saved results.
+			</p>
+
+			<h2>5. Where data is processed</h2>
+			<p>
+				We and our providers may process data outside your country. OpenAI
+				processes API requests in the United States. Where data leaves the
+				European Economic Area, the United Kingdom, or Switzerland, we rely on
+				the provider's contractual safeguards, such as standard contractual
+				clauses, where those apply.
+			</p>
+
+			<h2>6. How long we keep it</h2>
+			<ul>
+				<li>Photos from current checks: not kept after the analysis request.</li>
+				<li>
+					Check results, Support ID, and scan balance: until you ask us to
+					delete them, or until the account is no longer needed to provide the
+					Service.
+				</li>
+				<li>Access tokens: 15 minutes. Refresh tokens: 7 days.</li>
+				<li>
+					OpenAI may retain the photo it received for up to 30 days, as
+					described above.
+				</li>
+				<li>
+					Umami page stats and security logs: only as long as needed for those
+					purposes, then deleted or aggregated.
 				</li>
 			</ul>
 
-			<h2>2. How We Use Your Information</h2>
-			<ul>
-				<li>
-					<strong>Service Delivery:</strong> To analyze uploaded images using
-					third-party AI services and present structured feedback.
-				</li>
-				<li>
-					<strong>Account &amp; Balance Management:</strong> To track your free
-					daily allowance and credit balance.
-				</li>
-				<li>
-					<strong>Session Security:</strong> To authenticate user requests,
-					prevent unauthorized access, and mitigate abusive API calls.
-				</li>
-				<li>
-					<strong>Improvement:</strong> To fix bugs and understand how the app
-					is used.
-				</li>
-			</ul>
-
-			<h2>3. Third-Party Services &amp; Data Sharing</h2>
+			<h2>7. Security</h2>
 			<p>
-				We do not sell, rent, or trade your personal data. We share data with
-				trusted service providers solely to operate the Service:
+				Traffic uses HTTPS. Website refresh tokens are httpOnly and Secure.
+				Photos are not written to our file storage. No method of transmission
+				or storage is completely secure.
+			</p>
+
+			<h2>8. Your rights and deletion</h2>
+			<p>
+				Email contact@acdev.app with your Support ID and we'll delete your data
+				within 30 days. That includes your account, saved check results, and
+				any photo still held from an earlier version of the Service. Copy the
+				Support ID from Profile in the app.
+			</p>
+			<p>
+				If the GDPR applies to you, you can also ask us to:
 			</p>
 			<ul>
-				<li>
-					<strong>OpenAI (GPT-4o Vision API):</strong> Images and the selected
-					occasion are processed strictly for feedback generation. API data is
-					not used to train OpenAI models and is retained by OpenAI for up to 30
-					days solely for abuse monitoring.
-				</li>
-				<li>
-					<strong>Cloudflare R2:</strong> Used for hosting uploaded images with
-					HMAC-signed URLs (1-hour time-to-live) to restrict public exposure.
-				</li>
-				<li>
-					<strong>MongoDB Atlas:</strong> Hosted database infrastructure used to
-					store account profiles and analysis records.
-				</li>
-				<li>
-					<strong>Google:</strong> Google Play (including billing for any
-					purchases) and Firebase (crash reporting and analytics).
-				</li>
+				<li>access the personal data we hold about you</li>
+				<li>correct it</li>
+				<li>delete it</li>
+				<li>restrict or object to processing, including analytics</li>
+				<li>receive a copy in a portable format, where that right applies</li>
 			</ul>
-			<p>We may also disclose data if required by law.</p>
-
-			<h2>4. Photos and Facial Data</h2>
 			<p>
-				Your photos are used only to generate your feedback. We do not use
-				facial recognition, we do not identify people, and we do not build face
-				templates or profiles. Only submit photos of yourself, or of people who
-				have agreed to it.
+				We may need your Support ID to find the right account. You can lodge a
+				complaint with your local data protection authority. If you are in the
+				EU, that is the authority in your country of residence. You can also
+				contact us first and we will try to resolve it.
+			</p>
+			<p>
+				Your results are linked to the device Support ID. If you lose, reset,
+				or replace the device, or clear the app's storage, you may lose access
+				and we may not be able to match the account without that ID.
 			</p>
 
-			<h2>5. Data Security &amp; Storage</h2>
+			<h2>9. Age</h2>
 			<p>
-				We implement industry-standard technical measures to safeguard your
-				information, including httpOnly and Secure authentication cookies,
-				encrypted HTTPS/TLS transport, signed and time-limited image links, and
-				rate limiting. No system is completely secure, so we cannot guarantee
-				absolute security.
+				Sleekmirror is for adults aged 18 and older. We do not knowingly keep
+				personal data about anyone under 18. If you believe a minor has used
+				the Service, email us and we will delete it.
 			</p>
 
-			<h2>6. Data Retention &amp; Your Rights</h2>
+			<h2>10. Changes</h2>
 			<p>
-				<strong>Retention Schedule:</strong> Images and scan history are
-				retained until you delete them. Authentication tokens expire
-				automatically (15 minutes for access tokens, 7 days for refresh tokens).
-			</p>
-			<p>
-				<strong>Your Rights:</strong> You can delete any check in the app, which
-				removes its result and its image from our storage. You can also request
-				full data deletion at any time by emailing
-				<a href="mailto:contact@acdev.app">contact@acdev.app</a>, and we will
-				respond within 30 days. Deletion permanently removes your profile, scan
-				history, and stored images. Depending on where you live, you may also
-				have the right to access, correct, or object to the processing of your
-				personal data.
-			</p>
-			<p>
-				<strong>Device-based access:</strong> Because the current version has no
-				sign-up, your data is linked to your device. If you lose, reset, or
-				replace your device, or uninstall the app, you may lose access to your
-				data and we may not be able to recover it.
+				We will post changes on this page and update the date above. If a
+				change materially affects how we use personal data, we will make that
+				clear on this page.
 			</p>
 
-			<h2>7. Age Requirement</h2>
+			<h2>11. Contact</h2>
 			<p>
-				Sleekmirror is for adults aged 18 and older. We do not knowingly collect
-				personal data from anyone under 18. If you believe a minor has used the
-				Service, contact us and we will delete the data.
-			</p>
-
-			<h2>8. International Processing</h2>
-			<p>
-				Our providers may process data in countries other than your own,
-				including the United States.
-			</p>
-
-			<h2>9. Changes to This Privacy Policy</h2>
-			<p>
-				We may update this Privacy Policy from time to time. We will notify you
-				of any material changes by updating the "Last Updated" date at the top
-				of this document.
-			</p>
-
-			<h2>10. Contact Us</h2>
-			<p>
-				If you have any questions, concerns, or requests regarding this Privacy
-				Policy or your personal data, please contact us at:<br />
-				<strong>Email:</strong>
+				acdev<br />
 				<a href="mailto:contact@acdev.app">contact@acdev.app</a>
 			</p>
 
