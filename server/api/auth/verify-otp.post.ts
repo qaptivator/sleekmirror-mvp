@@ -1,6 +1,7 @@
 import { User } from '../../models/User'
 import { generateTokens, isOtpExpired } from '../../utils/jwt'
 import { toPublicUser } from '../../utils/publicUser'
+import { applyDailyScanRenewal } from '../../utils/scanCredits'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -15,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const emailIdentifier = `email:${email.toLowerCase()}`
-  const user = await User.findOne({ identifiers: emailIdentifier })
+  let user = await User.findOne({ identifiers: emailIdentifier })
 
   if (!user) {
     throw createError({
@@ -63,6 +64,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await user.save()
+  user = await applyDailyScanRenewal(user)
 
   // Generate JWT tokens
   const { accessToken, refreshToken, expiresIn } = generateTokens(user._id, config)

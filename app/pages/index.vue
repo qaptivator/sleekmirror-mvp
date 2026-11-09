@@ -11,16 +11,31 @@
 			</p>
 			<div class="flex items-center gap-2">
 				<!-- Credits Badge -->
-				<div
-					class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20"
+				<button
+					type="button"
+					@click="showScans = true"
+					class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors active:scale-95"
+					:class="
+						userStore.hasScans
+							? 'bg-gold/10 border-gold/20'
+							: 'bg-cream/5 border-cream/15'
+					"
 				>
-					<IconSparkles class="w-3 h-3 text-gold" />
+					<IconSparkles
+						class="w-3 h-3"
+						:class="userStore.hasScans ? 'text-gold' : 'text-cream/40'"
+					/>
 					<span
-						class="text-[11px] font-mono font-bold text-gold tabular-nums"
+						class="text-[11px] font-mono font-bold tabular-nums"
+						:class="userStore.hasScans ? 'text-gold' : 'text-cream/50'"
 						>{{ userStore.credits }}</span
 					>
-					<span class="text-[10px] font-medium text-gold/80">scans</span>
-				</div>
+					<span
+						class="text-[10px] font-medium"
+						:class="userStore.hasScans ? 'text-gold/80' : 'text-cream/40'"
+						>scans</span
+					>
+				</button>
 				<!-- Profile Button -->
 				<button
 					@click="showProfile = true"
@@ -41,6 +56,22 @@
 				</h1>
 			</div>
 
+			<!-- Out of scans banner -->
+			<button
+				v-if="!userStore.hasScans"
+				type="button"
+				@click="showScans = true"
+				class="w-full bg-gold/5 border border-gold/20 rounded-2xl p-4 text-left"
+			>
+				<p class="text-[10px] uppercase tracking-widest text-gold font-bold">
+					No scans left
+				</p>
+				<p class="text-sm text-cream mt-1">
+					You don't have any scans. Come back tomorrow.
+				</p>
+				<p class="text-[11px] text-muted mt-1">Tap to see when they refill.</p>
+			</button>
+
 			<!-- Hero Snap Card -->
 			<button
 				@click="openSnap"
@@ -53,7 +84,9 @@
 						>
 							Mirror Check
 						</p>
-						<p class="text-sm font-medium text-cream">Snap your look now</p>
+						<p class="text-sm font-medium text-cream">
+							{{ userStore.hasScans ? 'Snap your look now' : 'Scans refill tomorrow' }}
+						</p>
 						<p class="text-[11px] text-muted leading-snug max-w-[180px]">
 							AI-powered analysis in seconds.
 						</p>
@@ -158,9 +191,17 @@
 				<!-- Center Snap Button (raised) -->
 				<button
 					@click="openSnap"
-					class="w-20 h-20 rounded-full bg-gold flex items-center justify-center shadow-xl shadow-gold/25 hover:scale-105 active:scale-95 transition-all duration-200 -mt-4"
+					class="w-20 h-20 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 -mt-4"
+					:class="
+						userStore.hasScans
+							? 'bg-gold shadow-gold/25'
+							: 'bg-cream/20 shadow-none'
+					"
 				>
-					<IconCamera class="w-9 h-9 text-obsidian" />
+					<IconCamera
+						class="w-9 h-9"
+						:class="userStore.hasScans ? 'text-obsidian' : 'text-cream/50'"
+					/>
 				</button>
 
 				<!-- History -->
@@ -181,7 +222,11 @@
 		<!-- ── Overlays ─────────────────────────────────────────── -->
 
 		<!-- Snap / Camera page -->
-		<SnapPage v-if="userStore.hasAiPhotoConsent" v-model="showSnap" />
+		<SnapPage
+			v-if="userStore.hasAiPhotoConsent"
+			v-model="showSnap"
+			@out-of-scans="showScans = true"
+		/>
 
 		<Teleport to="body">
 			<Transition name="fade">
@@ -220,7 +265,11 @@
 		</Teleport>
 
 		<!-- Profile drawer -->
-		<ProfileDrawer v-model="showProfile" />
+		<ProfileDrawer
+			v-model="showProfile"
+			@open-scans="openScansFromProfile"
+		/>
+		<ScansSheet v-model="showScans" />
 	</div>
 </template>
 
@@ -234,9 +283,19 @@ const showSnap = ref(false)
 const showConsent = ref(false)
 const showHistory = ref(false)
 const showProfile = ref(false)
+const showScans = ref(false)
 const selectedCheck = ref<Check | null>(null)
 
+function openScansFromProfile() {
+	showProfile.value = false
+	showScans.value = true
+}
+
 function openSnap() {
+	if (!userStore.hasScans) {
+		showScans.value = true
+		return
+	}
 	if (!userStore.hasAiPhotoConsent) {
 		showConsent.value = true
 		return
@@ -254,9 +313,24 @@ const greeting = computed(() => {
 	return 'Good night,'
 })
 
+function refreshScanBalance() {
+	if (!userStore.currentUser) return
+	void userStore.refreshCredits().catch(() => {})
+}
+
 onMounted(() => {
 	checkStore.loadChecks()
+	refreshScanBalance()
+	document.addEventListener('visibilitychange', onVisibility)
 })
+
+onUnmounted(() => {
+	document.removeEventListener('visibilitychange', onVisibility)
+})
+
+function onVisibility() {
+	if (!document.hidden) refreshScanBalance()
+}
 
 watch(showSnap, (open) => {
 	if (!open) checkStore.loadChecks()

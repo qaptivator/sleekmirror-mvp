@@ -1,6 +1,8 @@
 import { User } from '../../models/User'
 import { generateTokens } from '../../utils/jwt'
 import { toPublicUser } from '../../utils/publicUser'
+import { applyDailyScanRenewal } from '../../utils/scanCredits'
+import { DAILY_SCAN_ALLOWANCE } from '#shared/utils/scans'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -22,8 +24,11 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     user = await User.create({
       identifiers: [deviceIdentifier],
-      credits: 10,
+      credits: DAILY_SCAN_ALLOWANCE,
+      creditsRenewedAt: new Date(),
     })
+  } else {
+    user = await applyDailyScanRenewal(user)
   }
 
   const { accessToken, refreshToken, expiresIn } = generateTokens(user._id, config)

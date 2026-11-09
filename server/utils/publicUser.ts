@@ -1,4 +1,8 @@
 import { AI_PHOTO_CONSENT_VERSION } from '#shared/utils/consent'
+import {
+	DAILY_SCAN_ALLOWANCE,
+	nextUtcMidnight,
+} from '#shared/utils/scans'
 
 export function toPublicUser(user: any) {
 	const src = typeof user?.toObject === 'function' ? user.toObject() : user
@@ -8,6 +12,9 @@ export function toPublicUser(user: any) {
 		email: src.email,
 		emailVerified: src.emailVerified,
 		credits: src.credits,
+		creditsRenewedAt: src.creditsRenewedAt ?? null,
+		dailyScanAllowance: DAILY_SCAN_ALLOWANCE,
+		nextScanRenewalAt: nextUtcMidnight().toISOString(),
 		firstName: src.firstName,
 		lastName: src.lastName,
 		aiPhotoConsent: src.aiPhotoConsent === true,

@@ -1,5 +1,6 @@
 import { User } from '../../models/User'
 import { toPublicUser } from '../../utils/publicUser'
+import { applyDailyScanRenewal } from '../../utils/scanCredits'
 
 export default defineEventHandler(async (event) => {
 	const currentUser = event.context.user
@@ -19,12 +20,16 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
-	const matchedUser = await User.findOne({ identifiers: identifier }).lean()
+	let matchedUser = await User.findOne({ identifiers: identifier })
 	if (!matchedUser) {
 		throw createError({
 			statusCode: 404,
 			statusMessage: 'No user matching criteria',
 		})
+	}
+
+	if (String(matchedUser._id) === String(currentUser._id)) {
+		matchedUser = await applyDailyScanRenewal(matchedUser)
 	}
 
 	return toPublicUser(matchedUser)

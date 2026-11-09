@@ -1,6 +1,7 @@
 import { Check } from '../../models/Check'
 import { User } from '../../models/User'
 import { hasValidAiPhotoConsent } from '../../utils/publicUser'
+import { applyDailyScanRenewal } from '../../utils/scanCredits'
 import OpenAI from 'openai'
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024
@@ -185,11 +186,13 @@ export default defineEventHandler(async (event) => {
 	})
 	console.log('connected to openai!')
 
-	const userRecord = await User.findById(currentUser._id)
+	const userRecord = await applyDailyScanRenewal(
+		await User.findById(currentUser._id)
+	)
 	if (!userRecord || userRecord.credits <= 0) {
 		throw createError({
 			statusCode: 402,
-			statusMessage: 'Insufficient scan credits',
+			statusMessage: 'No scans left today. Come back tomorrow.',
 		})
 	}
 

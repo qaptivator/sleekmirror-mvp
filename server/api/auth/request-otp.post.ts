@@ -1,5 +1,6 @@
 import { User } from '../../models/User'
 import { generateOtp } from '../../utils/jwt'
+import { DAILY_SCAN_ALLOWANCE } from '#shared/utils/scans'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -35,7 +36,8 @@ export default defineEventHandler(async (event) => {
     user = await User.create({
       identifiers: [emailIdentifier],
       email: email.toLowerCase(),
-      credits: 10,
+      credits: DAILY_SCAN_ALLOWANCE,
+      creditsRenewedAt: new Date(),
     })
   }
 

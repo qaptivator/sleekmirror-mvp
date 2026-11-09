@@ -51,16 +51,29 @@
 						</div>
 
 						<!-- Credits row -->
-						<div class="border-t border-cream/5 pt-3 flex items-center justify-between">
+						<button
+							type="button"
+							@click="emit('open-scans')"
+							class="w-full border-t border-cream/5 pt-3 flex items-center justify-between text-left"
+						>
 							<div>
 								<p class="text-xs text-muted">Remaining Scans</p>
-								<p class="text-[10px] text-muted/50 mt-0.5">1 scan per check</p>
+								<p class="text-[10px] text-muted/50 mt-0.5">
+									{{
+										userStore.hasScans
+											? '1 scan per check · tap for details'
+											: "None left · come back tomorrow"
+									}}
+								</p>
 							</div>
 							<div class="text-right">
-								<p class="text-xl font-bold text-gold font-mono tabular-nums">{{ userStore.credits }}</p>
+								<p
+									class="text-xl font-bold font-mono tabular-nums"
+									:class="userStore.hasScans ? 'text-gold' : 'text-cream/40'"
+								>{{ userStore.credits }}</p>
 								<p class="text-[10px] text-muted">scans left</p>
 							</div>
-						</div>
+						</button>
 					</div>
 
 					<!-- Email linking is hidden until mail sending exists.
@@ -200,7 +213,10 @@
 import { Device } from '@capacitor/device'
 
 const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
+const emit = defineEmits<{
+	'update:modelValue': [value: boolean]
+	'open-scans': []
+}>()
 
 const userStore = useUserStore()
 const auth = useJwtAuth()

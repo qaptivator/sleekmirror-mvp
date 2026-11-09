@@ -1,6 +1,7 @@
 import { User } from '../../models/User'
 import { generateTokens, verifyRefreshToken } from '../../utils/jwt'
 import { toPublicUser } from '../../utils/publicUser'
+import { applyDailyScanRenewal } from '../../utils/scanCredits'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -27,14 +28,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify user still exists
-  const user = await User.findById(payload.sub)
+  let user = await User.findById(payload.sub)
   if (!user) {
     throw createError({
       statusCode: 404,
       statusMessage: 'User not found',
     })
   }
+  user = await applyDailyScanRenewal(user)
 
   const { accessToken, refreshToken: nextRefreshToken, expiresIn } = generateTokens(
     user._id,

@@ -70,6 +70,28 @@
 						</div>
 					</div>
 
+					<!-- Out of scans / check error -->
+					<Transition name="fade">
+						<div
+							v-if="capture.errorMessage.value && !capture.isScanning.value"
+							class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md z-20 px-8 text-center"
+						>
+							<p class="text-gold text-sm font-semibold">
+								{{ capture.outOfScans.value ? 'No scans left' : 'Check failed' }}
+							</p>
+							<p class="text-white/70 text-xs leading-relaxed mt-2 max-w-xs">
+								{{ capture.errorMessage.value }}
+							</p>
+							<button
+								type="button"
+								@click="handleCaptureErrorDismiss"
+								class="mt-5 px-4 py-2 rounded-full bg-gold text-obsidian text-xs font-semibold active:scale-95"
+							>
+								{{ capture.outOfScans.value ? 'See scan status' : 'OK' }}
+							</button>
+						</div>
+					</Transition>
+
 					<!-- Scanning overlay -->
 					<Transition name="fade">
 						<div
@@ -130,7 +152,7 @@
 				>
 					<!-- Gallery Picker -->
 					<button
-						@click="capture.triggerGalleryPicker(selectedMode)"
+						@click="handleGallery"
 						class="w-14 h-14 rounded-full flex items-center justify-center border border-white/20 bg-black/40 hover:bg-white/10 transition-all active:scale-95"
 					>
 						<IconImage class="text-white/70 w-6 h-6" />
@@ -179,9 +201,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	'update:modelValue': [value: boolean]
+	'out-of-scans': []
 }>()
 
 const capture = useCapture()
+const userStore = useUserStore()
 const cameraStream = useCameraStream()
 const videoRef = ref<HTMLVideoElement | null>(null)
 
@@ -205,9 +229,30 @@ function stopCamera() {
 	cameraStream.stop(videoRef.value ?? undefined)
 }
 
+function blockIfNoScans() {
+	if (userStore.hasScans) return false
+	capture.outOfScans.value = true
+	capture.errorMessage.value =
+		"You don't have any scans left. Come back tomorrow."
+	return true
+}
+
 async function handleSnap() {
-	if (!videoRef.value) return
+	if (blockIfNoScans() || !videoRef.value) return
 	await capture.triggerCameraSnap(videoRef.value, selectedMode.value)
+}
+
+function handleGallery() {
+	if (blockIfNoScans()) return
+	capture.triggerGalleryPicker(selectedMode.value)
+}
+
+function handleCaptureErrorDismiss() {
+	if (capture.outOfScans.value) {
+		handleClose()
+		return
+	}
+	capture.errorMessage.value = ''
 }
 
 async function handleFlip() {
@@ -215,9 +260,11 @@ async function handleFlip() {
 }
 
 function handleClose() {
+	const depleted = capture.outOfScans.value
 	stopCamera()
 	capture.reset()
 	emit('update:modelValue', false)
+	if (depleted) emit('out-of-scans')
 }
 
 useBackHandler(() => props.modelValue, handleClose)

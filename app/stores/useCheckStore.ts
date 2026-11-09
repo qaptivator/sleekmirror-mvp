@@ -167,6 +167,14 @@ export const useCheckStore = defineStore('checks', () => {
 			return check
 		} catch (err) {
 			error.value = err instanceof Error ? err.message : 'Failed to run check'
+			const status =
+				err && typeof err === 'object'
+					? (err as { status?: number; statusCode?: number }).status ??
+						(err as { statusCode?: number }).statusCode
+					: undefined
+			if (status === 402) {
+				useUserStore().updateCredits(0)
+			}
 			throw err
 		} finally {
 			runningCheckFileId.value = null

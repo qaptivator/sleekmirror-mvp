@@ -1,5 +1,15 @@
 import type { Check } from '~/stores/useCheckStore'
 
+function getErrorStatus(err: unknown): number | undefined {
+	if (!err || typeof err !== 'object') return undefined
+	const e = err as {
+		status?: number
+		statusCode?: number
+		response?: { status?: number }
+	}
+	return e.status ?? e.statusCode ?? e.response?.status
+}
+
 export function useCapture() {
 	const checkStore = useCheckStore()
 
@@ -7,6 +17,8 @@ export function useCapture() {
 	const showResults = ref(false)
 	const currentCheck = ref<Check | null>(null)
 	const scanningMessage = ref('')
+	const errorMessage = ref('')
+	const outOfScans = ref(false)
 
 	const scanningMessages = [
 		'Querying engine pipelines...',
@@ -34,6 +46,8 @@ export function useCapture() {
 		isScanning.value = true
 		showResults.value = false
 		currentCheck.value = null
+		errorMessage.value = ''
+		outOfScans.value = false
 
 		const interval = startScanningAnimation()
 
@@ -43,6 +57,16 @@ export function useCapture() {
 			showResults.value = true
 		} catch (err) {
 			console.error('Check failed:', err)
+			const status = getErrorStatus(err)
+			if (status === 402) {
+				outOfScans.value = true
+				errorMessage.value =
+					"You don't have any scans left. Come back tomorrow."
+				useUserStore().updateCredits(0)
+			} else {
+				errorMessage.value =
+					'The check could not finish. Try again in a moment.'
+			}
 		} finally {
 			clearInterval(interval)
 			isScanning.value = false
@@ -96,6 +120,8 @@ export function useCapture() {
 		isScanning.value = false
 		showResults.value = false
 		currentCheck.value = null
+		errorMessage.value = ''
+		outOfScans.value = false
 	}
 
 	return {
@@ -103,6 +129,8 @@ export function useCapture() {
 		showResults,
 		currentCheck,
 		scanningMessage,
+		errorMessage,
+		outOfScans,
 		processFile,
 		triggerGalleryPicker,
 		triggerCameraSnap,

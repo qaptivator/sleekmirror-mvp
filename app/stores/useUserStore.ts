@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { AI_PHOTO_CONSENT_VERSION } from '#shared/utils/consent'
+import { DAILY_SCAN_ALLOWANCE, nextUtcMidnight } from '#shared/utils/scans'
 
 interface User {
 	_id: string
@@ -8,6 +9,9 @@ interface User {
 	email?: string
 	emailVerified?: boolean
 	credits: number
+	creditsRenewedAt?: string | null
+	dailyScanAllowance?: number
+	nextScanRenewalAt?: string | null
 	firstName?: string
 	lastName?: string
 	aiPhotoConsent?: boolean
@@ -34,6 +38,13 @@ export const useUserStore = defineStore('user', () => {
 	// Computed
 	const isAuthenticated = computed(() => currentUser.value !== null)
 	const credits = computed(() => currentUser.value?.credits ?? 0)
+	const dailyScanAllowance = computed(
+		() => currentUser.value?.dailyScanAllowance ?? DAILY_SCAN_ALLOWANCE
+	)
+	const nextScanRenewalAt = computed(
+		() => currentUser.value?.nextScanRenewalAt ?? nextUtcMidnight().toISOString()
+	)
+	const hasScans = computed(() => credits.value > 0)
 	const hasAiPhotoConsent = computed(
 		() =>
 			currentUser.value?.aiPhotoConsent === true &&
@@ -49,6 +60,22 @@ export const useUserStore = defineStore('user', () => {
 		const { firstName, lastName } = currentUser.value
 		return [firstName, lastName].filter(Boolean).join(' ').trim() || 'User'
 	})
+
+	const refreshCredits = async (): Promise<User | null> => {
+		if (!currentUser.value) return null
+		loading.value = true
+		error.value = null
+		try {
+			const response = await useApi<User>('/api/users/me')
+			setUser(response)
+			return response
+		} catch (err) {
+			error.value = err instanceof Error ? err.message : 'Failed to refresh scans'
+			throw err
+		} finally {
+			loading.value = false
+		}
+	}
 
 	// Fetch user by identifier
 	const fetchUser = async (identifier: string): Promise<User> => {
@@ -139,11 +166,15 @@ export const useUserStore = defineStore('user', () => {
 		// Computed
 		isAuthenticated,
 		credits,
+		dailyScanAllowance,
+		nextScanRenewalAt,
+		hasScans,
 		hasAiPhotoConsent,
 		consentPromptDismissed,
 		fullName,
 
 		// Methods
+		refreshCredits,
 		fetchUser,
 		updateUserCache,
 		updateCredits,

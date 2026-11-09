@@ -16,6 +16,7 @@ const userSchema = new Schema(
 
 		// User profile
 		credits: { type: Number, required: true, default: 0 },
+		creditsRenewedAt: { type: Date },
 		firstName: { type: String },
 		lastName: { type: String },
 
