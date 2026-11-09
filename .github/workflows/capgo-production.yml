@@ -1,4 +1,4 @@
-name: Deploy OTA Production Update
+name: Deploy Android OTA
 
 on:
   workflow_dispatch:
