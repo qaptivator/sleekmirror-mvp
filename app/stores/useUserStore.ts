@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { AI_PHOTO_CONSENT_VERSION } from '../../shared/consent'
+import { AI_PHOTO_CONSENT_VERSION } from '#shared/utils/consent'
 
 interface User {
 	_id: string

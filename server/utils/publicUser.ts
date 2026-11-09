@@ -1,4 +1,4 @@
-import { AI_PHOTO_CONSENT_VERSION } from '../../shared/consent'
+import { AI_PHOTO_CONSENT_VERSION } from '#shared/utils/consent'
 
 export function toPublicUser(user: any) {
 	const src = typeof user?.toObject === 'function' ? user.toObject() : user

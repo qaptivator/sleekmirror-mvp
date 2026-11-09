@@ -1,5 +1,5 @@
 import { User } from '../../models/User'
-import { AI_PHOTO_CONSENT_VERSION } from '../../../shared/consent'
+import { AI_PHOTO_CONSENT_VERSION } from '#shared/utils/consent'
 import { toPublicUser } from '../../utils/publicUser'
 
 export default defineEventHandler(async (event) => {
