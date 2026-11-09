@@ -168,12 +168,109 @@
 						</a>
 					</div>
 
-					<!-- App Info -->
-					<div class="bg-ink border border-cream/10 rounded-2xl overflow-hidden divide-y divide-cream/5">
-						<p class="text-[10px] uppercase tracking-widest text-muted font-bold px-4 pt-4 pb-2">App Info</p>
-						<div class="flex items-center justify-between px-4 py-3">
-							<span class="text-xs text-muted">Version</span>
-							<span class="text-xs font-mono text-cream/60">v1.0.0</span>
+					<!-- App / OTA -->
+					<div class="bg-ink border border-cream/10 rounded-2xl overflow-hidden">
+						<p class="text-[10px] uppercase tracking-widest text-muted font-bold px-4 pt-4 pb-2">App</p>
+
+						<div
+							v-if="updateReady"
+							class="mx-4 mb-3 rounded-xl bg-gold/10 border border-gold/30 px-3 py-3"
+						>
+							<p class="text-xs font-semibold text-gold">Update ready</p>
+							<p class="text-[10px] text-cream/70 mt-1 leading-relaxed">
+								Version {{ pendingVersion }} is downloaded. Restart to apply it.
+							</p>
+							<button
+								type="button"
+								:disabled="applying"
+								@click="restart()"
+								class="mt-2.5 px-3 py-1.5 rounded-lg bg-gold text-obsidian text-[11px] font-semibold active:scale-95 disabled:opacity-50"
+							>
+								{{ applying ? 'Restarting...' : 'Restart now' }}
+							</button>
+						</div>
+
+						<div
+							v-else-if="busy !== 'idle'"
+							class="mx-4 mb-3 rounded-xl bg-cream/5 border border-cream/10 px-3 py-3"
+						>
+							<p class="text-xs text-cream">
+								{{ busy === 'downloading' ? 'Downloading update…' : 'Checking for updates…' }}
+							</p>
+							<p
+								v-if="latestVersion"
+								class="text-[10px] font-mono text-muted mt-1"
+							>
+								Latest {{ latestVersion }}
+							</p>
+						</div>
+
+						<div
+							v-else-if="lastError"
+							class="mx-4 mb-3 rounded-xl bg-red-500/10 border border-red-500/30 px-3 py-3"
+						>
+							<p class="text-xs font-semibold text-red-300">Update check failed</p>
+							<p class="text-[10px] font-mono text-red-200/80 mt-1 leading-relaxed break-words">
+								{{ lastError }}
+							</p>
+						</div>
+
+						<div
+							v-else-if="upToDate"
+							class="mx-4 mb-3 rounded-xl bg-cream/5 border border-cream/10 px-3 py-3"
+						>
+							<p class="text-xs text-cream">You're on the latest bundle.</p>
+						</div>
+
+						<div class="divide-y divide-cream/5">
+							<div class="flex items-center justify-between gap-3 px-4 py-3">
+								<span class="text-xs text-muted">Current bundle</span>
+								<span class="text-right">
+									<span class="block text-xs font-mono text-cream/80">{{ currentVersion || '…' }}</span>
+									<span
+										v-if="currentSource"
+										class="block text-[10px] text-muted/60"
+									>{{ currentSource }}</span>
+								</span>
+							</div>
+							<div class="flex items-center justify-between gap-3 px-4 py-3">
+								<span class="text-xs text-muted">Latest bundle</span>
+								<span class="text-xs font-mono text-cream/80">{{ latestVersion || '—' }}</span>
+							</div>
+							<div
+								v-if="isNative"
+								class="flex items-center justify-between gap-3 px-4 py-3"
+							>
+								<span class="text-xs text-muted">Native version</span>
+								<span class="text-xs font-mono text-cream/80">{{ nativeVersion || '—' }}</span>
+							</div>
+							<div class="flex items-center justify-between gap-3 px-4 py-3">
+								<span class="text-xs text-muted">Last check</span>
+								<span class="text-xs font-mono text-cream/60">{{ lastCheckLabel }}</span>
+							</div>
+						</div>
+
+						<div class="px-4 pt-1 pb-4">
+							<p
+								v-if="!isNative"
+								class="text-[10px] text-muted/70 leading-relaxed mb-3"
+							>
+								Live bundles apply in the installed app. This screen can still read the latest version from the server.
+							</p>
+							<button
+								type="button"
+								:disabled="busy !== 'idle'"
+								@click="check({ force: true })"
+								class="w-full py-2.5 rounded-lg bg-cream/5 border border-cream/10 text-[11px] font-semibold text-cream hover:bg-cream/10 transition-colors active:scale-[0.98] disabled:opacity-50"
+							>
+								{{
+									busy === 'downloading'
+										? 'Downloading…'
+										: busy === 'checking'
+											? 'Checking…'
+											: 'Check for updates'
+								}}
+							</button>
 						</div>
 					</div>
 
@@ -220,6 +317,32 @@ const emit = defineEmits<{
 
 const userStore = useUserStore()
 const auth = useJwtAuth()
+const {
+	isNative,
+	currentVersion,
+	currentSource,
+	nativeVersion,
+	latestVersion,
+	pendingVersion,
+	busy,
+	applying,
+	lastError,
+	checkedAt,
+	updateReady,
+	upToDate,
+	check,
+	restart,
+} = useOta()
+
+const lastCheckLabel = computed(() => {
+	if (!checkedAt.value) return 'Not yet'
+	return new Date(checkedAt.value).toLocaleString(undefined, {
+		month: 'short',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	})
+})
 const supportId = ref<string>('')
 const showCopyToast = ref(false)
 const hapticsEnabled = ref(true)
@@ -240,6 +363,14 @@ function closeDrawer() {
 }
 
 useBackHandler(() => props.modelValue, closeDrawer)
+
+watch(
+	() => props.modelValue,
+	(open) => {
+		if (!open) return
+		void check({ force: true })
+	}
+)
 
 onMounted(async () => {
 	try {

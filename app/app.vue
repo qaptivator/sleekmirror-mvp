@@ -58,13 +58,11 @@
 </template>
 
 <script setup lang="ts">
-import { Capacitor, CapacitorHttp } from '@capacitor/core'
-import { CapacitorUpdater } from '@capgo/capacitor-updater'
-
-const OTA_VERSION_URL = 'https://sleekmirror-capgo.acdev.app'
+import { Capacitor } from '@capacitor/core'
 
 const auth = useJwtAuth()
 const userStore = useUserStore()
+const ota = useOta()
 
 const offline = auth.offline
 const offlineHold = auth.offlineHold
@@ -78,15 +76,17 @@ const isChecking = ref(true)
 let removeBackListener: (() => void) | null = null
 
 onMounted(async () => {
-	// Must be called on boot so Capgo knows the bundle is stable
-	await CapacitorUpdater.notifyAppReady()
-
 	window.addEventListener('offline', onOffline)
 	window.addEventListener('online', onOnline)
 
-	// Try to restore authentication from previous session (refresh token)
-	await auth.tryRestoreAuth()
-	isChecking.value = false
+	try {
+		// notifyAppReady has to run before the bundle is treated as stable.
+		// A failed update check must not trap the splash screen.
+		await ota.boot()
+		await auth.tryRestoreAuth()
+	} finally {
+		isChecking.value = false
+	}
 
 	if (Capacitor.isNativePlatform()) {
 		try {
@@ -101,9 +101,6 @@ onMounted(async () => {
 			console.warn('Back button handler unavailable', e)
 		}
 	}
-
-	// Fire and forget, never block the UI on an update check
-	checkForOtaUpdate()
 })
 
 onUnmounted(() => {
@@ -119,45 +116,12 @@ function onOffline() {
 async function onOnline() {
 	if (!navigator.onLine) return
 	offline.value = false
+	void ota.check({ force: true })
 	if (auth.isAuthenticated.value) {
 		offlineHold.value = false
 		return
 	}
 	await auth.tryRestoreAuth()
-}
-
-async function checkForOtaUpdate() {
-	if (!Capacitor.isNativePlatform()) return
-
-	try {
-		// CapacitorHttp goes through native code, so no CORS setup is needed
-		const res = await CapacitorHttp.get({
-			url: `${OTA_VERSION_URL}/version.json?t=${Date.now()}`,
-		})
-
-		const remote =
-			typeof res.data === 'string' ? JSON.parse(res.data) : res.data
-
-		if (!remote?.version || !remote?.url || !remote?.checksum) {
-			console.warn('OTA metadata is missing version, url, or checksum')
-			return
-		}
-
-		const { bundle } = await CapacitorUpdater.current()
-		if (bundle.version === remote.version) return
-
-		const downloaded = await CapacitorUpdater.download({
-			url: remote.url,
-			version: remote.version,
-			checksum: remote.checksum,
-		})
-
-		// Applies on the next app launch, so it won't reload the app mid-session.
-		// Use CapacitorUpdater.set({ id: downloaded.id }) to apply immediately instead.
-		await CapacitorUpdater.next({ id: downloaded.id })
-	} catch (e) {
-		console.warn('OTA update check failed', e)
-	}
 }
 
 async function onAuthenticatedSuccess() {
