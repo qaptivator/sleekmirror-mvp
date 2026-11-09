@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { AI_PHOTO_CONSENT_VERSION } from '../../shared/consent'
 
 interface User {
 	_id: string
@@ -9,6 +10,9 @@ interface User {
 	credits: number
 	firstName?: string
 	lastName?: string
+	aiPhotoConsent?: boolean
+	aiPhotoConsentAt?: string | null
+	consentVersion?: string | null
 	createdAt?: string
 	updatedAt?: string
 }
@@ -30,6 +34,16 @@ export const useUserStore = defineStore('user', () => {
 	// Computed
 	const isAuthenticated = computed(() => currentUser.value !== null)
 	const credits = computed(() => currentUser.value?.credits ?? 0)
+	const hasAiPhotoConsent = computed(
+		() =>
+			currentUser.value?.aiPhotoConsent === true &&
+			currentUser.value?.consentVersion === AI_PHOTO_CONSENT_VERSION
+	)
+	const consentPromptDismissed = ref(false)
+
+	const dismissConsentPrompt = () => {
+		consentPromptDismissed.value = true
+	}
 	const fullName = computed(() => {
 		if (!currentUser.value) return ''
 		const { firstName, lastName } = currentUser.value
@@ -48,7 +62,7 @@ export const useUserStore = defineStore('user', () => {
 				},
 			})
 
-			currentUser.value = response
+			setUser(response)
 			return response
 		} catch (err) {
 			error.value = err instanceof Error ? err.message : 'Failed to fetch user'
@@ -78,6 +92,12 @@ export const useUserStore = defineStore('user', () => {
 	const setUser = (user: User) => {
 		currentUser.value = user
 		persistUser(user)
+		if (
+			user.aiPhotoConsent === true &&
+			user.consentVersion === AI_PHOTO_CONSENT_VERSION
+		) {
+			consentPromptDismissed.value = false
+		}
 	}
 
 	const loadCachedUser = (): User | null => {
@@ -96,6 +116,7 @@ export const useUserStore = defineStore('user', () => {
 	// Clear user (logout)
 	const clearUser = () => {
 		currentUser.value = null
+		consentPromptDismissed.value = false
 		persistUser(null)
 	}
 
@@ -118,6 +139,8 @@ export const useUserStore = defineStore('user', () => {
 		// Computed
 		isAuthenticated,
 		credits,
+		hasAiPhotoConsent,
+		consentPromptDismissed,
 		fullName,
 
 		// Methods
@@ -125,6 +148,7 @@ export const useUserStore = defineStore('user', () => {
 		updateUserCache,
 		updateCredits,
 		setUser,
+		dismissConsentPrompt,
 		loadCachedUser,
 		clearUser,
 		getCredits,

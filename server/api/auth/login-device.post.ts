@@ -1,5 +1,6 @@
 import { User } from '../../models/User'
 import { generateTokens } from '../../utils/jwt'
+import { toPublicUser } from '../../utils/publicUser'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -39,15 +40,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    user: {
-      _id: user._id,
-      identifiers: user.identifiers,
-      email: user.email,
-      emailVerified: user.emailVerified,
-      credits: user.credits,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    },
+    user: toPublicUser(user),
     accessToken,
     refreshToken,
     expiresIn,

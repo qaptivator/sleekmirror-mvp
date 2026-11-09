@@ -1,4 +1,5 @@
 import { User } from '../../models/User'
+import { toPublicUser } from '../../utils/publicUser'
 
 export default defineEventHandler(async (event) => {
 	const currentUser = event.context.user
@@ -26,5 +27,5 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
-	return matchedUser
+	return toPublicUser(matchedUser)
 })

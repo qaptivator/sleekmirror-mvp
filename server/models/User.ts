@@ -18,8 +18,17 @@ const userSchema = new Schema(
 		credits: { type: Number, required: true, default: 0 },
 		firstName: { type: String },
 		lastName: { type: String },
+
+		aiPhotoConsent: { type: Boolean, default: false },
+		aiPhotoConsentAt: { type: Date },
+		aiPhotoConsentWithdrawnAt: { type: Date },
+		consentVersion: { type: String },
+		ageConfirmed: { type: Boolean, default: false },
 	},
 	{ timestamps: true }
 )
 
-export const User = mongoose.models.User || model('User', userSchema)
+if (mongoose.models.User) {
+	mongoose.deleteModel('User')
+}
+export const User = model('User', userSchema)

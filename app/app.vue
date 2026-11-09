@@ -32,6 +32,11 @@
 			@authenticated="onAuthenticatedSuccess"
 		/>
 
+		<ConsentScreen
+			v-else-if="needsConsent && !userStore.consentPromptDismissed"
+			@declined="userStore.dismissConsentPrompt()"
+		/>
+
 		<!-- Authenticated: show main app -->
 		<div
 			v-else
@@ -65,6 +70,9 @@ const offline = auth.offline
 const offlineHold = auth.offlineHold
 const hasSession = computed(
 	() => auth.isAuthenticated.value || userStore.currentUser !== null
+)
+const needsConsent = computed(
+	() => hasSession.value && !userStore.hasAiPhotoConsent
 )
 const isChecking = ref(true)
 let removeBackListener: (() => void) | null = null

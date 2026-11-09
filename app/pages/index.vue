@@ -43,7 +43,7 @@
 
 			<!-- Hero Snap Card -->
 			<button
-				@click="showSnap = true"
+				@click="openSnap"
 				class="w-full bg-ink border border-cream/10 rounded-2xl p-5 text-left group hover:border-gold/30 transition-all duration-300 active:scale-[0.99]"
 			>
 				<div class="flex items-center justify-between">
@@ -157,7 +157,7 @@
 
 				<!-- Center Snap Button (raised) -->
 				<button
-					@click="showSnap = true"
+					@click="openSnap"
 					class="w-20 h-20 rounded-full bg-gold flex items-center justify-center shadow-xl shadow-gold/25 hover:scale-105 active:scale-95 transition-all duration-200 -mt-4"
 				>
 					<IconCamera class="w-9 h-9 text-obsidian" />
@@ -181,7 +181,18 @@
 		<!-- ── Overlays ─────────────────────────────────────────── -->
 
 		<!-- Snap / Camera page -->
-		<SnapPage v-model="showSnap" />
+		<SnapPage v-if="userStore.hasAiPhotoConsent" v-model="showSnap" />
+
+		<Teleport to="body">
+			<Transition name="fade">
+				<div
+					v-if="showConsent"
+					class="fixed inset-0 z-50"
+				>
+					<ConsentScreen @declined="showConsent = false" />
+				</div>
+			</Transition>
+		</Teleport>
 
 		<!-- History full-screen -->
 		<Teleport to="body">
@@ -220,9 +231,18 @@ const userStore = useUserStore()
 const checkStore = useCheckStore()
 
 const showSnap = ref(false)
+const showConsent = ref(false)
 const showHistory = ref(false)
 const showProfile = ref(false)
 const selectedCheck = ref<Check | null>(null)
+
+function openSnap() {
+	if (!userStore.hasAiPhotoConsent) {
+		showConsent.value = true
+		return
+	}
+	showSnap.value = true
+}
 
 const recentChecks = computed(() => checkStore.recentChecks)
 
@@ -241,6 +261,16 @@ onMounted(() => {
 watch(showSnap, (open) => {
 	if (!open) checkStore.loadChecks()
 })
+
+watch(
+	() => userStore.hasAiPhotoConsent,
+	(granted) => {
+		if (granted && showConsent.value) {
+			showConsent.value = false
+			showSnap.value = true
+		}
+	}
+)
 
 </script>
 

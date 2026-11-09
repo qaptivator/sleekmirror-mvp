@@ -90,6 +90,23 @@
 			</button>
 			-->
 
+			<p class="text-[10px] text-cream/40 text-center leading-relaxed px-2">
+				You will be asked to consent before any photo is sent for analysis.
+				<a
+					href="https://sleekmirror.com/privacy"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-gold/80 underline"
+				>Privacy</a>
+				·
+				<a
+					href="https://sleekmirror.com/terms"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-gold/80 underline"
+				>Terms</a>
+			</p>
+
 			<!-- Error message -->
 			<Transition name="fade">
 				<div

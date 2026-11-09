@@ -1,0 +1,1 @@
+export const AI_PHOTO_CONSENT_VERSION = '2026-11-09'

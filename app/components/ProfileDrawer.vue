@@ -113,6 +113,48 @@
 						</div>
 					</div>
 
+					<!-- Privacy -->
+					<div class="bg-ink border border-cream/10 rounded-2xl overflow-hidden divide-y divide-cream/5">
+						<p class="text-[10px] uppercase tracking-widest text-muted font-bold px-4 pt-4 pb-2">Privacy</p>
+						<div class="px-4 py-3.5 space-y-1.5">
+							<p class="text-xs text-cream">Photo processing</p>
+							<p class="text-[10px] text-muted/70 leading-relaxed">
+								{{
+									userStore.hasAiPhotoConsent
+										? 'You consented to sending photos to OpenAI for analysis. Withdraw below to stop new checks.'
+										: 'Required before a check can run. Photos go to OpenAI for analysis and are not stored by us.'
+								}}
+							</p>
+							<button
+								v-if="userStore.hasAiPhotoConsent"
+								type="button"
+								:disabled="isWithdrawing"
+								@click="withdrawConsent"
+								class="mt-2 text-[11px] font-semibold text-red-400 hover:text-red-300 disabled:opacity-50"
+							>
+								{{ withdrawLabel }}
+							</button>
+						</div>
+						<a
+							href="https://sleekmirror.com/privacy"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="flex items-center justify-between px-4 py-3"
+						>
+							<span class="text-xs text-cream">Privacy Policy</span>
+							<span class="text-[10px] text-muted">Open</span>
+						</a>
+						<a
+							href="https://sleekmirror.com/terms"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="flex items-center justify-between px-4 py-3"
+						>
+							<span class="text-xs text-cream">Terms of Service</span>
+							<span class="text-[10px] text-muted">Open</span>
+						</a>
+					</div>
+
 					<!-- App Info -->
 					<div class="bg-ink border border-cream/10 rounded-2xl overflow-hidden divide-y divide-cream/5">
 						<p class="text-[10px] uppercase tracking-widest text-muted font-bold px-4 pt-4 pb-2">App Info</p>
@@ -164,15 +206,24 @@ const userStore = useUserStore()
 const auth = useJwtAuth()
 const supportId = ref<string>('')
 const showCopyToast = ref(false)
+const hapticsEnabled = ref(true)
+const defaultMode = ref('casual')
+const isLoggingOut = ref(false)
+const isWithdrawing = ref(false)
+const withdrawArmed = ref(false)
+
+const withdrawLabel = computed(() => {
+	if (isWithdrawing.value) return 'Withdrawing...'
+	if (withdrawArmed.value) return 'Tap again to confirm'
+	return 'Withdraw consent'
+})
 
 function closeDrawer() {
+	withdrawArmed.value = false
 	emit('update:modelValue', false)
 }
 
 useBackHandler(() => props.modelValue, closeDrawer)
-const hapticsEnabled = ref(true)
-const defaultMode = ref('casual')
-const isLoggingOut = ref(false)
 
 onMounted(async () => {
 	try {
@@ -218,6 +269,26 @@ async function copySupportId() {
 	}
 	showCopyToast.value = true
 	setTimeout(() => (showCopyToast.value = false), 2000)
+}
+
+async function withdrawConsent() {
+	if (!withdrawArmed.value) {
+		withdrawArmed.value = true
+		return
+	}
+	isWithdrawing.value = true
+	try {
+		const response = await useApi<{ user: typeof userStore.currentUser }>(
+			'/api/users/consent',
+			{ method: 'POST', body: { granted: false } }
+		)
+		if (response.user) userStore.setUser(response.user)
+		userStore.dismissConsentPrompt()
+		closeDrawer()
+	} finally {
+		isWithdrawing.value = false
+		withdrawArmed.value = false
+	}
 }
 
 async function handleLogout() {

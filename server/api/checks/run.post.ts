@@ -1,5 +1,6 @@
 import { Check } from '../../models/Check'
 import { User } from '../../models/User'
+import { hasValidAiPhotoConsent } from '../../utils/publicUser'
 import OpenAI from 'openai'
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024
@@ -189,6 +190,13 @@ export default defineEventHandler(async (event) => {
 		throw createError({
 			statusCode: 402,
 			statusMessage: 'Insufficient scan credits',
+		})
+	}
+
+	if (!hasValidAiPhotoConsent(userRecord)) {
+		throw createError({
+			statusCode: 403,
+			statusMessage: 'Consent is required before a photo can be analyzed',
 		})
 	}
 
