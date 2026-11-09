@@ -29,7 +29,7 @@
 						ref="videoRef"
 						class="w-full h-full object-cover transition-opacity duration-300 absolute inset-0"
 						:class="[
-							(cameraStream.isReady.value && !capture.capturedPhoto.value) ? 'opacity-100' : 'opacity-0',
+							cameraStream.isReady.value && !capture.isScanning.value ? 'opacity-100' : 'opacity-0',
 							cameraStream.isMirrored.value ? '-scale-x-100' : '',
 						]"
 						playsinline
@@ -39,7 +39,7 @@
 
 					<!-- Camera loading indicator -->
 					<div
-						v-if="!cameraStream.isReady.value && !capture.capturedPhoto.value && !capture.isScanning.value"
+						v-if="!cameraStream.isReady.value && !capture.isScanning.value"
 						class="absolute inset-0 flex items-center justify-center bg-black"
 					>
 						<div class="text-center space-y-3">
@@ -55,17 +55,9 @@
 						</div>
 					</div>
 
-					<!-- Captured photo preview (shown while scanning) -->
-					<img
-						v-if="capture.capturedPhoto.value"
-						:src="capture.capturedPhoto.value"
-						alt="captured preview"
-						class="absolute inset-0 w-full h-full object-cover"
-					/>
-
-					<!-- Scan reticle (only when live, no photo yet) -->
+					<!-- Scan reticle (only while the live camera is up) -->
 					<div
-						v-if="cameraStream.isReady.value && !capture.capturedPhoto.value"
+						v-if="cameraStream.isReady.value && !capture.isScanning.value"
 						class="absolute inset-0 flex items-center justify-center pointer-events-none"
 					>
 						<div class="w-64 h-64 relative rounded-2xl border border-dashed border-gold/30 overflow-hidden">
@@ -103,7 +95,7 @@
 
 				<!-- Style Mode Carousel -->
 				<div
-					v-if="!capture.isScanning.value && !capture.capturedPhoto.value"
+					v-if="!capture.isScanning.value && !capture.showResults.value"
 					class="shrink-0 py-4"
 				>
 					<div
@@ -133,7 +125,7 @@
 
 				<!-- Bottom Controls -->
 				<div
-					v-if="!capture.isScanning.value && !capture.capturedPhoto.value"
+					v-if="!capture.isScanning.value && !capture.showResults.value"
 					class="shrink-0 flex items-center justify-center gap-10 px-6 pb-safe-bottom pt-2"
 				>
 					<!-- Gallery Picker -->

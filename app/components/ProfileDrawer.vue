@@ -29,14 +29,25 @@
 							</div>
 							<div class="flex-1 min-w-0">
 								<p class="text-sm font-semibold text-cream">Guest Account</p>
-								<button
-									@click="copyDeviceId"
-									class="text-[10px] text-muted truncate text-left hover:text-cream/60 transition-colors active:scale-95 max-w-full"
-									:title="deviceIdentifier"
-								>
-									{{ deviceIdentifier || 'Identifying device...' }}
-								</button>
+								<p class="text-[10px] text-muted">This device</p>
 							</div>
+						</div>
+
+						<div class="border-t border-cream/5 pt-3 flex items-center gap-3">
+							<div class="min-w-0 flex-1">
+								<p class="text-xs text-cream">Support ID</p>
+								<p class="text-[10px] font-mono text-muted truncate mt-0.5">
+									{{ supportId || 'Identifying device...' }}
+								</p>
+							</div>
+							<button
+								type="button"
+								@click="copySupportId"
+								:disabled="!supportId"
+								class="shrink-0 px-3 py-1.5 rounded-lg bg-cream/5 border border-cream/10 text-[11px] font-semibold text-cream hover:bg-cream/10 transition-colors active:scale-95 disabled:opacity-40"
+							>
+								Copy
+							</button>
 						</div>
 
 						<!-- Credits row -->
@@ -131,7 +142,7 @@
 						v-if="showCopyToast"
 						class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-ink border border-cream/20 rounded-xl px-4 py-2.5 text-xs text-cream shadow-xl z-50 whitespace-nowrap"
 					>
-						Device ID copied
+						Support ID copied
 					</div>
 				</Transition>
 			</div>
@@ -151,7 +162,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const userStore = useUserStore()
 const auth = useJwtAuth()
-const deviceIdentifier = ref<string>('')
+const supportId = ref<string>('')
 const showCopyToast = ref(false)
 
 function closeDrawer() {
@@ -166,9 +177,9 @@ const isLoggingOut = ref(false)
 onMounted(async () => {
 	try {
 		const info = await Device.getId()
-		deviceIdentifier.value = `device:${info.identifier}`
+		supportId.value = `device:${info.identifier}`
 	} catch {
-		deviceIdentifier.value = 'Unknown Device'
+		supportId.value = ''
 	}
 
 	// Restore preferences from localStorage
@@ -190,12 +201,20 @@ watch([hapticsEnabled, defaultMode], () => {
 	}))
 })
 
-async function copyDeviceId() {
-	if (!deviceIdentifier.value) return
+async function copySupportId() {
+	if (!supportId.value) return
 	try {
-		await navigator.clipboard.writeText(deviceIdentifier.value)
+		await navigator.clipboard.writeText(supportId.value)
 	} catch {
-		// ignore
+		const field = document.createElement('textarea')
+		field.value = supportId.value
+		field.setAttribute('readonly', '')
+		field.style.position = 'fixed'
+		field.style.left = '-9999px'
+		document.body.appendChild(field)
+		field.select()
+		document.execCommand('copy')
+		document.body.removeChild(field)
 	}
 	showCopyToast.value = true
 	setTimeout(() => (showCopyToast.value = false), 2000)

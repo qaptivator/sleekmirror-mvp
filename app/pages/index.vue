@@ -104,64 +104,12 @@
 					v-else
 					class="grid grid-cols-2 gap-3"
 				>
-					<div
+					<CheckCard
 						v-for="check in recentChecks"
 						:key="check._id"
-						@click="selectedCheck = check"
-						class="bg-ink border border-cream/10 rounded-2xl overflow-hidden active:scale-[0.97] transition-transform cursor-pointer"
-					>
-						<!-- Thumbnail -->
-						<div class="aspect-square bg-black/30 relative">
-							<img
-								v-if="checkStore.thumbnails[check.file]"
-								:src="checkStore.thumbnails[check.file]"
-								alt="thumbnail"
-								class="w-full h-full object-cover"
-							/>
-							<div
-								v-else
-								class="w-full h-full flex items-center justify-center"
-							>
-								<IconCamera class="w-6 h-6 text-cream/20" />
-							</div>
-							<!-- Score Badge -->
-							<div
-								class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-0.5"
-							>
-								<span
-									v-if="check.photoUsable === false"
-									class="text-[10px] font-bold uppercase tracking-wide text-cream/70"
-									>N/A</span
-								>
-								<span
-									v-else
-									class="text-sm font-bold font-mono tabular-nums"
-									:style="getScoreColor(check.overallScore)"
-									>{{ check.overallScore }}</span
-								>
-							</div>
-						</div>
-						<!-- Info -->
-						<div class="p-2.5 space-y-1">
-							<div class="flex items-center justify-between">
-								<span
-									class="text-[9px] uppercase tracking-wider text-gold font-semibold"
-								>
-									{{ check.contextTag }}
-								</span>
-								<span class="text-[9px] text-muted">{{
-									formatDate(check.createdAt)
-								}}</span>
-							</div>
-							<p class="text-[10px] text-cream/70 leading-snug line-clamp-2">
-								{{
-									check.photoUsable === false
-										? check.photoIssue || "This photo can't be scored"
-										: check.verdictHeadline
-								}}
-							</p>
-						</div>
-					</div>
+						:check="check"
+						@open="selectedCheck = check"
+					/>
 				</div>
 
 				<!-- View All -->
@@ -294,20 +242,6 @@ watch(showSnap, (open) => {
 	if (!open) checkStore.loadChecks()
 })
 
-function formatDate(dateStr: string): string {
-	return new Date(dateStr).toLocaleDateString('en-US', {
-		month: 'short',
-		day: 'numeric',
-	})
-}
-
-function getScoreColor(score: number): Record<string, string> {
-	const pct = Math.min(Math.max(score, 0), 100)
-	const h = 30 + pct * 0.15
-	const s = 20 + pct * 0.65
-	const l = 40 + pct * 0.15
-	return { color: `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(0)}%)` }
-}
 </script>
 
 <style scoped>
@@ -326,13 +260,6 @@ function getScoreColor(score: number): Record<string, string> {
 .hide-scrollbar {
 	-ms-overflow-style: none;
 	scrollbar-width: none;
-}
-
-.line-clamp-2 {
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
 }
 
 .fade-enter-active,

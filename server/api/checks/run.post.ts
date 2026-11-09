@@ -1,8 +1,8 @@
 import { Check } from '../../models/Check'
 import { User } from '../../models/User'
-import { File } from '../../models/File'
-import { downloadFromR2 } from '../../utils/r2'
 import OpenAI from 'openai'
+
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
 const ANALYSIS_PROMPT = `You are the analysis engine for Sleekmirror. You act as a blunt visual editor who checks an outfit, grooming and presentation the way an honest friend would at a mirror.
 
@@ -148,9 +148,30 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 	}
 
-	const { fileId, contextTag } = await readBody(event)
-	if (!fileId || !contextTag) {
-		throw createError({ statusCode: 400, statusMessage: 'Missing parameters' })
+	const formData = await readMultipartFormData(event)
+	const filePart = formData?.find((part) => part.name === 'file' && part.data?.length)
+	const contextTag = formData
+		?.find((part) => part.name === 'contextTag')
+		?.data?.toString('utf8')
+		.trim()
+
+	if (!filePart || !contextTag) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Missing image or occasion',
+		})
+	}
+
+	if (filePart.data.length > MAX_IMAGE_BYTES) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Image larger than 4 MB',
+		})
+	}
+
+	const mimeType = filePart.type || 'image/jpeg'
+	if (!mimeType.startsWith('image/')) {
+		throw createError({ statusCode: 400, statusMessage: 'File is not an image' })
 	}
 
 	console.log('try to connect to openai')
@@ -163,18 +184,6 @@ export default defineEventHandler(async (event) => {
 	})
 	console.log('connected to openai!')
 
-	// Use the clean 'user' field path matching your relational references
-	const sourceFile = await File.findOne({
-		_id: fileId,
-		user: currentUser._id,
-	})
-	if (!sourceFile) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'Target image not found or access denied',
-		})
-	}
-
 	const userRecord = await User.findById(currentUser._id)
 	if (!userRecord || userRecord.credits <= 0) {
 		throw createError({
@@ -183,22 +192,11 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
-	let imageBuffer: Buffer
-	if (sourceFile.r2Key) {
-		imageBuffer = await downloadFromR2(sourceFile.r2Key)
-	} else if (sourceFile.binaryData) {
-		imageBuffer = Buffer.isBuffer(sourceFile.binaryData)
-			? sourceFile.binaryData
-			: Buffer.from((sourceFile.binaryData as any).buffer)
-	} else {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'File image data not found',
-		})
-	}
-
-	const base64Image = imageBuffer.toString('base64')
-	const dataUrl = `data:${sourceFile.mimeType};base64,${base64Image}`
+	// Held only for this request. Nothing is written to object storage or the database.
+	const imageBuffer = Buffer.from(filePart.data)
+	const dataUrl = `data:${mimeType};base64,${imageBuffer.toString('base64')}`
+	imageBuffer.fill(0)
+	filePart.data.fill(0)
 
 
 	console.log('start asking ai')
@@ -251,7 +249,6 @@ export default defineEventHandler(async (event) => {
 
 	const finalizedCheck = await Check.create({
 		user: currentUser._id,
-		file: fileId,
 		contextTag,
 		photoUsable,
 		photoIssue: photoUsable ? '' : (aiOutput.photoIssue || 'This photo cannot be scored.').trim(),

@@ -17,7 +17,7 @@ const checkSchema = new Schema(
 			required: true,
 			index: true,
 		},
-		file: { type: Schema.Types.ObjectId, ref: 'File', required: true },
+		file: { type: Schema.Types.ObjectId, ref: 'File', required: false },
 		contextTag: { type: String, required: true },
 
 		photoUsable: { type: Boolean, required: true, default: true },

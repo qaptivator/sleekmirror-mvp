@@ -53,88 +53,12 @@
 			v-else
 			class="grid grid-cols-2 gap-3 p-4"
 		>
-			<div
+			<CheckCard
 				v-for="check in checks"
 				:key="check._id"
-				@click="selectedCheck = check"
-				class="relative rounded-2xl overflow-hidden border border-cream/10 bg-ink cursor-pointer hover:border-gold/30 transition-all duration-200 active:scale-[0.98]"
-			>
-				<!-- Thumbnail -->
-				<div class="aspect-square bg-black/40 relative">
-					<img
-						v-if="checkStore.thumbnails[check.file]"
-						:src="checkStore.thumbnails[check.file]"
-						class="w-full h-full object-cover"
-						alt="check thumbnail"
-					/>
-					<div
-						v-else
-						class="w-full h-full flex items-center justify-center"
-					>
-						<IconCamera class="text-cream/20 w-8 h-8" />
-					</div>
-
-					<!-- Score badge -->
-					<div
-						class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1"
-					>
-						<span
-							v-if="check.photoUsable === false"
-							class="text-[10px] font-bold uppercase tracking-wide text-cream/70"
-						>
-							N/A
-						</span>
-						<span
-							v-else
-							class="text-sm font-bold font-mono tabular-nums"
-							:style="getScoreStyle(check.overallScore)"
-						>
-							{{ check.overallScore }}
-						</span>
-					</div>
-				</div>
-
-				<!-- Info -->
-				<div class="p-3 space-y-1">
-					<div class="flex items-center justify-between">
-						<span
-							class="text-[9px] uppercase tracking-wider text-gold font-semibold"
-						>
-							{{ check.contextTag }}
-						</span>
-						<span class="text-[9px] text-muted">
-							{{ formatDate(check.createdAt) }}
-						</span>
-					</div>
-					<p class="text-[11px] text-cream/80 leading-snug line-clamp-2">
-						{{
-							check.photoUsable === false
-								? check.photoIssue || "This photo can't be scored"
-								: check.verdictHeadline
-						}}
-					</p>
-
-					<!-- Category mini bars -->
-					<div
-						v-if="check.photoUsable !== false && check.categories"
-						class="flex gap-1 pt-1"
-					>
-						<div
-							v-for="(cat, key) in check.categories"
-							:key="key"
-							class="flex-1 h-1 rounded-full bg-cream/10 overflow-hidden"
-						>
-							<div
-								class="h-full rounded-full"
-								:style="{
-									width: `${cat.score}%`,
-									backgroundColor: getScoreColor(cat.score),
-								}"
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
+				:check="check"
+				@open="selectedCheck = check"
+			/>
 		</div>
 
 		<!-- CheckView modal for selected check -->
@@ -170,26 +94,6 @@ useBackHandler(
 onMounted(() => {
 	checkStore.loadChecks()
 })
-
-function formatDate(dateStr: string): string {
-	const date = new Date(dateStr)
-	return date.toLocaleDateString('en-US', {
-		month: 'short',
-		day: 'numeric',
-	})
-}
-
-function getScoreColor(score: number): string {
-	const pct = Math.min(Math.max(score, 0), 100)
-	const h = 30 + pct * 0.15
-	const s = 20 + pct * 0.65
-	const l = 40 + pct * 0.15
-	return `hsl(${h.toFixed(0)}deg ${s.toFixed(0)}% ${l.toFixed(0)}%)`
-}
-
-function getScoreStyle(score: number): Record<string, string> {
-	return { color: getScoreColor(score) }
-}
 </script>
 
 <style scoped>
@@ -206,10 +110,4 @@ function getScoreStyle(score: number): Record<string, string> {
 	opacity: 0;
 }
 
-.line-clamp-2 {
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-}
 </style>

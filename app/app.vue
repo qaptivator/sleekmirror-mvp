@@ -122,7 +122,7 @@ async function checkForOtaUpdate() {
 	if (!Capacitor.isNativePlatform()) return
 
 	try {
-		// CapacitorHttp goes through native code, so no CORS setup is needed on the bucket
+		// CapacitorHttp goes through native code, so no CORS setup is needed
 		const res = await CapacitorHttp.get({
 			url: `${OTA_VERSION_URL}/version.json?t=${Date.now()}`,
 		})

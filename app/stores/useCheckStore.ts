@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useFileStore } from './useFileStore'
-
 interface Category {
 	score: number
 	feedback: string
@@ -11,7 +9,7 @@ interface Category {
 export interface Check {
 	_id: string
 	user: string
-	file: string
+	file?: string
 	contextTag: string
 	photoUsable?: boolean
 	photoIssue?: string
@@ -29,16 +27,6 @@ export interface Check {
 	updatedAt: string
 }
 
-interface CheckRunRequest {
-	fileId: string
-	contextTag: string
-}
-
-interface CheckRunResponse {
-	checkId: string
-	check: Check
-}
-
 export const useCheckStore = defineStore('checks', () => {
 	// State
 	const checks = ref<Map<string, Check>>(new Map())
@@ -47,7 +35,6 @@ export const useCheckStore = defineStore('checks', () => {
 	const error = ref<string | null>(null)
 	const runningCheckFileId = ref<string | null>(null)
 	const checksList = ref<Check[]>([])
-	const thumbnails = ref<Record<string, string>>({})
 	const listLoading = ref(false)
 	const listError = ref<string | null>(null)
 	let listRequest: Promise<void> | null = null
@@ -86,11 +73,12 @@ export const useCheckStore = defineStore('checks', () => {
 			// Cache the check
 			checks.value.set(checkId, check)
 
-			// Add to file's check list
-			const fileCheckIds = checksByFile.value.get(check.file) || []
-			if (!fileCheckIds.includes(checkId)) {
-				fileCheckIds.push(checkId)
-				checksByFile.value.set(check.file, fileCheckIds)
+			if (check.file) {
+				const fileCheckIds = checksByFile.value.get(check.file) || []
+				if (!fileCheckIds.includes(checkId)) {
+					fileCheckIds.push(checkId)
+					checksByFile.value.set(check.file, fileCheckIds)
+				}
 			}
 
 			return check
@@ -102,36 +90,17 @@ export const useCheckStore = defineStore('checks', () => {
 
 	function rememberCheck(check: Check) {
 		checks.value.set(check._id, check)
-		const fileCheckIds = checksByFile.value.get(check.file) || []
-		if (!fileCheckIds.includes(check._id)) {
-			fileCheckIds.push(check._id)
-			checksByFile.value.set(check.file, fileCheckIds)
+		if (check.file) {
+			const fileCheckIds = checksByFile.value.get(check.file) || []
+			if (!fileCheckIds.includes(check._id)) {
+				fileCheckIds.push(check._id)
+				checksByFile.value.set(check.file, fileCheckIds)
+			}
 		}
 		const without = checksList.value.filter((item) => item._id !== check._id)
 		checksList.value = [check, ...without].sort(
 			(a, b) =>
 				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-		)
-	}
-
-	async function ensureThumbnails(fileIds: string[]) {
-		const missing = [...new Set(fileIds)].filter(
-			(fileId) => fileId && !thumbnails.value[fileId]
-		)
-		await Promise.all(
-			missing.map(async (fileId) => {
-				try {
-					const blob = await useApi<Blob>(`/api/files/${fileId}/file`, {
-						responseType: 'blob',
-					})
-					thumbnails.value = {
-						...thumbnails.value,
-						[fileId]: URL.createObjectURL(blob),
-					}
-				} catch {
-					// Card keeps the camera placeholder.
-				}
-			})
 		)
 	}
 
@@ -157,7 +126,6 @@ export const useCheckStore = defineStore('checks', () => {
 				for (const check of checksList.value) {
 					checks.value.set(check._id, check)
 				}
-				await ensureThumbnails(checksList.value.map((check) => check.file))
 			} catch (err) {
 				listError.value =
 					err instanceof Error ? err.message : 'Failed to load checks'
@@ -171,37 +139,27 @@ export const useCheckStore = defineStore('checks', () => {
 	}
 
 	// Run a check on a file
-	const runCheck = async (
-		fileId: string,
-		contextTag: string
-	): Promise<Check> => {
-		// Prevent multiple simultaneous checks
+	const runCheck = async (file: File, contextTag: string): Promise<Check> => {
 		if (runningCheckFileId.value !== null) {
 			throw new Error(
 				'A check is already running. Please wait for it to complete.'
 			)
 		}
 
-		runningCheckFileId.value = fileId
+		runningCheckFileId.value = 'in-flight'
 		error.value = null
 
 		try {
-			// Verify file exists (will sync from server if needed)
-			const fileStore = useFileStore()
-			await fileStore.getFileMetadata(fileId)
+			const body = new FormData()
+			body.append('file', file, file.name || 'snap.jpg')
+			body.append('contextTag', contextTag)
 
-			const response = await useApi<Check>('/api/checks/run', {
+			const check = await useApi<Check>('/api/checks/run', {
 				method: 'POST',
-				body: {
-					fileId,
-					contextTag,
-				},
+				body,
 			})
 
-			const check = response
-
 			rememberCheck(check)
-			void ensureThumbnails([check.file])
 
 			const userStore = useUserStore()
 			userStore.updateCredits(userStore.credits - 1)
@@ -243,7 +201,6 @@ export const useCheckStore = defineStore('checks', () => {
 		checks,
 		checksByFile,
 		checksList,
-		thumbnails,
 		loading,
 		error,
 		listLoading,
