@@ -149,7 +149,7 @@
 							</button>
 						</div>
 						<a
-							href="https://sleekmirror.com/privacy"
+							href="https://sleekmirror.acdev.app/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="flex items-center justify-between px-4 py-3"
@@ -158,13 +158,20 @@
 							<span class="text-[10px] text-muted">Open</span>
 						</a>
 						<a
-							href="https://sleekmirror.com/terms"
+							href="https://sleekmirror.acdev.app/terms"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="flex items-center justify-between px-4 py-3"
 						>
 							<span class="text-xs text-cream">Terms of Service</span>
 							<span class="text-[10px] text-muted">Open</span>
+						</a>
+						<a
+							href="mailto:contact@acdev.app"
+							class="flex items-center justify-between px-4 py-3"
+						>
+							<span class="text-xs text-cream">Support</span>
+							<span class="text-[10px] text-muted">contact@acdev.app</span>
 						</a>
 					</div>
 

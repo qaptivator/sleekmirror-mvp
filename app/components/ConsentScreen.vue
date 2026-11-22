@@ -39,7 +39,7 @@
 					<span class="text-xs text-cream/80 leading-relaxed">
 						I have read and agree to the
 						<a
-							href="https://sleekmirror.com/privacy"
+							href="https://sleekmirror.acdev.app/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-gold underline"
@@ -47,7 +47,7 @@
 						>Privacy Policy</a>
 						and
 						<a
-							href="https://sleekmirror.com/terms"
+							href="https://sleekmirror.acdev.app/terms"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-gold underline"
