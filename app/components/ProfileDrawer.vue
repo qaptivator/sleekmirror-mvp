@@ -37,7 +37,7 @@
 							<div class="min-w-0 flex-1">
 								<p class="text-xs text-cream">Support ID</p>
 								<p class="text-[10px] font-mono text-muted truncate mt-0.5">
-									{{ supportId || 'Identifying device...' }}
+									{{ supportId || 'Loading…' }}
 								</p>
 							</div>
 							<button
@@ -149,7 +149,7 @@
 							</button>
 						</div>
 						<a
-							href="https://sleekmirror.acdev.app/privacy"
+							:href="privacyUrl"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="flex items-center justify-between px-4 py-3"
@@ -158,7 +158,7 @@
 							<span class="text-[10px] text-muted">Open</span>
 						</a>
 						<a
-							href="https://sleekmirror.acdev.app/terms"
+							:href="termsUrl"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="flex items-center justify-between px-4 py-3"
@@ -167,11 +167,11 @@
 							<span class="text-[10px] text-muted">Open</span>
 						</a>
 						<a
-							href="mailto:contact@acdev.app"
+							:href="`mailto:${supportEmail}`"
 							class="flex items-center justify-between px-4 py-3"
 						>
 							<span class="text-xs text-cream">Support</span>
-							<span class="text-[10px] text-muted">contact@acdev.app</span>
+							<span class="text-[10px] text-muted">{{ supportEmail }}</span>
 						</a>
 					</div>
 
@@ -314,8 +314,6 @@
 </template>
 
 <script setup lang="ts">
-import { Device } from '@capacitor/device'
-
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
 	'update:modelValue': [value: boolean]
@@ -350,7 +348,11 @@ const lastCheckLabel = computed(() => {
 		minute: '2-digit',
 	})
 })
-const supportId = ref<string>('')
+const runtimeConfig = useRuntimeConfig()
+const privacyUrl = runtimeConfig.public.privacyUrl
+const termsUrl = runtimeConfig.public.termsUrl
+const supportEmail = runtimeConfig.public.supportEmail
+const supportId = computed(() => userStore.currentUser?.supportId || '')
 const showCopyToast = ref(false)
 const hapticsEnabled = ref(true)
 const defaultMode = ref('casual')
@@ -380,11 +382,8 @@ watch(
 )
 
 onMounted(async () => {
-	try {
-		const info = await Device.getId()
-		supportId.value = `device:${info.identifier}`
-	} catch {
-		supportId.value = ''
+	if (userStore.currentUser && !userStore.currentUser.supportId) {
+		void userStore.refreshCredits().catch(() => {})
 	}
 
 	// Restore preferences from localStorage

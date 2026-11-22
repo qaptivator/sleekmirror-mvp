@@ -1,7 +1,11 @@
 import { Check } from '../../models/Check'
 import { User } from '../../models/User'
 import { hasValidAiPhotoConsent } from '../../utils/publicUser'
-import { applyDailyScanRenewal } from '../../utils/scanCredits'
+import {
+	applyDailyScanRenewal,
+	tryDecrementScanCredit,
+} from '../../utils/scanCredits'
+import { assertRateLimit, getClientIp } from '../../utils/rateLimit'
 import OpenAI from 'openai'
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024
@@ -150,6 +154,17 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 	}
 
+	assertRateLimit(event, {
+		key: `checks-run:user:${currentUser._id}`,
+		limit: 20,
+		windowMs: 10 * 60 * 1000,
+	})
+	assertRateLimit(event, {
+		key: `checks-run:ip:${getClientIp(event)}`,
+		limit: 60,
+		windowMs: 10 * 60 * 1000,
+	})
+
 	const formData = await readMultipartFormData(event)
 	const filePart = formData?.find((part) => part.name === 'file' && part.data?.length)
 	const contextTag = formData
@@ -176,7 +191,6 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 400, statusMessage: 'File is not an image' })
 	}
 
-	console.log('try to connect to openai')
 	const config = useRuntimeConfig()
 	if (!config.openaiApiKey) {
 		console.error('OpenAI Connection Error: OpenAI API Key not provided')
@@ -184,22 +198,30 @@ export default defineEventHandler(async (event) => {
 	const client = new OpenAI({
 		apiKey: config.openaiApiKey,
 	})
-	console.log('connected to openai!')
 
 	const userRecord = await applyDailyScanRenewal(
 		await User.findById(currentUser._id)
 	)
-	if (!userRecord || userRecord.credits <= 0) {
-		throw createError({
-			statusCode: 402,
-			statusMessage: 'No scans left today. Come back tomorrow.',
-		})
+	if (!userRecord) {
+		throw createError({ statusCode: 404, statusMessage: 'User not found' })
 	}
 
+	// Charge order: consent first, then OpenAI, then atomic decrement only
+	// when the analysis succeeds and photoUsable is true. Daily reset runs
+	// before this so the decrement sees today's allowance. Zero credits
+	// reject here so OpenAI is not called. A post-OpenAI decrement miss
+	// (rare race) still returns the result.
 	if (!hasValidAiPhotoConsent(userRecord)) {
 		throw createError({
 			statusCode: 403,
 			statusMessage: 'Consent is required before a photo can be analyzed',
+		})
+	}
+
+	if (userRecord.credits <= 0) {
+		throw createError({
+			statusCode: 402,
+			statusMessage: 'No scans left today. Come back tomorrow.',
 		})
 	}
 
@@ -210,11 +232,11 @@ export default defineEventHandler(async (event) => {
 	filePart.data.fill(0)
 
 
-	console.log('start asking ai')
 	const response = await client.chat.completions.create({
 		model: 'gpt-4o',
 		temperature: 0.2,
 		max_tokens: 1000,
+		store: false,
 		response_format: {
 			type: 'json_schema',
 			json_schema: analysisJsonSchema,
@@ -242,7 +264,6 @@ export default defineEventHandler(async (event) => {
 			},
 		],
 	})
-	console.log('we got a response back!')
 
 	const raw = response.choices[0].message.content?.trim() ?? ''
 	let aiOutput: AnalysisOutput
@@ -271,14 +292,14 @@ export default defineEventHandler(async (event) => {
 		actionChecklist: photoUsable ? aiOutput.actionChecklist ?? [] : [],
 	})
 
-	await User.findByIdAndUpdate(
-		currentUser._id,
-		{
-			$inc: { credits: -1 },
-		},
-		// @ts-ignore
-		{}
-	)
+	if (photoUsable) {
+		const charged = await tryDecrementScanCredit(currentUser._id)
+		if (!charged) {
+			console.error(
+				'Credit decrement missed after successful analysis'
+			)
+		}
+	}
 
 	return finalizedCheck.toObject()
 })

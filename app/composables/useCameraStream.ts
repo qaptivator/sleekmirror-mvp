@@ -12,6 +12,7 @@ export function useCameraStream() {
   const flashEnabled = useState<boolean>('camera:flash', () => false)
   const isReady = useState<boolean>('camera:ready', () => false)
   const error = useState<string | null>('camera:error', () => null)
+  const permissionDenied = useState<boolean>('camera:permissionDenied', () => false)
 
   const isMirrored = computed(() => facingMode.value === 'user')
 
@@ -46,6 +47,7 @@ export function useCameraStream() {
     // Stop any existing stream cleanly first
     stop(videoElement)
     error.value = null
+    permissionDenied.value = false
 
     const gen = _generation // capture to detect if we get cancelled mid-flight
 
@@ -98,6 +100,12 @@ export function useCameraStream() {
         return true
       } catch (err: any) {
         console.error('Camera stream failed:', err)
+        const name = String(err?.name || '')
+        const message = String(err?.message || '')
+        permissionDenied.value =
+          name === 'NotAllowedError' ||
+          name === 'PermissionDeniedError' ||
+          /permission|denied|notallowed/i.test(message)
         error.value = err?.message || 'Failed to access camera'
         if (gen === _generation) stop(videoElement)
         _startPromise = null
@@ -152,6 +160,7 @@ export function useCameraStream() {
     isReady,
     isMirrored,
     error,
+    permissionDenied,
     start,
     stop,
     restart,

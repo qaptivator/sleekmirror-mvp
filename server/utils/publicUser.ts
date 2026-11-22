@@ -8,7 +8,7 @@ export function toPublicUser(user: any) {
 	const src = typeof user?.toObject === 'function' ? user.toObject() : user
 	return {
 		_id: src._id,
-		identifiers: src.identifiers,
+		supportId: src.supportId ?? '',
 		email: src.email,
 		emailVerified: src.emailVerified,
 		credits: src.credits,

@@ -37,9 +37,28 @@
 						muted
 					/>
 
+					<!-- Camera denied -->
+					<div
+						v-if="cameraStream.permissionDenied.value && !capture.isScanning.value"
+						class="absolute inset-0 flex items-center justify-center bg-black z-20 px-8"
+					>
+						<div class="text-center space-y-4 max-w-xs">
+							<p class="text-white/80 text-sm leading-relaxed">
+								Camera access is off. Turn it on in Settings to scan.
+							</p>
+							<button
+								type="button"
+								@click="openAppSettings"
+								class="px-4 py-2 rounded-full bg-gold text-obsidian text-xs font-semibold active:scale-95"
+							>
+								Open Settings
+							</button>
+						</div>
+					</div>
+
 					<!-- Camera loading indicator -->
 					<div
-						v-if="!cameraStream.isReady.value && !capture.isScanning.value"
+						v-else-if="!cameraStream.isReady.value && !capture.isScanning.value"
 						class="absolute inset-0 flex items-center justify-center bg-black"
 					>
 						<div class="text-center space-y-3">
@@ -195,6 +214,9 @@
 </template>
 
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
+import { App } from '@capacitor/app'
+
 const props = defineProps<{
 	modelValue: boolean
 }>()
@@ -217,6 +239,17 @@ const modes = [
 	{ tag: 'cocktail', label: 'Cocktail' },
 ]
 const selectedMode = ref('casual')
+
+async function openAppSettings() {
+	if (!Capacitor.isNativePlatform()) return
+	try {
+		await App.openUrl({
+			url: 'intent:#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;data=package:com.sleekmirror.app;end',
+		})
+	} catch {
+		await App.openUrl({ url: 'app-settings:' })
+	}
+}
 
 async function startCamera() {
 	await nextTick()

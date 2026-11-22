@@ -39,7 +39,7 @@
 					<span class="text-xs text-cream/80 leading-relaxed">
 						I have read and agree to the
 						<a
-							href="https://sleekmirror.acdev.app/privacy"
+							:href="privacyUrl"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-gold underline"
@@ -47,7 +47,7 @@
 						>Privacy Policy</a>
 						and
 						<a
-							href="https://sleekmirror.acdev.app/terms"
+							:href="termsUrl"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="text-gold underline"
@@ -100,7 +100,11 @@
 </template>
 
 <script setup lang="ts">
+const props = defineProps<{ root?: boolean }>()
 const emit = defineEmits<{ declined: [] }>()
+const runtimeConfig = useRuntimeConfig()
+const privacyUrl = runtimeConfig.public.privacyUrl
+const termsUrl = runtimeConfig.public.termsUrl
 
 const userStore = useUserStore()
 
@@ -144,6 +148,8 @@ function decline() {
 	userStore.dismissConsentPrompt()
 	emit('declined')
 }
+
+useBackHandler(() => !props.root, decline)
 </script>
 
 <style scoped>

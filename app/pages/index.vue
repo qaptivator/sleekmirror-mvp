@@ -174,11 +174,18 @@
 		<div class="shrink-0 border-t border-cream/5 bg-obsidian">
 			<div class="flex items-center justify-around px-8 pt-3 pb-safe-bottom">
 				<!-- Wardrobe is unfinished, so the button stays out of the bar.-->
-				<button class="flex flex-col items-center gap-1">
+				<button
+					type="button"
+					class="flex flex-col items-center gap-1"
+					@click="showWardrobeSoon"
+				>
 					<div
 						class="w-12 h-12 rounded-2xl flex items-center justify-center bg-cream/5 relative"
 					>
 						<IconShirt class="w-5 h-5 text-cream/35" />
+						<span
+							class="absolute -top-1 -right-1 px-1 py-px rounded bg-gold text-obsidian text-[7px] font-bold tracking-wide"
+						>Soon</span>
 					</div>
 					<span class="text-[9px] text-muted/40 tracking-wide">Wardrobe</span>
 				</button>
@@ -270,6 +277,17 @@
 			@open-scans="openScansFromProfile"
 		/>
 		<ScansSheet v-model="showScans" />
+
+		<Teleport to="body">
+			<Transition name="toast-fade">
+				<div
+					v-if="wardrobeToast"
+					class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-ink border border-cream/20 rounded-xl px-4 py-2.5 text-xs text-cream shadow-xl z-50 whitespace-nowrap"
+				>
+					Wardrobe is coming soon
+				</div>
+			</Transition>
+		</Teleport>
 	</div>
 </template>
 
@@ -285,6 +303,16 @@ const showHistory = ref(false)
 const showProfile = ref(false)
 const showScans = ref(false)
 const selectedCheck = ref<Check | null>(null)
+const wardrobeToast = ref(false)
+let wardrobeToastTimer: ReturnType<typeof setTimeout> | null = null
+
+function showWardrobeSoon() {
+	wardrobeToast.value = true
+	if (wardrobeToastTimer) clearTimeout(wardrobeToastTimer)
+	wardrobeToastTimer = setTimeout(() => {
+		wardrobeToast.value = false
+	}, 2000)
+}
 
 function openScansFromProfile() {
 	showProfile.value = false
@@ -373,5 +401,15 @@ watch(
 .fade-enter-from,
 .fade-leave-to {
 	opacity: 0;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+	opacity: 0;
+	transform: translateX(-50%) translateY(6px);
 }
 </style>

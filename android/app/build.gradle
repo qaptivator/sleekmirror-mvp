@@ -39,6 +39,24 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    def needsReleaseKey = graph.allTasks.any { task ->
+        def n = task.name.toLowerCase()
+        n.contains('release') && (n.contains('bundle') || n.contains('assemble') || n.contains('package'))
+    }
+    if (needsReleaseKey && !keystorePropertiesFile.exists()) {
+        throw new GradleException("Missing android/key.properties. Release builds require a signing keystore.")
+    }
+    if (needsReleaseKey) {
+        def required = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+        def missing = required.findAll { !keystoreProperties[it] }
+        if (missing) {
+            throw new GradleException("android/key.properties is missing: ${missing.join(', ')}")
         }
     }
 }

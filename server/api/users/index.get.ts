@@ -1,36 +1,24 @@
 import { User } from '../../models/User'
 import { toPublicUser } from '../../utils/publicUser'
 import { applyDailyScanRenewal } from '../../utils/scanCredits'
+import { ensureSupportId } from '../../utils/supportId'
 
+// Own record only. Identifier lookup was removed (IDOR).
 export default defineEventHandler(async (event) => {
 	const currentUser = event.context.user
 	if (!currentUser) {
 		throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
 	}
 
-	// [Optional internal permission gate can go here]
-
-	const query = getQuery(event)
-	const identifier = query.identifier as string
-
-	if (!identifier) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Missing identifier query parameter',
-		})
-	}
-
-	let matchedUser = await User.findOne({ identifiers: identifier })
-	if (!matchedUser) {
+	const user = await ensureSupportId(
+		await applyDailyScanRenewal(await User.findById(currentUser._id))
+	)
+	if (!user) {
 		throw createError({
 			statusCode: 404,
-			statusMessage: 'No user matching criteria',
+			statusMessage: 'User not found',
 		})
 	}
 
-	if (String(matchedUser._id) === String(currentUser._id)) {
-		matchedUser = await applyDailyScanRenewal(matchedUser)
-	}
-
-	return toPublicUser(matchedUser)
+	return toPublicUser(user)
 })

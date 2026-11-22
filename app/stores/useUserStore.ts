@@ -5,7 +5,8 @@ import { DAILY_SCAN_ALLOWANCE, nextUtcMidnight } from '#shared/utils/scans'
 
 interface User {
 	_id: string
-	identifiers: string[]
+	supportId?: string
+	identifiers?: string[]
 	email?: string
 	emailVerified?: boolean
 	credits: number
@@ -78,16 +79,12 @@ export const useUserStore = defineStore('user', () => {
 	}
 
 	// Fetch user by identifier
-	const fetchUser = async (identifier: string): Promise<User> => {
+	const fetchUser = async (_identifier?: string): Promise<User> => {
 		loading.value = true
 		error.value = null
 
 		try {
-			const response = await useApi<User>('/api/users', {
-				query: {
-					identifier,
-				},
-			})
+			const response = await useApi<User>('/api/users/me')
 
 			setUser(response)
 			return response

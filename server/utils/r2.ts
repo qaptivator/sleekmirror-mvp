@@ -84,10 +84,6 @@ export async function uploadToR2(
 	const encodedKey = key.split('/').map(encodeURIComponent).join('/')
 	const uploadUrl = `${base}/internal/file/${encodedKey}`
 
-	console.log(
-		`[r2.upload] Uploading to ${uploadUrl} (secret length: ${secret.length}, bytes: ${data.length})`
-	)
-
 	await $fetch(uploadUrl, {
 		method: 'PUT',
 		headers: {

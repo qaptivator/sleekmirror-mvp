@@ -18,7 +18,6 @@ export const useAuth = () => {
 
 	const initAuth = async () => {
 		const identifier = await getDeviceId()
-		console.log('initAuth identifier:', identifier)
 
 		const res = await $fetch<{ token: string; user: any }>(
 			'/api/auth/device-login',
@@ -28,7 +27,6 @@ export const useAuth = () => {
 				body: { deviceId: identifier },
 			}
 		)
-		console.log('initAuth res:', res)
 
 		token.value = res.token
 		user.value = res.user

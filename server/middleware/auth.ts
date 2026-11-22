@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
     '/api/auth/login-device',
     '/api/auth/request-otp',
     '/api/auth/verify-otp',
+    '/api/auth/device-login',
     '/api/auth/refresh',
     '/api/auth/logout',
   ]

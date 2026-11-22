@@ -161,8 +161,10 @@ export const useCheckStore = defineStore('checks', () => {
 
 			rememberCheck(check)
 
-			const userStore = useUserStore()
-			userStore.updateCredits(userStore.credits - 1)
+			if (check.photoUsable) {
+				const userStore = useUserStore()
+				userStore.updateCredits(userStore.credits - 1)
+			}
 
 			return check
 		} catch (err) {

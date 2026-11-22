@@ -34,6 +34,7 @@
 
 		<ConsentScreen
 			v-else-if="needsConsent && !userStore.consentPromptDismissed"
+			root
 			@declined="userStore.dismissConsentPrompt()"
 		/>
 

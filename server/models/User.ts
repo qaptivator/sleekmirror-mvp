@@ -4,6 +4,8 @@ const userSchema = new Schema(
 	{
 		// identifiers: 'device:uuid', 'email:user@example.com'
 		identifiers: { type: [String], required: true },
+		// Public support handle. Never used as a login credential.
+		supportId: { type: String, unique: true, sparse: true, index: true },
 
 		// Email linked to account (optional)
 		email: { type: String },

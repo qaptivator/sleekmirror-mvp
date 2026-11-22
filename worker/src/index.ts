@@ -93,6 +93,20 @@ export default {
 			)
 		}
 
+		// User photos are no longer served. OTA bundles are not on this worker.
+		if (pathname.startsWith('/file/') || pathname.startsWith('/internal/file/')) {
+			return new Response(
+				JSON.stringify({ error: 'Image storage is disabled' }),
+				{
+					status: 410,
+					headers: {
+						...corsHeaders,
+						'Content-Type': 'application/json',
+					},
+				}
+			)
+		}
+
 		// -------------------------------------------------------------
 		// 1. PUBLIC SIGNED URL ACCESS: GET /file/:key?exp=...&sig=...
 		// -------------------------------------------------------------

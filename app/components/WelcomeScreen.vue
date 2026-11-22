@@ -93,14 +93,14 @@
 			<p class="text-[10px] text-cream/40 text-center leading-relaxed px-2">
 				You will be asked to consent before any photo is sent for analysis.
 				<a
-					href="https://sleekmirror.acdev.app/privacy"
+					:href="privacyUrl"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="text-gold/80 underline"
 				>Privacy</a>
 				·
 				<a
-					href="https://sleekmirror.acdev.app/terms"
+					:href="termsUrl"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="text-gold/80 underline"
@@ -127,6 +127,9 @@
 <script setup lang="ts">
 import { Device } from '@capacitor/device'
 
+const runtimeConfig = useRuntimeConfig()
+const privacyUrl = runtimeConfig.public.privacyUrl
+const termsUrl = runtimeConfig.public.termsUrl
 const auth = useJwtAuth()
 const offline = auth.offline
 const isLoading = ref(false)
@@ -143,9 +146,7 @@ async function handleDeviceLogin() {
 
 	try {
 		const info = await Device.getId()
-		console.log('handleDeviceLogin Device.getId', info)
 		await auth.loginWithDevice(info.identifier)
-		console.log('auth.loginWithDevice done')
 		emit('authenticated')
 	} catch (err: any) {
 		errorMessage.value = err?.message || 'Device login failed'

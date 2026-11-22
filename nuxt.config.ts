@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
 	compatibilityDate: '2025-07-15',
-	devtools: { enabled: true },
+	devtools: { enabled: process.env.NODE_ENV !== 'production' },
 	modules: ['nuxt-lucide-icons', '@pinia/nuxt'],
 	css: ['~/assets/css/main.css'],
 	ssr: true, // Changed from false — we need the Nitro server for /api routes!
@@ -37,7 +37,11 @@ export default defineNuxtConfig({
 				process.env.NODE_ENV === 'production'
 					? process.env.API_BASE || 'https://sleekmirror-api.convenotes.com'
 					: 'https://sleekmirror-api.convenotes.com', // dev: relative URLs (goes to localhost:3000 backend)
+			privacyUrl: 'https://sleekmirror.acdev.app/privacy',
+			termsUrl: 'https://sleekmirror.acdev.app/terms',
+			supportEmail: 'contact@acdev.app',
 		},
+		corsAllowedOrigins: process.env.CORS_ALLOWED_ORIGINS || '',
 		// .env
 		mongodbUri: '',
 		openaiApiKey: '',
@@ -45,13 +49,8 @@ export default defineNuxtConfig({
 			process.env.NUXT_R2_WORKER_URL || process.env.R2_WORKER_URL || '',
 		r2WorkerSecret:
 			process.env.NUXT_R2_WORKER_SECRET || process.env.R2_WORKER_SECRET || '',
-		jwtSecret:
-			process.env.NUXT_JWT_SECRET ||
-			process.env.JWT_SECRET ||
-			'dev-secret-change-in-production',
+		jwtSecret: process.env.NUXT_JWT_SECRET || process.env.JWT_SECRET || '',
 		jwtRefreshSecret:
-			process.env.NUXT_JWT_REFRESH_SECRET ||
-			process.env.JWT_REFRESH_SECRET ||
-			'dev-refresh-secret-change-in-production',
+			process.env.NUXT_JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET || '',
 	},
 })
